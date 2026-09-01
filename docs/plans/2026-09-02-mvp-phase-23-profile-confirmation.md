@@ -103,6 +103,29 @@ Risk Profile。这样画像变化有明确的确认动作，且不会让自然�
   不在本阶段宣称完成。
 - Phase 24 只能从 Phase 23 接受提交创建新 worktree，并先提交计划书。
 
+## Independent review and acceptance
+
+- Implementation commits: `5b24d68` (proposal API/workbench) and `dd21d06`
+  (deeply immutable confirmation resolutions); branch
+  `codex/mvp-phase-23-profile-confirmation`; no push.
+- Phase-specific tests: `6 passed`; full regression: `299 passed`, with only the
+  existing Starlette/httpx deprecation warning.
+- `compileall`, public imports, `node --check`, `git diff --check`, runtime-scope
+  and DOM-sink scans passed. The wheel contains the new service, contracts and
+  static assets together with the existing tools and 9 evaluation cases.
+- `python -m tools.evaluate_mvp --repeat 100 --json` passed all 9 cases with
+  case/profile/risk/compliance/evidence/replay metrics equal to `1.0`.
+- Local ASGI load replay at 100 concurrent owners remained 100/100 with zero
+  errors and zero owner mismatches for Template, Research and Advisor; these
+  remain fixture baselines rather than production SLA evidence.
+- Real local browser verification completed a five-conflict proposal preview,
+  mixed explicit resolutions, the resulting Risk Profile, Advisor `HOLD` and
+  `REDUCE`, Evidence/Receipt expansion, questionnaire invalidation, owner
+  clearing, and an empty browser error log.
+- Review found no natural-language/LLM/Gemini façade, frontend scoring, raw
+  language persistence, cross-owner path, external network, order, or new
+  Recommendation side effect in the proposal boundary.
+
 ## Status
 
-`PLANNED`
+`ACCEPTED`

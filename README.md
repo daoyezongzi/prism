@@ -81,6 +81,11 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   自然语言或 LLM/Gemini 当作问题理解。详见 [Intent/Plan 契约](docs/intent-planning.md)。
   Phase 22 最终 `293` 项回归、100 次固定评测回放、三场景 100 并发本地基线和真实
   浏览器验收均通过；这些 fixture/ASGI 数字不代表真实市场准确率或生产 SLA。
+- Phase 23 已把 Phase 2 的结构化 `ProfileExtractionProposal` 接入 Risk Profile 工作台：
+  用户先预览问卷与提取值冲突，再逐项选择 `USE_QUESTIONNAIRE` 或 `USE_EXTRACTION`，
+  服务端重建 draft 后生成保留冲突审计的确定性 Profile；不解析自然语言、不保存原文、
+  不写 DecisionEvent。`299` 项回归、100 次评测回放、三场景 100 并发本地基线和真实
+  浏览器路径均通过。详见 [画像提案契约](docs/profile-proposal-confirmation.md)。
 
 尚未实现：
 
@@ -171,6 +176,8 @@ python -m pytest
 - [Phase 21 固定评测与回放计划](docs/plans/2026-09-02-mvp-phase-21-evaluation-harness.md)
 - [Phase 22 Intent/Plan 契约](docs/intent-planning.md)
 - [Phase 22 结构化意图与任务计划预览计划](docs/plans/2026-09-02-mvp-phase-22-intent-planning.md)
+- [Phase 23 画像提案确认契约](docs/profile-proposal-confirmation.md)
+- [Phase 23 结构化画像提案与冲突确认计划](docs/plans/2026-09-02-mvp-phase-23-profile-confirmation.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

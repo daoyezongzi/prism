@@ -839,3 +839,46 @@ worktree，并先提交计划书。
 - 独立审查确认无自然语言/LLM/Gemini 假象、前端金融重算、跨 owner 泄露、
   Recommendation 伪造、外部网络、订单/交易或新的持久化路径。Phase 22 已接受，
   下一阶段必须从本提交创建新 worktree 并先提交计划书。
+
+## 2026-09-02 — MVP Phase 23 结构化画像提取提案与冲突确认
+
+### 计划与 worktree
+
+- 在已接受的 Phase 22 `abd9a35` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-23`，分支为
+  `codex/mvp-phase-23-profile-confirmation`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `952ce5a`；本阶段继续不接入自然语言解析、LLM/Gemini、SkillHub、认证、原文
+  持久化或交易。
+
+### 本地实现
+
+- 新增 owner-scoped `advisor-profile-proposal-request.v1` /
+  `advisor-profile-proposal-response.v1` 与
+  `advisor-profile-confirmation-request.v1` /
+  `advisor-profile-confirmation-response.v1`；服务端始终重建
+  `ProfileDraft`，不信任客户端 draft，并保留 resolved conflict 审计。
+- 新增 `POST /api/v1/advisor/profile-proposals` 和 `/confirm`，复用 Phase 2
+  `build_profile_draft`/`finalize_profile`；确认请求 resolutions 以深度不可变
+  `FrozenDict` 保存，未知/未解决/跨 owner/敏感/无时区/extra 输入安全拒绝，接口不写
+  `DecisionEventStore` 或生成 Recommendation。
+- Risk Profile 工作台增加脱敏 typed proposal 预览、逐冲突选择和确认结果；owner、
+  问卷变化、模板失败和异步竞态清理旧提案与 JSON，Advisor HOLD/REDUCE 纵切保持不变。
+- `ProfileExtractionProposal` 增加敏感字段扫描；新增 [画像提案确认契约](docs/profile-proposal-confirmation.md)
+  与 Phase 23 integration tests。
+
+### 独立审查与验收
+
+- 实现提交为 `5b24d68`，随后以 `dd21d06` 完成 resolutions 深度不可变硬化；无 push。
+- Phase-specific tests `6 passed`；全量回归 `299 passed`，仅已知 Starlette/httpx
+  deprecation warning。`compileall`、公开导入、`node --check`、`git diff --check`、
+  wheel package-data、运行时范围/DOM sink 扫描均通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json` 仍为 9/9，所有 case/profile/
+  risk/compliance/evidence/replay 指标为 `1.0`；Template/Research/Advisor 三场景
+  本地 100 并发均 100/100、error/owner mismatch 为 0，Advisor 写入 100 条预期事件。
+- 最新真实本地浏览器完成 5 冲突提案预览、混合选择并生成 Profile、Advisor
+  `HOLD`/`REDUCE`、Evidence/Receipt 展开、问卷变化清理和 owner 切换清空；浏览器
+  错误日志为空。
+- 独立审查确认没有自然语言/LLM/Gemini 假象、前端评分、原文持久化、跨 owner 泄露、
+  外部网络、订单/交易或新的 Recommendation 路径。Phase 23 已接受，下一阶段必须
+  从本提交创建新 worktree 并先提交计划书。
