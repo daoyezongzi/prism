@@ -34,6 +34,16 @@ class ResearchSpecialistRole(StrEnum):
     ETF_FUND = "ETF_FUND"
 
 
+class ResearchScenarioId(StrEnum):
+    """Deterministic, offline scenarios exposed by the research workbench."""
+
+    BASELINE_READY = "BASELINE_READY"
+    SOURCE_DISAGREEMENT = "SOURCE_DISAGREEMENT"
+    SOURCE_PARTIAL = "SOURCE_PARTIAL"
+    SOURCE_EMPTY = "SOURCE_EMPTY"
+    SOURCE_FAILED = "SOURCE_FAILED"
+
+
 _ROLE_TO_NODE_KIND: dict[ResearchSpecialistRole, ResearchNodeKind] = {
     ResearchSpecialistRole.MACRO: ResearchNodeKind.MACRO,
     ResearchSpecialistRole.INDUSTRY: ResearchNodeKind.INDUSTRY,
@@ -143,6 +153,24 @@ class ResearchSpecialistNode(ContractModel):
         serialized = self.model_dump_json().casefold()
         if any(token in serialized for token in _SENSITIVE_SUBSTRINGS):
             raise ValueError("specialist node must not contain sensitive metadata")
+        return self
+
+
+class ResearchScenarioDefinition(ContractModel):
+    """Safe product metadata for one replayable research scenario."""
+
+    schema_version: Literal["research-scenario-definition.v1"] = (
+        "research-scenario-definition.v1"
+    )
+    scenario_id: ResearchScenarioId
+    label: NonEmptyStr
+    description: NonEmptyStr
+
+    @model_validator(mode="after")
+    def validate_definition(self) -> Self:
+        serialized = self.model_dump_json().casefold()
+        if any(token in serialized for token in _SENSITIVE_SUBSTRINGS):
+            raise ValueError("research scenario definition must not contain sensitive metadata")
         return self
 
 
@@ -280,6 +308,7 @@ class ResearchSpecialistMatrixRequest(ContractModel):
     request_id: ResearchIdentifier
     owner_id: ResearchIdentifier
     generated_at: datetime
+    scenario_id: ResearchScenarioId = ResearchScenarioId.BASELINE_READY
 
     @model_validator(mode="after")
     def validate_request(self) -> Self:
@@ -292,6 +321,8 @@ class ResearchSpecialistMatrixRequest(ContractModel):
 
 __all__ = [
     "ResearchIdentifier",
+    "ResearchScenarioDefinition",
+    "ResearchScenarioId",
     "ResearchSpecialistMatrix",
     "ResearchSpecialistMatrixRequest",
     "ResearchSpecialistNode",

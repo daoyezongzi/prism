@@ -17,6 +17,7 @@ from app.research import (
     CrossValidationResult,
     ResearchPipelineIssue,
     ResearchPipelineStatus,
+    ResearchScenarioId,
     ResearchSpecialistMatrixRequest,
     ResearchSpecialistRole,
 )
@@ -286,6 +287,22 @@ class AdvisorProfileConfirmationResponse(ContractModel):
         return self
 
 
+class ResearchScenarioResponse(ContractModel):
+    """Safe catalog metadata for one deterministic research replay."""
+
+    schema_version: Literal["research-scenario-response.v1"] = (
+        "research-scenario-response.v1"
+    )
+    scenario_id: ResearchScenarioId
+    label: NonEmptyStr
+    description: NonEmptyStr
+
+    @model_validator(mode="after")
+    def validate_safety(self) -> Self:
+        _validate_context_payload_safety(self.model_dump_json(), "research scenario response")
+        return self
+
+
 class ResearchMatrixTemplateResponse(ContractModel):
     schema_version: Literal["research-matrix-template.v1"] = (
         "research-matrix-template.v1"
@@ -296,6 +313,7 @@ class ResearchMatrixTemplateResponse(ContractModel):
     scope_description: NonEmptyStr
     roles: tuple[ResearchSpecialistRole, ...] = Field(min_length=4)
     node_count: int = Field(ge=4)
+    scenarios: tuple[ResearchScenarioResponse, ...] = Field(min_length=5)
 
     @model_validator(mode="after")
     def validate_template_response(self) -> Self:
@@ -307,6 +325,13 @@ class ResearchMatrixTemplateResponse(ContractModel):
             raise ValueError("research template must cover all specialist roles")
         if self.node_count < len(self.roles):
             raise ValueError("research template node_count is too small")
+        scenario_ids = [item.scenario_id for item in self.scenarios]
+        if scenario_ids != sorted(scenario_ids, key=lambda item: item.value):
+            raise ValueError("research template scenarios must be sorted")
+        if len(set(scenario_ids)) != len(scenario_ids):
+            raise ValueError("research template scenarios must be unique")
+        if ResearchScenarioId.BASELINE_READY not in scenario_ids:
+            raise ValueError("research template must include the baseline scenario")
         return self
 
 
@@ -347,6 +372,7 @@ class ResearchMatrixResponse(ContractModel):
         "research-matrix-response.v1"
     )
     matrix_id: NonEmptyStr
+    scenario: ResearchScenarioResponse
     request_id: NonEmptyStr
     owner_id: NonEmptyStr
     run_id: NonEmptyStr
@@ -409,6 +435,7 @@ __all__ = [
     "AdvisorProfileContextResponse",
     "AdvisorProfileProposalRequest",
     "AdvisorProfileProposalResponse",
+    "ResearchScenarioResponse",
     "ResearchMatrixTemplateResponse",
     "ResearchMatrixIssueResponse",
     "ResearchMatrixNodeResponse",

@@ -31,6 +31,7 @@ from app.api.contracts import (
     ResearchMatrixNodeResponse,
     ResearchMatrixResponse,
     ResearchMatrixTemplateResponse,
+    ResearchScenarioResponse,
 )
 from app.recommendation import RecommendationCompositionResult
 from app.research import ResearchSpecialistMatrixRequest
@@ -116,6 +117,13 @@ def _research_matrix_response(output: SpecialistMatrixOutput) -> ResearchMatrixR
         )
     return ResearchMatrixResponse(
         matrix_id=output.matrix.matrix_id,
+        scenario=ResearchScenarioResponse.model_validate(
+            {
+                "scenario_id": output.scenario.scenario_id,
+                "label": output.scenario.label,
+                "description": output.scenario.description,
+            }
+        ),
         request_id=output.request_id,
         owner_id=output.owner_id,
         run_id=output.execution.state.run_id,
@@ -446,6 +454,16 @@ def create_app(
             scope_description=template.scope_description,
             roles=tuple(sorted({node.role for node in template.nodes}, key=lambda item: item.value)),
             node_count=len(template.nodes),
+            scenarios=tuple(
+                ResearchScenarioResponse.model_validate(
+                    {
+                        "scenario_id": scenario.scenario_id,
+                        "label": scenario.label,
+                        "description": scenario.description,
+                    }
+                )
+                for scenario in active_specialist.scenarios
+            ),
         )
 
     @api.post(

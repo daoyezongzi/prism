@@ -24,6 +24,8 @@ from app.research.evidence_bridge import (
 )
 from app.research.specialists import (
     ResearchIdentifier,
+    ResearchScenarioDefinition,
+    ResearchScenarioId,
     ResearchSpecialistMatrix,
     ResearchSpecialistMatrixRequest,
     ResearchSpecialistNode,
@@ -72,6 +74,8 @@ __all__ = [
     "bridge_cross_validation",
     "build_evidence_grounded_finding",
     "ResearchIdentifier",
+    "ResearchScenarioDefinition",
+    "ResearchScenarioId",
     "ResearchSpecialistMatrix",
     "ResearchSpecialistMatrixRequest",
     "ResearchSpecialistNode",

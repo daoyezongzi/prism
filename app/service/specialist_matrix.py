@@ -23,10 +23,20 @@ from app.orchestration import (
     create_research_run,
     execute_research_run,
 )
-from app.providers import FixtureFinancialProvider, ProviderRequest
+from app.providers import (
+    FixtureFinancialProvider,
+    ProviderIssue,
+    ProviderIssueCode,
+    ProviderRecord,
+    ProviderRequest,
+    ProviderResult,
+    ProviderStatus,
+)
 from app.research import (
     ResearchSpecialistMatrix,
     ResearchSpecialistMatrixRequest,
+    ResearchScenarioDefinition,
+    ResearchScenarioId,
     ValidationClaim,
 )
 from app.research.pipeline import ResearchEvidencePipelineResult
@@ -35,6 +45,172 @@ from app.research.pipeline import ResearchEvidencePipelineResult
 _DEFAULT_MATRIX_ROOT = Path(__file__).resolve().parent.parent / "fixtures" / "research"
 _DEFAULT_MANIFEST = _DEFAULT_MATRIX_ROOT / "specialist_matrix.json"
 _DEFAULT_PROVIDER_DIR = _DEFAULT_MATRIX_ROOT / "providers"
+
+
+_SCENARIO_DEFINITIONS = (
+    ResearchScenarioDefinition(
+        scenario_id=ResearchScenarioId.BASELINE_READY,
+        label="基线：来源一致",
+        description="两条独立来源对四条研究 claim 给出一致数值，形成 READY 证据闭包。",
+    ),
+    ResearchScenarioDefinition(
+        scenario_id=ResearchScenarioId.SOURCE_DISAGREEMENT,
+        label="分歧：来源冲突",
+        description="宏观来源对同一政策利率给出不同数值，保留双方 Evidence 并要求复核。",
+    ),
+    ResearchScenarioDefinition(
+        scenario_id=ResearchScenarioId.SOURCE_EMPTY,
+        label="异常：范围无结果",
+        description="行业来源在声明范围内没有记录，系统不把无结果当作零值。",
+    ),
+    ResearchScenarioDefinition(
+        scenario_id=ResearchScenarioId.SOURCE_FAILED,
+        label="异常：来源失败",
+        description="个股来源安全失败，run 关闭未完成节点并阻止下游事实升级。",
+    ),
+    ResearchScenarioDefinition(
+        scenario_id=ResearchScenarioId.SOURCE_PARTIAL,
+        label="异常：字段缺失",
+        description="基金来源返回部分记录但缺少必需字段，保留可见范围并要求复核。",
+    ),
+)
+_SCENARIO_BY_ID = {item.scenario_id: item for item in _SCENARIO_DEFINITIONS}
+
+
+def _validated_result(
+    result: ProviderResult,
+    *,
+    status: ProviderStatus | None = None,
+    records: tuple[ProviderRecord, ...] | None = None,
+    missing_fields: tuple[str, ...] | None = None,
+    issues: tuple[ProviderIssue, ...] | None = None,
+    scope_description: str | None | object = None,
+) -> ProviderResult:
+    """Rebuild an overlay result through the Provider contract validators."""
+
+    payload = result.model_dump(mode="python")
+    if status is not None:
+        payload["status"] = status
+    if records is not None:
+        payload["records"] = records
+    if missing_fields is not None:
+        payload["missing_fields"] = missing_fields
+    if issues is not None:
+        payload["issues"] = issues
+    if scope_description is not None:
+        payload["scope_description"] = scope_description
+    return ProviderResult.model_validate(payload)
+
+
+class _ScenarioFixtureProvider:
+    """Apply one explicit offline scenario to the existing fixture provider."""
+
+    def __init__(self, base: FixtureFinancialProvider, scenario_id: ResearchScenarioId) -> None:
+        self._base = base
+        self._scenario_id = scenario_id
+
+    @property
+    def name(self) -> str:
+        return self._base.name
+
+    async def execute(self, request: ProviderRequest) -> ProviderResult:
+        result = await self._base.execute(request)
+        scenario = self._scenario_id
+
+        if scenario == ResearchScenarioId.BASELINE_READY:
+            return result
+
+        if scenario == ResearchScenarioId.SOURCE_DISAGREEMENT:
+            if request.request_id != "matrix-macro-request-b":
+                return result
+            records: list[ProviderRecord] = []
+            for record in result.records:
+                fields = dict(record.fields)
+                fields["policy_rate_pct"] = "3.25"
+                records.append(
+                    ProviderRecord.model_validate(
+                        {
+                            **record.model_dump(mode="python"),
+                            "fields": fields,
+                        }
+                    )
+                )
+            return _validated_result(result, records=tuple(records))
+
+        if scenario == ResearchScenarioId.SOURCE_PARTIAL:
+            if request.request_id != "matrix-fund-request-b":
+                return result
+            records = []
+            for record in result.records:
+                fields = {
+                    key: value
+                    for key, value in record.fields.items()
+                    if key != "technology_weight_pct"
+                }
+                units = {
+                    key: value
+                    for key, value in record.units.items()
+                    if key != "technology_weight_pct"
+                }
+                if not fields:
+                    fields = {"coverage_pct": "50.00"}
+                    units = {"coverage_pct": "pct"}
+                records.append(
+                    ProviderRecord.model_validate(
+                        {
+                            **record.model_dump(mode="python"),
+                            "fields": fields,
+                            "units": units,
+                        }
+                    )
+                )
+            issue = ProviderIssue(
+                code=ProviderIssueCode.INVALID_RESPONSE,
+                stage="scenario",
+                safe_message="synthetic fixture omitted a required field",
+                retriable=False,
+                diagnostics={"scenario_id": scenario.value},
+            )
+            return _validated_result(
+                result,
+                status=ProviderStatus.PARTIAL,
+                records=tuple(records),
+                missing_fields=("technology_weight_pct",),
+                issues=(issue,),
+            )
+
+        if scenario == ResearchScenarioId.SOURCE_EMPTY:
+            if request.request_id != "matrix-industry-request-b":
+                return result
+            return _validated_result(
+                result,
+                status=ProviderStatus.EMPTY,
+                records=(),
+                missing_fields=(),
+                issues=(),
+                scope_description="synthetic fixture returned no records for the requested scope",
+            )
+
+        if scenario == ResearchScenarioId.SOURCE_FAILED:
+            if request.request_id != "matrix-stock-request-b":
+                return result
+            issue = ProviderIssue(
+                code=ProviderIssueCode.TRANSPORT_ERROR,
+                stage="scenario",
+                safe_message="synthetic fixture source was unavailable",
+                retriable=False,
+                diagnostics={"scenario_id": scenario.value},
+            )
+            return _validated_result(
+                result,
+                status=ProviderStatus.FAILED,
+                records=(),
+                missing_fields=(),
+                issues=(issue,),
+                scope_description=None,
+            )
+
+        raise ValueError("unknown research scenario")
 
 
 class SpecialistMatrixError(RuntimeError):
@@ -48,6 +224,7 @@ class SpecialistMatrixOutput(ContractModel):
         "research-specialist-matrix-output.v1"
     )
     matrix: ResearchSpecialistMatrix
+    scenario: ResearchScenarioDefinition
     request_id: NonEmptyStr
     owner_id: NonEmptyStr
     execution: ResearchRunExecutionResult
@@ -57,6 +234,8 @@ class SpecialistMatrixOutput(ContractModel):
     def validate_output(self) -> Self:
         if self.matrix.owner_id != self.owner_id:
             raise ValueError("matrix owner does not match output owner")
+        if self.scenario.scenario_id not in _SCENARIO_BY_ID:
+            raise ValueError("output scenario is not in the scenario catalog")
         if self.execution.state.owner_id != self.owner_id:
             raise ValueError("execution owner does not match output owner")
         if self.execution.state.request_id != self.request_id:
@@ -123,6 +302,12 @@ class FixtureResearchSpecialistMatrixService:
     @property
     def matrix_id(self) -> str:
         return self._template.matrix_id
+
+    @property
+    def scenarios(self) -> tuple[ResearchScenarioDefinition, ...]:
+        """Return the stable, safe scenario catalog for the workbench."""
+
+        return tuple(sorted(_SCENARIO_DEFINITIONS, key=lambda item: item.scenario_id.value))
 
     def matrix_template(self, owner_id: str) -> ResearchSpecialistMatrix:
         """Return the manifest rebound and revalidated for one owner."""
@@ -294,6 +479,9 @@ class FixtureResearchSpecialistMatrixService:
             raise SpecialistMatrixError("specialist matrix request was refused") from exc
         if request.matrix_id != self._template.matrix_id:
             raise SpecialistMatrixError("requested specialist matrix is unavailable")
+        scenario = _SCENARIO_BY_ID.get(request.scenario_id)
+        if scenario is None:
+            raise SpecialistMatrixError("requested research scenario is unavailable")
 
         try:
             matrix = self.matrix_template(request.owner_id)
@@ -307,7 +495,10 @@ class FixtureResearchSpecialistMatrixService:
             clock = lambda: request.generated_at
             execution = await execute_research_run(
                 state,
-                FixtureFinancialProvider(fixture_dir=self._provider_dir, clock=clock),
+                _ScenarioFixtureProvider(
+                    FixtureFinancialProvider(fixture_dir=self._provider_dir, clock=clock),
+                    request.scenario_id,
+                ),
                 self._requests(matrix),
                 started_at=request.generated_at,
                 clock=clock,
@@ -320,6 +511,7 @@ class FixtureResearchSpecialistMatrixService:
             )
             return SpecialistMatrixOutput(
                 matrix=matrix,
+                scenario=scenario,
                 request_id=request.request_id,
                 owner_id=request.owner_id,
                 execution=execution,
