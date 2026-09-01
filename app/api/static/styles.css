@@ -209,6 +209,27 @@ h2 { margin-bottom: 0; font: 700 21px/1.3 var(--serif); }
 .stock-available-evidence summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
 .stock-rules { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
 .stock-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
+.fund-research-panel { grid-column: 1 / -1; }
+.fund-research-content { display: grid; gap: 16px; margin-top: 18px; }
+.fund-research-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 13px 14px; border-left: 3px solid var(--clay); background: var(--surface-muted); }
+.fund-research-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.fund-fact-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fund-fact-card { min-width: 0; padding: 12px 13px; border: 1px solid var(--outline); border-radius: 7px; background: var(--surface-muted); }
+.fund-fact-card strong { display: block; font: 700 14px var(--serif); overflow-wrap: anywhere; }
+.fund-fact-card .fund-fact-value { margin-top: 7px; font: 700 17px var(--mono); }
+.fund-fact-card .muted { margin-top: 3px; overflow-wrap: anywhere; }
+.fund-risk-summary { display: grid; gap: 8px; padding: 13px 14px; border: 1px solid var(--outline); border-radius: 7px; background: var(--yellow-soft); }
+.fund-risk-summary header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.fund-risk-summary strong { font: 700 15px var(--serif); }
+.fund-risk-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.fund-findings { display: grid; gap: 8px; }
+.fund-findings details { padding: 11px 13px; border: 1px solid var(--outline); border-radius: 7px; }
+.fund-findings summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
+.fund-available-evidence { display: grid; gap: 8px; }
+.fund-available-evidence details { padding: 11px 13px; border: 1px dashed var(--outline); border-radius: 7px; background: var(--surface-muted); }
+.fund-available-evidence summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
+.fund-rules { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
+.fund-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
 .portfolio-content, .profile-context { display: grid; gap: 16px; }
 .portfolio-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 16px; padding: 13px 14px; background: var(--surface-muted); border: 1px solid var(--outline); border-radius: 7px; }
 .portfolio-summary dt { font-size: 10px; }
@@ -287,14 +308,14 @@ dd { margin: 1px 0 0; overflow-wrap: anywhere; font: 12px var(--mono); }
   .context-confirm-actions { grid-template-columns: 1fr; }
   .profile-conflict-values { grid-template-columns: 1fr; }
   .research-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stock-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stock-fact-grid, .fund-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portfolio-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .position-grid, .holding-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
   .research-grid { grid-template-columns: 1fr; }
-  .stock-fact-grid { grid-template-columns: 1fr; }
+  .stock-fact-grid, .fund-fact-grid { grid-template-columns: 1fr; }
   .research-validation { grid-template-columns: 1fr; }
   .portfolio-summary { grid-template-columns: 1fr; }
 }

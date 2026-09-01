@@ -40,6 +40,11 @@ from app.stock import (
     StockResearchResponse,
     StockResearchTemplateResponse,
 )
+from app.fund import (
+    FundResearchRequest,
+    FundResearchResponse,
+    FundResearchTemplateResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -58,6 +63,8 @@ from app.service import (
     confirm_profile_proposal,
     FixtureStockResearchService,
     StockResearchError,
+    FixtureFundResearchService,
+    FundResearchError,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -150,6 +157,7 @@ def create_app(
     advisor_service: FixtureAdvisorQueryService | None = None,
     specialist_service: FixtureResearchSpecialistMatrixService | None = None,
     stock_service: FixtureStockResearchService | None = None,
+    fund_service: FixtureFundResearchService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -163,6 +171,7 @@ def create_app(
     active_advisor = advisor_service or FixtureAdvisorQueryService()
     active_specialist = specialist_service or FixtureResearchSpecialistMatrixService()
     active_stock = stock_service or FixtureStockResearchService()
+    active_fund = fund_service or FixtureFundResearchService()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -234,6 +243,12 @@ def create_app(
         _: Request, __: StockResearchError
     ) -> JSONResponse:
         return _error_response(400, "STOCK_RESEARCH_ERROR", "stock research was refused")
+
+    @api.exception_handler(FundResearchError)
+    async def fund_research_error_handler(
+        _: Request, __: FundResearchError
+    ) -> JSONResponse:
+        return _error_response(400, "FUND_RESEARCH_ERROR", "fund research was refused")
 
     @api.exception_handler(ProfileConfirmationError)
     async def profile_confirmation_error_handler(
@@ -533,6 +548,35 @@ def create_app(
             raise
         except Exception as exc:
             raise StockResearchError("stock research execution was refused") from exc
+        return output
+
+    @api.get(
+        "/api/v1/advisor/fund-research-template",
+        response_model=FundResearchTemplateResponse,
+    )
+    def get_fund_research_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> FundResearchTemplateResponse:
+        return active_fund.template(owner_id)
+
+    @api.post(
+        "/api/v1/advisor/fund-research-runs",
+        response_model=FundResearchResponse,
+    )
+    async def create_fund_research_run(
+        request: FundResearchRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> FundResearchResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("fund research request owner does not match owner scope")
+        try:
+            output = await active_fund.run(request)
+            if not isinstance(output, FundResearchResponse) or output.owner_id != owner_id:
+                raise FundResearchError("fund research output owner drifted")
+        except FundResearchError:
+            raise
+        except Exception as exc:
+            raise FundResearchError("fund research execution was refused") from exc
         return output
 
     @api.get(

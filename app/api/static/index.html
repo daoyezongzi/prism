@@ -25,6 +25,7 @@
           <a class="nav-item" href="#portfolio">Portfolio</a>
           <a class="nav-item" href="#research-tracks">Research Tracks</a>
           <a class="nav-item" href="#stock-research">Stock Research</a>
+          <a class="nav-item" href="#fund-research">ETF / Fund Research</a>
           <a class="nav-item" href="#evidence">Evidence</a>
           <a class="nav-item" href="#profile">Risk Profile</a>
         </nav>
@@ -212,6 +213,33 @@
             <p class="research-boundary">财务事实、异常和风险均来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
             <div id="stock-research-content" class="stock-research-content" aria-live="polite">
               <div class="empty-state">运行个股研究后查看财务事实、异常、风险与 Evidence 闭合。</div>
+            </div>
+          </section>
+
+          <section class="panel fund-research-panel" id="fund-research" aria-labelledby="fund-research-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">DEMO G · ETF / FUND RESEARCH</span>
+                <h2 id="fund-research-title">ETF / Fund 资产 Evidence Card</h2>
+              </div>
+              <span id="fund-research-status" class="status-chip">待运行</span>
+            </div>
+            <div class="research-actions">
+              <div id="fund-research-template-meta" class="query-meta">
+                运行时读取固定合成基金与资产风险规则；结果不写入决策回执。
+              </div>
+              <label class="research-scenario-picker" for="fund-research-scenario">
+                <span>回放场景</span>
+                <select id="fund-research-scenario" disabled>
+                  <option value="">读取场景目录…</option>
+                </select>
+                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+              </label>
+              <button id="run-fund-research" class="query-submit" type="button">运行 ETF / Fund 研究</button>
+            </div>
+            <p class="research-boundary">资产事实、集中度、费用、波动与回撤风险来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
+            <div id="fund-research-content" class="fund-research-content" aria-live="polite">
+              <div class="empty-state">运行 ETF / Fund 研究后查看资产事实、风险与 Evidence 闭合。</div>
             </div>
           </section>
 

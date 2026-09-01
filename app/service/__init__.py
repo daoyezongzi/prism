@@ -34,6 +34,10 @@ from app.service.stock_research import (
     FixtureStockResearchService,
     StockResearchError,
 )
+from app.service.fund_research import (
+    FixtureFundResearchService,
+    FundResearchError,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -56,4 +60,6 @@ __all__ = [
     "confirm_profile_proposal",
     "FixtureStockResearchService",
     "StockResearchError",
+    "FixtureFundResearchService",
+    "FundResearchError",
 ]

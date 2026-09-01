@@ -30,6 +30,12 @@ from app.stock import (
     StockResearchNodeResponse,
     StockResearchTemplateResponse,
 )
+from app.fund import (
+    FundResearchRequest,
+    FundResearchResponse,
+    FundResearchNodeResponse,
+    FundResearchTemplateResponse,
+)
 from app.profile import (
     ConflictResolution,
     ProfileDraft,
@@ -454,4 +460,8 @@ __all__ = [
     "StockResearchResponse",
     "StockResearchNodeResponse",
     "StockResearchTemplateResponse",
+    "FundResearchRequest",
+    "FundResearchResponse",
+    "FundResearchNodeResponse",
+    "FundResearchTemplateResponse",
 ]

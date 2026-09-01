@@ -1,0 +1,47 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "PRISM_FUND_DEMO_G",
+    "required_fields": [
+      "annualized_volatility_pct",
+      "expense_ratio_pct",
+      "max_drawdown_pct",
+      "technology_weight_pct",
+      "top10_weight_pct",
+      "tracking_error_pct"
+    ],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [
+      {
+        "source": "fund-research-source-a",
+        "record_id": "fund-research-record-a",
+        "fields": {
+          "annualized_volatility_pct": "28.00",
+          "expense_ratio_pct": "1.20",
+          "max_drawdown_pct": "35.00",
+          "technology_weight_pct": "68.00",
+          "top10_weight_pct": "64.00",
+          "tracking_error_pct": "2.10"
+        },
+        "units": {
+          "annualized_volatility_pct": "pct",
+          "expense_ratio_pct": "pct",
+          "max_drawdown_pct": "pct",
+          "technology_weight_pct": "pct",
+          "top10_weight_pct": "pct",
+          "tracking_error_pct": "pct"
+        },
+        "period": "2026-Q2",
+        "observed_at": "2026-08-01T00:00:00Z",
+        "lineage_id": "fund-research-lineage-a"
+      }
+    ],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

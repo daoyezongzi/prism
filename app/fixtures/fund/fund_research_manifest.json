@@ -1,0 +1,108 @@
+{
+  "schema_version": "fund-research-manifest.v1",
+  "manifest_id": "fund-research-demo-g-001",
+  "subject": "PRISM_FUND_DEMO_G",
+  "period": "2026-Q2",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "budget_ms": 3000,
+  "scope_description": "offline synthetic ETF fund asset research replay",
+  "metrics": [
+    {
+      "metric": "annualized_volatility_pct",
+      "label": "年化波动率",
+      "unit": "pct",
+      "expected_value": "28.00",
+      "finding_kind": "FUND_VOLATILITY_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对年化波动率给出一致的期间数值。"
+    },
+    {
+      "metric": "expense_ratio_pct",
+      "label": "费率",
+      "unit": "pct",
+      "expected_value": "1.20",
+      "finding_kind": "FUND_EXPENSE_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对费率给出一致的期间数值。"
+    },
+    {
+      "metric": "max_drawdown_pct",
+      "label": "最大回撤",
+      "unit": "pct",
+      "expected_value": "35.00",
+      "finding_kind": "FUND_DRAWDOWN_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对最大回撤给出一致的期间数值。"
+    },
+    {
+      "metric": "technology_weight_pct",
+      "label": "科技行业权重",
+      "unit": "pct",
+      "expected_value": "68.00",
+      "finding_kind": "FUND_TECHNOLOGY_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对科技行业权重给出一致的期间数值。"
+    },
+    {
+      "metric": "top10_weight_pct",
+      "label": "前十大持仓权重",
+      "unit": "pct",
+      "expected_value": "64.00",
+      "finding_kind": "FUND_TOP10_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对前十大持仓权重给出一致的期间数值。"
+    },
+    {
+      "metric": "tracking_error_pct",
+      "label": "跟踪误差",
+      "unit": "pct",
+      "expected_value": "2.10",
+      "finding_kind": "FUND_TRACKING_ERROR_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成基金来源对跟踪误差给出一致的期间数值。"
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "fund-research-source-a",
+      "request_id": "fund-research-request-a",
+      "source": "fund-research-source-a",
+      "record_id": "fund-research-record-a",
+      "lineage_id": "fund-research-lineage-a",
+      "source_slot": "a",
+      "required_fields": [
+        "annualized_volatility_pct",
+        "expense_ratio_pct",
+        "max_drawdown_pct",
+        "technology_weight_pct",
+        "top10_weight_pct",
+        "tracking_error_pct"
+      ],
+      "parameters": {"period": "2026-Q2", "source_slot": "a"},
+      "timeout_ms": 1000
+    },
+    {
+      "node_id": "fund-research-source-b",
+      "request_id": "fund-research-request-b",
+      "source": "fund-research-source-b",
+      "record_id": "fund-research-record-b",
+      "lineage_id": "fund-research-lineage-b",
+      "source_slot": "b",
+      "required_fields": [
+        "annualized_volatility_pct",
+        "expense_ratio_pct",
+        "max_drawdown_pct",
+        "technology_weight_pct",
+        "top10_weight_pct",
+        "tracking_error_pct"
+      ],
+      "parameters": {"period": "2026-Q2", "source_slot": "b"},
+      "timeout_ms": 1000
+    }
+  ],
+  "technology_weight_max_pct": "50.00",
+  "top10_weight_max_pct": "60.00",
+  "volatility_max_pct": "25.00",
+  "drawdown_max_pct": "30.00",
+  "expense_ratio_max_pct": "1.00"
+}
