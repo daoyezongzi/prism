@@ -6,9 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 26 ETF/Fund Evidence Card is under independent review in the
-> dedicated `D:\Github_Storage\prism-phase-26` worktree; Phase 27 starts only after
-> this phase is accepted and a new worktree is created.
+> Active phase: Phase 27 Convertible Bond Evidence Card is accepted in the dedicated
+> `D:\Github_Storage\prism-phase-27` worktree; Phase 28 starts only after a new worktree
+> is created and its plan is submitted.
 
 ## P0 — Foundation
 
@@ -92,7 +92,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Explicitly deferred
 
-- Convertible-bond research;
 - broad persistent conversational memory beyond profile/decision audit state;
 - autonomous trading or real order execution;
 - microservices and Kubernetes;
@@ -100,7 +99,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 26 is in independent review in the dedicated `D:\Github_Storage\prism-phase-26`
-worktree. Finish its review, documentation and verification, then create a new worktree
-for Phase 27 and submit that phase's plan before implementation; keep real authentication,
-live Provider access and production persistence deferred.
+Phase 27 is accepted in the dedicated `D:\Github_Storage\prism-phase-27` worktree. Create
+a new worktree for Phase 28 and submit that phase's plan before implementation; keep real
+authentication, live Provider access, production persistence and broad conversational
+memory deferred.

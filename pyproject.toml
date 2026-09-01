@@ -42,6 +42,8 @@ app = [
   "fixtures/stock/providers/*.json",
   "fixtures/fund/*.json",
   "fixtures/fund/providers/*.json",
+  "fixtures/convertible_bond/*.json",
+  "fixtures/convertible_bond/providers/*.json",
 ]
 
 [tool.pytest.ini_options]

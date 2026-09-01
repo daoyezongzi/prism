@@ -1,6 +1,6 @@
 # Prism MVP Phase 27：最低可转债资产卡计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 日期：2026-09-02
 
@@ -173,10 +173,26 @@ DecisionEvent 或订单。
 
 ## 7. 验收记录（实现后填写）
 
-- 实现提交：待定
-- 独立审查：待定
-- 阶段测试：待定
-- 全量回归：待定
-- 固定评测/并发：待定
-- 浏览器验收：待定
-- 最终状态：`PLANNED`
+- 实现提交：`d88d7ea`；公式/状态/响应闭合修复：`d2d1295`；
+  validation 覆盖、双节点与 required 闭合修复：`4b2627c`；API manifest/node
+  identity closure：`4105ce9`。
+- 独立审查：发现并修复三类边界——派生公式可被伪造、注入输出 scope/风险可漂移、
+  原始 validation 不完整/节点数量不固定；均新增对抗性回归，且未扩大到实时 Provider、
+  交易或 Recommendation。
+- 阶段测试：`python -m pytest tests/integration/test_phase27_convertible_bond.py -q`
+  → `28 passed`。
+- 全量回归：`python -m pytest -o addopts='' -q` → `377 passed`，仅已知
+  Starlette/httpx deprecation warning；`compileall`、公开 import、`node --check`、
+  `git diff --check` 均通过。
+- 固定评测：`python -m tools.evaluate_mvp --repeat 100 --json`，9/9 case 通过，
+  所有指标 `1.0`。
+- 本地并发：100 个独立 owner 的可转债 template 请求 100/100，P50/P95/P99
+  `165.328/180.471/183.205 ms`；research 请求 100/100，P50/P95/P99
+  `790.712/1308.629/1364.426 ms`；错误 0、owner mismatch 0、存储行数 0。
+  这是 fixture/ASGI 基线，不外推真实市场准确率或生产 SLA。
+- 打包：wheel 共 `106` entries，包含可转债 manifest、双 Provider fixture、contracts、
+  service 与静态资源；从 wheel 安装目录实例化 service 并成功加载 manifest。
+- 浏览器验收：本地真实浏览器完成模板、基线 READY/9 Facts/公式/五类风险、来源分歧、
+  PARTIAL、EMPTY、FAILED 和 owner 切换清空；Finding → Fact → Evidence、lineage、
+  节点状态可见；控制台错误 `[]`，无外部请求。
+- 最终状态：`ACCEPTED`；Phase 27 worktree 保持独立，未 push。

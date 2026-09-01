@@ -1039,6 +1039,59 @@ Phase 25 已在本地 worktree 接受，未 push；下一阶段必须从本提�
   节点状态、缺失/范围/安全 issue 且没有 Fact/Finding；展开 Finding → Fact → Evidence
   链路；owner 切换清空旧卡；console error 为 `[]`。
 
-Phase 26 已在本地 worktree 接受，未 push；下一阶段必须从 `6efa834` 创建新 worktree，
+Phase 26 已在本地 worktree 接受，未 push；下一阶段必须从 `21714f8` 创建新 worktree，
 并先提交 Phase 27 计划书。下一阶段优先补齐 Prism.md 明确要求的最低可转债资产卡，
 继续保持真实 Provider、认证、生产持久化和交易执行延期。
+
+## 2026-09-02 — MVP Phase 27 最低可转债资产研究 Evidence Card（Demo H）
+
+### 计划与 worktree
+
+- 在已接受的 Phase 26 `21714f8` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-27`，分支为
+  `codex/mvp-phase-27-convertible-bond`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `04790a7`；本阶段保持 fixture-first，不接入真实 SkillHub/同花顺网络、在线鉴权、
+  LLM/Gemini、交易执行、组合优化或 Recommendation。
+
+### 本地实现
+
+- 新增 `CONVERTIBLE_BOND_DATA` Provider operation、`CONVERTIBLE_BOND` research node
+  kind，以及严格的 Convertible Bond manifest/request/template/response、节点、场景、
+  风险摘要契约；七个原始指标和两个派生指标均有稳定 metric/unit 定义，面值固定为
+  100 CNY，信用/流动性等级只接受 manifest 的安全序数标签。
+- 新增两条独立 lineage 的合成可转债 Provider fixture 与
+  `FixtureConvertibleBondResearchService`。它复用既有四态 Provider、bounded executor、
+  lineage-aware Cross-Validation、Evidence/Finding bridge 和 DecisionTrace；服务端以
+  `Decimal`/`ROUND_HALF_UP` 计算转股价值与转股溢价率，并生成版本化风险 Finding。
+- 新增五场景 owner-scoped API 与静态工作台：基线闭合 9 个 Fact、16 条 Evidence 和
+  五类非 INFO 风险；分歧、PARTIAL、EMPTY、FAILED 保留 validation/Evidence/节点原因，
+  不升级 Fact/Finding/风险，也不写 DecisionEvent。
+- 新增 [可转债资产研究 Evidence Card](docs/convertible-bond-research-card.md)，同步
+  架构、README、TODO 与 package-data；wheel 安装后可从包内 fixture 实例化 service。
+
+### 独立审查与验收
+
+- 首版实现提交为 `d88d7ea`。审查发现响应模型只校验公式输入时间排序，未防止注入
+  服务伪造派生值；`d2d1295` 加入精确 Decimal 复算、正数/等级范围、公式 Evidence
+  Finding 引用和风险摘要闭合，并增加对抗性回归。
+- 后续审查发现风险摘要可隐藏已触发 Finding、API 注入输出可漂移 scope，以及响应未
+  强制每个原始指标对应 validation、双节点数量和 required 语义；`d2d1295`、`4b2627c`
+  和 `4105ce9` 分别完成 API/风险、response-contract 与 manifest/node identity 修复。
+- 阶段测试：`28 passed`；全量回归：`377 passed`，仅已知 Starlette/httpx deprecation
+  warning。`compileall`、公开 import、`node --check`、`git diff --check` 通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9 case 通过，所有指标为
+  `1.0`。可转债本地 ASGI 100 并发基线为：template 100/100，P50/P95/P99
+  `165.328/180.471/183.205 ms`；research 100/100，P50/P95/P99
+  `790.712/1308.629/1364.426 ms`；错误、owner mismatch 和存储行数均为 0；不外推
+  真实市场准确率或生产 SLA。
+- wheel 共 `106` entries，包含可转债 manifest、双 Provider fixture、service/contracts
+  和静态资源；wheel 安装目录实例化 service 成功。运行时范围扫描无外网、LLM/Gemini、
+  上游运行时导入、凭据、HTML sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成模板、基线、分歧、PARTIAL、EMPTY、FAILED 与 owner 切换；9 个
+  指标、派生公式、HIGH_RISK、节点状态、validation、Finding → Fact → Evidence 与
+  lineage 可见；控制台错误为 `[]`，无外部请求；等级卡片重复单位已修正。
+
+Phase 27 已在本地 worktree 接受，最终验收记录见
+`docs/plans/2026-09-02-mvp-phase-27-convertible-bond.md`；未 push。下一阶段必须从本
+阶段接受提交创建全新 worktree，并先提交 Phase 28 计划书。

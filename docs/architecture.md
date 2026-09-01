@@ -48,6 +48,15 @@ lineage-aware Cross-Validation 和 Evidence/Finding bridge，基线闭合科技�
 生成五类资产风险 Finding；来源冲突、PARTIAL、EMPTY 和 FAILED 只返回 Evidence 与
 节点 reason，不升级 Fact/Finding/风险。该卡通过 owner-scoped API 与静态工作台展示，
 不写 DecisionEvent、不生成 Recommendation，仍不接入网络、LLM/Gemini、认证或生产存储。
+Phase 27 在同一边界增加独立的 Demo H 可转债资产研究 Evidence Card：两个
+`CONVERTIBLE_BOND_DATA` fixture 节点复用 bounded run、Provider 四态、lineage-aware
+Cross-Validation 和 Evidence/Finding bridge，基线闭合正股、转股价、转债价格、债底、
+到期收益、信用序数和流动性序数七个原始 Fact，并由服务端 deterministic `Decimal`
+公式生成转股价值与转股溢价率，再按版本化阈值生成风险 Finding。来源分歧、PARTIAL、
+EMPTY 和 FAILED 只保留 Evidence、validation 与节点降级原因，不生成 Fact/Finding/
+风险结论；API 对注入输出重新校验 owner/request/scope/scenario、双节点和七项原始
+validation。该卡不写 DecisionEvent、不生成 Recommendation，仍不接入网络、LLM/Gemini、
+认证或生产存储。
 
 ## 数据流
 
@@ -136,8 +145,9 @@ Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/�
 Query 工作台、Phase 16 的四轨道研究节点矩阵、Phase 17 的 Research Tracks API/UI
 切片、Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图、Phase 19
 的本地 fixture 负载测试骨架，以及 Phase 25 的个股研究 Evidence Card API/UI。
-Phase 26 的 ETF/Fund 资产研究 Evidence Card API/UI 也已完成，并保留非 READY
-阻断和双 lineage Evidence 展开语义。
+Phase 26 的 ETF/Fund 资产研究 Evidence Card API/UI 与 Phase 27 的可转债资产研究
+Evidence Card API/UI 也已完成，并保留非 READY 阻断、双 lineage Evidence 展开和
+确定性派生公式语义。
 真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
 专用多研究 Agent、Portfolio/Risk Profile CRUD、真实持仓导入、云压测和外部真实
 旗舰流/SLA 仍未完成；README 与 TODO 必须持续保持这一事实边界。

@@ -108,6 +108,16 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   [ETF/Fund 资产研究 Evidence Card](docs/fund-research-card.md)。Phase-specific `24`
   项、全量 `349` 项回归、100 次固定评测和本地 100 并发基线均通过；这些仍是离线
   fixture/ASGI 证据，不代表实时市场准确率或生产 SLA。
+- Phase 27 已把 Demo H 最低可转债资产研究落成独立的 Evidence Card：两条
+  `CONVERTIBLE_BOND_DATA` lineage 经过同一 bounded run、四态 Provider、
+  Cross-Validation 和 Evidence/Finding bridge，基线闭合正股、转股价、转债价格、
+  债底、到期收益、信用序数和流动性序数七个原始 Fact，并由服务端 deterministic
+  `Decimal` 公式生成转股价值与转股溢价率，再生成可审计的风险 Finding。分歧、PARTIAL、
+  EMPTY、FAILED 保留 Evidence、validation 和节点原因，不升级 Fact/Finding/风险；
+  owner-scoped API 与静态工作台支持五场景回放，结果不写 DecisionEvent、不生成
+  Recommendation。阶段 `28` 项、全量 `377` 项回归、100 次固定评测、本地 100 并发
+  基线、wheel 与真实浏览器路径均通过；这些仍是离线 fixture/ASGI 证据，不代表实时
+  市场准确率或生产 SLA。详见 [可转债资产研究 Evidence Card](docs/convertible-bond-research-card.md)。
 
 尚未实现：
 
@@ -115,8 +125,7 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
 - Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
 - 完整 Portfolio/Risk Profile CRUD、真实持仓导入和真实端到端场景；
-- 宏观、行业、个股、ETF/Fund 的真实 SkillHub Provider、实时数据和完整工作台消费；
-- 可转债研究与最低资产级合约；
+- 宏观、行业、个股、ETF/Fund、可转债的真实 SkillHub Provider、实时数据和完整工作台消费；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
 ## 核心不变量
@@ -207,6 +216,8 @@ python -m pytest
 - [Phase 25 个股研究计划与验收](docs/plans/2026-09-02-mvp-phase-25-stock-research.md)
 - [Phase 26 ETF/Fund 资产研究 Evidence Card](docs/fund-research-card.md)
 - [Phase 26 ETF/Fund 资产研究计划与验收](docs/plans/2026-09-02-mvp-phase-26-fund-research.md)
+- [Phase 27 可转债资产研究 Evidence Card](docs/convertible-bond-research-card.md)
+- [Phase 27 可转债资产研究计划与验收](docs/plans/2026-09-02-mvp-phase-27-convertible-bond.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

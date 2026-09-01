@@ -1585,9 +1585,10 @@
       const value = document.createElement("div");
       value.className = "convertible-bond-fact-value";
       let displayValue = text(fact.value);
+      const levelMetric = fact.metric === "credit_rating_rank" || fact.metric === "liquidity_score";
       if (fact.metric === "credit_rating_rank") displayValue = `${text(creditLabels[String(fact.value)], "未知评级")} · rank ${displayValue}`;
       if (fact.metric === "liquidity_score") displayValue = `${text(liquidityLabels[String(fact.value)], "未知流动性")} · score ${displayValue}`;
-      value.textContent = `${displayValue} ${text(fact.unit, "")}`;
+      value.textContent = levelMetric ? displayValue : `${displayValue} ${text(fact.unit, "")}`;
       const period = document.createElement("div");
       period.className = "muted";
       period.textContent = `${text(fact.metric)} · ${text(fact.period)} · ${text(fact.status)}`;
