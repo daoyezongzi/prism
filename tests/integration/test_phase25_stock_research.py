@@ -127,6 +127,19 @@ def test_stock_scenarios_preserve_degraded_semantics(
         assert len(body["facts"]) == 6
         store.close()
         return
+    target = next(item for item in body["nodes"] if item["node_id"].endswith("source-b"))
+    if scenario_id == "SOURCE_PARTIAL":
+        assert target["status"] == "PARTIAL"
+        assert target["missing_fields"] == ["debt_ratio_pct"]
+        assert any(issue["code"] == "MISSING_FIELDS" for issue in target["issues"])
+    elif scenario_id == "SOURCE_EMPTY":
+        assert target["status"] == "EMPTY"
+        assert "no records" in target["scope_description"]
+    elif scenario_id == "SOURCE_DISAGREEMENT":
+        assert target["status"] == "COMPLETE"
+    elif scenario_id == "SOURCE_FAILED":
+        assert target["status"] == "FAILED"
+        assert any(issue["code"] == "SOURCE_UNAVAILABLE" for issue in target["issues"])
     assert body["risk"]["status"] == "NOT_ASSESSED"
     assert body["facts"] == []
     assert body["findings"] == []

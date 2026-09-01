@@ -908,6 +908,41 @@
     }
     panel.append(summary);
 
+    const nodeHeading = document.createElement("h3");
+    nodeHeading.textContent = "Source nodes";
+    panel.append(nodeHeading);
+    const nodeGrid = document.createElement("div");
+    nodeGrid.className = "research-grid";
+    (result.nodes || []).forEach((node) => {
+      const card = document.createElement("article");
+      card.className = "research-card";
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = text(node.node_id);
+      header.append(title, chip(researchStatusLabel(node.status), researchStatusClass(node.status)));
+      card.append(header);
+      const metadata = document.createElement("dl");
+      addMetadata(metadata, "Status", researchStatusLabel(node.status));
+      if (node.missing_fields && node.missing_fields.length) {
+        addMetadata(metadata, "Missing", node.missing_fields.join(", "));
+      }
+      card.append(metadata);
+      if (node.scope_description) {
+        const scope = document.createElement("div");
+        scope.className = "muted";
+        scope.textContent = node.scope_description;
+        card.append(scope);
+      }
+      (node.issues || []).forEach((issue) => {
+        const issueLine = document.createElement("div");
+        issueLine.className = "muted";
+        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        card.append(issueLine);
+      });
+      nodeGrid.append(card);
+    });
+    if (nodeGrid.childElementCount) panel.append(nodeGrid);
+
     const validationsHeading = document.createElement("h3");
     validationsHeading.textContent = "Source validation";
     panel.append(validationsHeading);

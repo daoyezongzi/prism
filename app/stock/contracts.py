@@ -18,7 +18,7 @@ from app.contracts.evidence import (
     FindingSeverity,
     NonEmptyStr,
 )
-from app.orchestration.contracts import ResearchRunStatus
+from app.orchestration.contracts import ResearchNodeRunStatus, ResearchRunStatus
 from app.providers import FrozenDict
 from app.research.contracts import CrossValidationResult
 from app.research.pipeline import ResearchPipelineStatus
@@ -295,6 +295,39 @@ class StockRiskSummary(ContractModel):
         return self
 
 
+class StockResearchNodeResponse(ContractModel):
+    """Safe run state for one stock source node."""
+
+    node_id: ResearchIdentifier
+    required: bool
+    status: ResearchNodeRunStatus
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    missing_fields: tuple[ResearchIdentifier, ...] = Field(default_factory=tuple)
+    scope_description: NonEmptyStr | None = None
+    issues: tuple[StockResearchIssue, ...] = Field(default_factory=tuple)
+
+    @model_validator(mode="after")
+    def validate_node(self) -> Self:
+        if self.missing_fields != tuple(sorted(self.missing_fields)):
+            raise ValueError("stock node missing_fields must be sorted")
+        if len(set(self.missing_fields)) != len(self.missing_fields):
+            raise ValueError("stock node missing_fields must be unique")
+        issue_codes = [item.code for item in self.issues]
+        if len(issue_codes) != len(set(issue_codes)):
+            raise ValueError("stock node issues must be unique")
+        for name, value in (("started_at", self.started_at), ("finished_at", self.finished_at)):
+            if value is not None:
+                _aware(value, f"stock node {name}")
+        if self.started_at is None and self.finished_at is not None:
+            raise ValueError("stock node finished_at requires started_at")
+        if self.started_at is not None and self.finished_at is not None and self.finished_at < self.started_at:
+            raise ValueError("stock node finished_at must not precede started_at")
+        if self.status == ResearchNodeRunStatus.EMPTY and not self.scope_description:
+            raise ValueError("EMPTY stock node requires scope_description")
+        return self
+
+
 class StockResearchTemplateResponse(ContractModel):
     schema_version: Literal["stock-research-template.v1"] = "stock-research-template.v1"
     manifest_id: ResearchIdentifier
@@ -340,6 +373,7 @@ class StockResearchResponse(ContractModel):
     run_id: NonEmptyStr
     run_status: ResearchRunStatus
     pipeline_status: ResearchPipelineStatus
+    nodes: tuple[StockResearchNodeResponse, ...] = Field(min_length=2)
     validations: tuple[CrossValidationResult, ...] = Field(default_factory=tuple)
     facts: tuple[Fact, ...] = Field(default_factory=tuple)
     findings: tuple[Finding, ...] = Field(default_factory=tuple)
@@ -361,6 +395,9 @@ class StockResearchResponse(ContractModel):
             raise ValueError("stock response facts must be unique")
         if len({item.finding_id for item in self.findings}) != len(self.findings):
             raise ValueError("stock response findings must be unique")
+        node_ids = [item.node_id for item in self.nodes]
+        if node_ids != sorted(node_ids) or len(node_ids) != len(set(node_ids)):
+            raise ValueError("stock response nodes must be unique and sorted")
         validation_ids = [item.validation_id for item in self.validations]
         if len(validation_ids) != len(set(validation_ids)):
             raise ValueError("stock response validations must be unique")
@@ -428,6 +465,7 @@ __all__ = [
     "StockResearchManifest",
     "StockResearchManifestNode",
     "StockResearchMetricSpec",
+    "StockResearchNodeResponse",
     "StockResearchRequest",
     "StockResearchResponse",
     "StockResearchScenarioDefinition",

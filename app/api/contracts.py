@@ -27,6 +27,7 @@ from app.providers import FrozenDict
 from app.stock import (
     StockResearchRequest,
     StockResearchResponse,
+    StockResearchNodeResponse,
     StockResearchTemplateResponse,
 )
 from app.profile import (
@@ -451,5 +452,6 @@ __all__ = [
     "ResearchSpecialistMatrixRequest",
     "StockResearchRequest",
     "StockResearchResponse",
+    "StockResearchNodeResponse",
     "StockResearchTemplateResponse",
 ]

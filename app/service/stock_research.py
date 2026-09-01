@@ -37,6 +37,7 @@ from app.stock.contracts import (
     StockResearchManifest,
     StockResearchManifestNode,
     StockResearchMetricSpec,
+    StockResearchNodeResponse,
     StockResearchRequest,
     StockResearchResponse,
     StockResearchScenarioDefinition,
@@ -377,6 +378,42 @@ class FixtureStockResearchService:
         return tuple(specs)
 
     @staticmethod
+    def _node_responses(execution) -> tuple[StockResearchNodeResponse, ...]:
+        responses: list[StockResearchNodeResponse] = []
+        for node in sorted(execution.state.nodes, key=lambda item: item.node_id):
+            issue_by_code: dict[str, StockResearchIssue] = {}
+            for issue in node.issues:
+                code = issue.code.value
+                issue_by_code.setdefault(
+                    code,
+                    StockResearchIssue(code=code, safe_message=issue.safe_message),
+                )
+            missing_fields: tuple[str, ...] = ()
+            scope_description: str | None = None
+            if node.result is not None:
+                missing_fields = tuple(sorted(node.result.missing_fields))
+                scope_description = node.result.scope_description
+                for issue in node.result.issues:
+                    code = issue.code.value
+                    issue_by_code.setdefault(
+                        code,
+                        StockResearchIssue(code=code, safe_message=issue.safe_message),
+                    )
+            responses.append(
+                StockResearchNodeResponse(
+                    node_id=node.node_id,
+                    required=node.required,
+                    status=node.status,
+                    started_at=node.started_at,
+                    finished_at=node.finished_at,
+                    missing_fields=missing_fields,
+                    scope_description=scope_description,
+                    issues=tuple(issue_by_code[key] for key in sorted(issue_by_code)),
+                )
+            )
+        return tuple(responses)
+
+    @staticmethod
     def _derived_findings(
         owner_id: str,
         facts: tuple[Fact, ...],
@@ -543,6 +580,7 @@ class FixtureStockResearchService:
                     run_id=execution.state.run_id,
                     run_status=execution.state.status,
                     pipeline_status=pipeline.status,
+                    nodes=self._node_responses(execution),
                     validations=pipeline.validations,
                     facts=(),
                     findings=(),
@@ -581,6 +619,7 @@ class FixtureStockResearchService:
                 run_id=execution.state.run_id,
                 run_status=execution.state.status,
                 pipeline_status=pipeline.status,
+                nodes=self._node_responses(execution),
                 validations=pipeline.validations,
                 facts=facts,
                 findings=findings,
