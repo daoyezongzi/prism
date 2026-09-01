@@ -1,0 +1,56 @@
+{
+  "schema_version": "fixture-research-run.v1",
+  "fixture_id": "fixture-research-run-case-001",
+  "owner_id": "fixture-run-owner-001",
+  "request_id": "fixture-research-request-001",
+  "budget_ms": 3000,
+  "created_at": "2026-09-01T12:00:00Z",
+  "scope_description": "fixture fund research run",
+  "nodes": [
+    {
+      "node_id": "fund_empty",
+      "owner_id": "fixture-run-owner-001",
+      "node_kind": "FUND",
+      "required": false,
+      "dependencies": [],
+      "timeout_ms": 1000
+    },
+    {
+      "node_id": "fund_success",
+      "owner_id": "fixture-run-owner-001",
+      "node_kind": "FUND",
+      "required": true,
+      "dependencies": [],
+      "timeout_ms": 1000
+    }
+  ],
+  "requests": [
+    {
+      "node_id": "fund_empty",
+      "request": {
+        "request_id": "fixture-node-request-empty",
+        "operation": "FUND_DATA",
+        "subject": "FUND_FIXTURE_EMPTY",
+        "required_fields": ["fund_name"],
+        "parameters": {"period": "1990-01-01"},
+        "timeout_ms": 1000
+      }
+    },
+    {
+      "node_id": "fund_success",
+      "request": {
+        "request_id": "fixture-node-request-success",
+        "operation": "FUND_DATA",
+        "subject": "FUND_FIXTURE_001",
+        "required_fields": [
+          "fund_name",
+          "technology_weight_pct",
+          "top10_concentration_pct"
+        ],
+        "parameters": {"period": "2026-06-30"},
+        "timeout_ms": 1000
+      }
+    }
+  ],
+  "forbidden_fields": ["recommendation", "trade_order", "target_price"]
+}

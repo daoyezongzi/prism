@@ -37,6 +37,7 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 6 已实现四态结构化研究节点、lineage-aware Cross-Validation 与冲突/缺失语义；真实 Provider、DAG 执行器和 Evidence/Finding 连接仍未实现。
 - Phase 7 已实现 owner 隔离、依赖闭包、预算/deadline、required/optional 降级和可回放的研究 run 状态机；真实异步执行、Provider 与 Evidence/Finding 桥接仍未实现。
 - Phase 8 已实现 CrossValidationResult、ResearchObservation 与 Evidence 的确定性闭包校验，并只在完整支持条件下生成稳定 `VERIFIED Fact -> Finding`；Recommendation、独立合规闸门和真实执行仍未实现。
+- Phase 9 已实现注入式 Fixture-backed 异步研究执行：ready 节点并行、依赖门控、四态 Provider 映射、预算边界和 Evidence/Observation 输出；真实 SkillHub、CrossValidation 自动接线、风险合规和 Recommendation 仍未实现。
 
 尚未实现：
 
@@ -98,6 +99,8 @@ python -m pytest
 - [Phase 7 Bounded Orchestration 契约](docs/bounded-orchestration.md)
 - [Phase 8 Evidence/Finding 桥接计划](docs/plans/2026-09-01-mvp-phase-8-evidence-finding.md)
 - [Phase 8 Evidence/Finding 桥接契约](docs/evidence-finding-bridge.md)
+- [Phase 9 Fixture-backed Research Run 计划](docs/plans/2026-09-01-mvp-phase-9-fixture-research-run.md)
+- [Phase 9 Fixture-backed Research Run 契约](docs/fixture-research-run.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

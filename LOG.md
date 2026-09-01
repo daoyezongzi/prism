@@ -320,3 +320,25 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - `python -m compileall -q app`, research bridge import, `git diff --check`, fixture JSON and sensitive-value scans all pass.
 - Adversarial checks cover stable ordering, DecisionTrace closure, forged `SUPPORTED`, duplicate lineage, missing/unknown evidence, owner/provenance tampering, sensitive text/IDs and immutable inputs.
 - Phase 8 is accepted in this worktree; the next bounded fixture-backed async research execution plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 9 fixture-backed async research run
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-9` on branch `codex/mvp-phase-9-fixture-research-run` from the accepted Phase 8 commit `6606be1`.
+- Added `docs/plans/2026-09-01-mvp-phase-9-fixture-research-run.md` and committed the plan before implementation (`8d1cabb`).
+- The phase is limited to an injected-provider execution adapter: bounded parallel ready nodes, dependency gating, four-state mapping, and normalized Evidence/Observation output. Live SkillHub, LLM, persistence, UI and recommendation generation remain out of scope.
+
+### Implemented locally
+
+- Added `ResearchNodeRequest`, `ResearchRunExecutionResult` and `execute_research_run`/`run_research` under `app/orchestration/executor.py`.
+- Reused `execute_with_budget`, `normalize_result_to_evidence` and all Phase 7 transitions; ready roots run concurrently, children wait for completed parents, and required/optional/deadline semantics remain authoritative.
+- Mapped Provider `SUCCESS/PARTIAL/EMPTY/FAILED` and timeout/exception paths to safe typed research results. Textual Evidence is retained, finite scalar fields become owner-bound Observations, and missing lineage remains visible without counting as independent support.
+- Added synthetic multi-node fixture, unit/integration counterexamples and `docs/fixture-research-run.md`; no raw exception, credential, zero fallback, network call, LLM, persistence, UI or Recommendation path was introduced.
+
+### Independent review evidence
+
+- Phase-specific tests and independent review pass; full suite reports `169 passed` (Phase 1–8's 156 tests remain green).
+- Parallel timing, dependency order, four-state mapping, timeout/exception safety, provider identity, sensitive value filtering, no-lineage behavior, output closure and input immutability are covered.
+- `python -m compileall -q app`, orchestration import, `git diff --check`, fixture JSON and sensitive-value scans all pass.
+- Phase 9 is accepted in this worktree; the next Evidence/Finding consumer plus risk/compliance gate plan must use a new worktree.

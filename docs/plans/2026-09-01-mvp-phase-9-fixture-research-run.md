@@ -65,7 +65,8 @@ Phase 8 可消费的 Evidence/Observation 结构接成一个可执行的异步�
 - 规范化沿用 `normalize_result_to_evidence` 的 record/lineage-aware Evidence
   ID；Observation ID 使用 owner/node/evidence 的稳定 hash；值只接受有限
   Decimal 标量，字符串数值可解析，布尔/集合/无单位/无期间的字段不进入
-  Observation。
+  Observation。缺少 lineage 的数值仍可作为观察输出，但不能被后续
+  Cross-Validation 计为独立来源。
 
 ### 4. Fixtures、文档与验收测试
 
@@ -135,4 +136,4 @@ Finding 还可沿 Evidence lineage 钻取。这样产品差异不是 Agent 数�
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`

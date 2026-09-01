@@ -20,6 +20,13 @@ from app.orchestration.state_machine import (
     record_node_result,
     start_research_run,
 )
+from app.orchestration.executor import (
+    ExecutionIssueCode,
+    ResearchNodeRequest,
+    ResearchRunExecutionResult,
+    execute_research_run,
+    run_research,
+)
 from app.research import ResearchNodeStatus
 
 __all__ = [
@@ -40,4 +47,9 @@ __all__ = [
     "finish_research_run",
     "record_node_result",
     "start_research_run",
+    "ExecutionIssueCode",
+    "ResearchNodeRequest",
+    "ResearchRunExecutionResult",
+    "execute_research_run",
+    "run_research",
 ]
