@@ -420,3 +420,14 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
   no-network/storage/LLM boundary checks all passed.
 - Phase 12 is accepted locally. No push was performed; Phase 13 must start from
   this accepted commit in a new worktree.
+
+## 2026-09-02 — MVP Phase 13 owner-scoped API, persistence and explainable UI
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-13` on branch
+  `codex/mvp-phase-13-api-persistence-ui` from accepted Phase 12 commit `076e1e6`.
+- Added the Phase 13 plan before implementation: owner-scoped SQLite decision
+  events, FastAPI health/create/list/detail boundaries, and a zero-build
+  explainable workbench first slice. Real authentication, PostgreSQL, live
+  providers and API-triggered orchestration remain explicitly out of scope.

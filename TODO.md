@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 12 Recommendation and Decision Receipt](docs/plans/2026-09-02-mvp-phase-12-recommendation-decision-receipt.md)
+> Active phase: [MVP Phase 13 Owner-scoped API, Persistence and Explainable UI](docs/plans/2026-09-02-mvp-phase-13-owner-scoped-api-persistence-ui.md)
 
 ## P0 — Foundation
 
@@ -67,4 +67,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 12 is accepted locally. Create a new Phase 13 worktree and write its plan before implementing owner-scoped persistence/API and the first explainable UI slice.
+Phase 13 plan is committed. Implement the store/API/UI slice in this worktree, then run independent review and real browser verification before acceptance.
