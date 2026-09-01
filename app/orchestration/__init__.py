@@ -27,6 +27,15 @@ from app.orchestration.executor import (
     execute_research_run,
     run_research,
 )
+from app.research.pipeline import (
+    ResearchClaimSpec,
+    ResearchEvidencePipelineResult,
+    ResearchPipelineIssue,
+    ResearchPipelineIssueCode,
+    ResearchPipelineStatus,
+    build_research_evidence_pipeline,
+    evaluate_research_run,
+)
 from app.research import ResearchNodeStatus
 
 __all__ = [
@@ -52,4 +61,11 @@ __all__ = [
     "ResearchRunExecutionResult",
     "execute_research_run",
     "run_research",
+    "ResearchClaimSpec",
+    "ResearchEvidencePipelineResult",
+    "ResearchPipelineIssue",
+    "ResearchPipelineIssueCode",
+    "ResearchPipelineStatus",
+    "build_research_evidence_pipeline",
+    "evaluate_research_run",
 ]

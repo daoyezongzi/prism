@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 9 Fixture-backed Async Research Run](docs/plans/2026-09-01-mvp-phase-9-fixture-research-run.md)
+> Active phase: [MVP Phase 10 Research-to-Evidence Pipeline](docs/plans/2026-09-01-mvp-phase-10-research-evidence-pipeline.md)
 
 ## P0 — Foundation
 
@@ -40,7 +40,8 @@
 - [x] Bridge only fully supported cross-validation claims into closed `VERIFIED Fact -> Finding` objects; degraded and mismatched evidence remains review/blocked.
 - [x] Implement bounded Fixture-backed async orchestration with structured `ResearchRunState`, dependency gating and four-state mapping; live execution remains deferred.
 - [ ] Add macro, industry, stock and fund/ETF research nodes.
-- [ ] Implement source-lineage-aware cross validation and disagreement handling.
+- [x] Implement source-lineage-aware cross validation and disagreement handling for executed fixture observations; live provider nodes remain deferred.
+- [x] Consume complete-run validation through the Evidence/Finding bridge and emit a closed DecisionTrace; degraded runs remain review/blocked.
 - [ ] Implement independent risk and compliance gates.
 - [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
 - [ ] Verify the complete flagship flow in a real browser.
@@ -65,4 +66,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 9 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for Evidence/Finding bridge consumption plus independent risk/compliance gates.
+Phase 10 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for independent risk/compliance gates and Recommendation eligibility.

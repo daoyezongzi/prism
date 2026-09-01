@@ -342,3 +342,24 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - Parallel timing, dependency order, four-state mapping, timeout/exception safety, provider identity, sensitive value filtering, no-lineage behavior, output closure and input immutability are covered.
 - `python -m compileall -q app`, orchestration import, `git diff --check`, fixture JSON and sensitive-value scans all pass.
 - Phase 9 is accepted in this worktree; the next Evidence/Finding consumer plus risk/compliance gate plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 10 research-to-Evidence pipeline
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-10` on branch `codex/mvp-phase-10-research-evidence-pipeline` from the accepted Phase 9 commit `7ae186b`.
+- Added `docs/plans/2026-09-01-mvp-phase-10-research-evidence-pipeline.md` and committed the plan before implementation (`405f80e`).
+- The phase is limited to consuming a `ResearchRunExecutionResult`: run-aware Cross Validation and Phase 8 Evidence/Finding registration. Risk, compliance, Recommendation, network, persistence and UI remain out of scope.
+
+### Implemented locally
+
+- Added `ResearchClaimSpec`, `ResearchEvidencePipelineResult`, safe pipeline issue contracts and `build_research_evidence_pipeline`/`evaluate_research_run`.
+- Complete runs with two independent lineages can produce READY `VERIFIED Fact -> Finding` objects and a closed `DecisionTrace`; PARTIAL/FAILED/EMPTY runs downgrade supported claims to explicit unresolved review and expose no Facts/Findings in the trace.
+- Added deterministic claim ordering, validation/bridge closure, duplicate/owner checks, sensitive-output filtering, two-lineage fixture and unit/integration counterexamples; no Recommendation, network, LLM, persistence, UI or upstream change was introduced.
+
+### Independent review evidence
+
+- Phase-specific pipeline tests and independent adversarial review pass; full suite reports `177 passed` (Phase 1–9's 169 tests remain green).
+- Verified complete/partial/contradictory/single-lineage semantics, forged execution/evidence, duplicate/foreign claims, sensitive text, closed DecisionTrace and input immutability.
+- `python -m compileall -q app`, imports from both orchestration and research pipeline modules, `git diff --check`, fixture JSON and sensitive-value scans all pass.
+- Phase 10 is accepted in this worktree; the next independent risk/compliance gate plan must use a new worktree.

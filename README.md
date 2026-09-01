@@ -38,12 +38,14 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 7 已实现 owner 隔离、依赖闭包、预算/deadline、required/optional 降级和可回放的研究 run 状态机；真实异步执行、Provider 与 Evidence/Finding 桥接仍未实现。
 - Phase 8 已实现 CrossValidationResult、ResearchObservation 与 Evidence 的确定性闭包校验，并只在完整支持条件下生成稳定 `VERIFIED Fact -> Finding`；Recommendation、独立合规闸门和真实执行仍未实现。
 - Phase 9 已实现注入式 Fixture-backed 异步研究执行：ready 节点并行、依赖门控、四态 Provider 映射、预算边界和 Evidence/Observation 输出；真实 SkillHub、CrossValidation 自动接线、风险合规和 Recommendation 仍未实现。
+- Phase 10 已实现 run-aware 研究证据流水线：完整 run 才能将两条独立 lineage 的支持结论接入 Phase 8，并生成闭合 DecisionTrace；partial/failed/empty、冲突和缺失均保持待复核/阻断。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
 - 实时自然语言画像提取、研究编排、组合暴露/风险/合规计算模块；
 - 真实异步研究节点、Recommendation/Decision Receipt 和独立合规闸门；
+- 独立风险/合规 gate 与 Recommendation 生成；
 - Web 工作台与真实端到端场景；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -101,6 +103,8 @@ python -m pytest
 - [Phase 8 Evidence/Finding 桥接契约](docs/evidence-finding-bridge.md)
 - [Phase 9 Fixture-backed Research Run 计划](docs/plans/2026-09-01-mvp-phase-9-fixture-research-run.md)
 - [Phase 9 Fixture-backed Research Run 契约](docs/fixture-research-run.md)
+- [Phase 10 Research-to-Evidence Pipeline 计划](docs/plans/2026-09-01-mvp-phase-10-research-evidence-pipeline.md)
+- [Phase 10 Research-to-Evidence Pipeline 契约](docs/research-evidence-pipeline.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

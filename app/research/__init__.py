@@ -23,6 +23,26 @@ from app.research.evidence_bridge import (
     build_evidence_grounded_finding,
 )
 
+_PIPELINE_EXPORTS = {
+    "ResearchClaimSpec",
+    "ResearchEvidencePipelineResult",
+    "ResearchPipelineIssue",
+    "ResearchPipelineIssueCode",
+    "ResearchPipelineStatus",
+    "build_research_evidence_pipeline",
+    "evaluate_research_run",
+}
+
+
+def __getattr__(name: str):
+    """Lazily expose the orchestration-dependent pipeline without import cycles."""
+
+    if name in _PIPELINE_EXPORTS:
+        from app.research import pipeline
+
+        return getattr(pipeline, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 __all__ = [
     "CrossValidationResult",
     "ResearchNodeIssue",
@@ -43,4 +63,5 @@ __all__ = [
     "EvidenceFindingBridgeResult",
     "bridge_cross_validation",
     "build_evidence_grounded_finding",
+    *sorted(_PIPELINE_EXPORTS),
 ]

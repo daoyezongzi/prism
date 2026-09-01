@@ -114,4 +114,4 @@ statement）以及 `ResearchEvidencePipelineResult`：
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`

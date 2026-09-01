@@ -1,0 +1,45 @@
+{
+  "schema_version": "research-evidence-pipeline-fixture.v1",
+  "fixture_id": "pipeline-two-lineage-case-001",
+  "owner_id": "pipeline-fixture-owner-001",
+  "request_id": "pipeline-fixture-run-001",
+  "created_at": "2026-09-01T12:00:00Z",
+  "budget_ms": 3000,
+  "scope_description": "two-source scalar revenue validation",
+  "claim": {
+    "claim_id": "pipeline-claim-revenue-001",
+    "owner_id": "pipeline-fixture-owner-001",
+    "subject": "PIPELINE_STOCK_001",
+    "metric": "revenue",
+    "unit": "CNY",
+    "period": "2026-Q2",
+    "expected_value": "10.00"
+  },
+  "finding": {
+    "kind": "REVENUE_STABLE",
+    "severity": "INFO",
+    "statement": "两个独立来源对该报告期的收入数值一致。"
+  },
+  "sources": [
+    {
+      "node_id": "macro-source",
+      "node_kind": "MACRO",
+      "operation": "MACRO_DATA",
+      "request_id": "pipeline-provider-request-a",
+      "source": "pipeline-source-a",
+      "record_id": "pipeline-record-a",
+      "lineage_id": "pipeline-lineage-a",
+      "value": "10.00"
+    },
+    {
+      "node_id": "industry-source",
+      "node_kind": "INDUSTRY",
+      "operation": "INDUSTRY_DATA",
+      "request_id": "pipeline-provider-request-b",
+      "source": "pipeline-source-b",
+      "record_id": "pipeline-record-b",
+      "lineage_id": "pipeline-lineage-b",
+      "value": "10.00"
+    }
+  ]
+}
