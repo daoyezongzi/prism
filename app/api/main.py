@@ -50,6 +50,11 @@ from app.convertible_bond import (
     ConvertibleBondResearchResponse,
     ConvertibleBondResearchTemplateResponse,
 )
+from app.optimization import (
+    PortfolioOptimizationRequest,
+    PortfolioOptimizationResponse,
+    PortfolioOptimizationTemplateResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -72,6 +77,8 @@ from app.service import (
     FundResearchError,
     FixtureConvertibleBondResearchService,
     ConvertibleBondResearchError,
+    FixturePortfolioOptimizationService,
+    PortfolioOptimizationError,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -166,6 +173,7 @@ def create_app(
     stock_service: FixtureStockResearchService | None = None,
     fund_service: FixtureFundResearchService | None = None,
     convertible_bond_service: FixtureConvertibleBondResearchService | None = None,
+    portfolio_optimization_service: FixturePortfolioOptimizationService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -181,6 +189,9 @@ def create_app(
     active_stock = stock_service or FixtureStockResearchService()
     active_fund = fund_service or FixtureFundResearchService()
     active_convertible_bond = convertible_bond_service or FixtureConvertibleBondResearchService()
+    active_portfolio_optimization = (
+        portfolio_optimization_service or FixturePortfolioOptimizationService()
+    )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -267,6 +278,16 @@ def create_app(
             400,
             "CONVERTIBLE_BOND_RESEARCH_ERROR",
             "convertible-bond research was refused",
+        )
+
+    @api.exception_handler(PortfolioOptimizationError)
+    async def portfolio_optimization_error_handler(
+        _: Request, __: PortfolioOptimizationError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "PORTFOLIO_OPTIMIZATION_ERROR",
+            "portfolio optimization was refused",
         )
 
     @api.exception_handler(ProfileConfirmationError)
@@ -671,6 +692,71 @@ def create_app(
         except (AttributeError, TypeError, ValueError, ValidationError) as exc:
             raise ConvertibleBondResearchError(
                 "convertible-bond research execution was refused"
+            ) from exc
+        return output
+
+    @api.get(
+        "/api/v1/advisor/portfolio-optimization-template",
+        response_model=PortfolioOptimizationTemplateResponse,
+    )
+    def get_portfolio_optimization_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> PortfolioOptimizationTemplateResponse:
+        return active_portfolio_optimization.template(owner_id)
+
+    @api.post(
+        "/api/v1/advisor/portfolio-optimization-runs",
+        response_model=PortfolioOptimizationResponse,
+    )
+    async def create_portfolio_optimization_run(
+        request: PortfolioOptimizationRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> PortfolioOptimizationResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError(
+                "portfolio optimization request owner does not match owner scope"
+            )
+        try:
+            raw_output = await active_portfolio_optimization.run(request)
+            if not isinstance(raw_output, PortfolioOptimizationResponse):
+                raise PortfolioOptimizationError(
+                    "portfolio optimization output type was invalid"
+                )
+            output = PortfolioOptimizationResponse.model_validate(
+                raw_output.model_dump(mode="python")
+            )
+            if output.owner_id != owner_id:
+                raise PortfolioOptimizationError(
+                    "portfolio optimization output owner drifted"
+                )
+            try:
+                expected_profile = confirm_questionnaire(request.questionnaire)
+            except ProfileConfirmationError as exc:
+                raise PortfolioOptimizationError(
+                    "portfolio optimization profile could not be confirmed"
+                ) from exc
+            if (
+                output.request_id != request.request_id
+                or output.generated_at != request.generated_at
+                or output.profile_id != expected_profile.profile_id
+                or output.profile_version != expected_profile.profile_version
+                or output.risk_level != expected_profile.risk_level
+                or output.portfolio_bundle_id != request.portfolio.bundle_id
+                or output.position_snapshot_id
+                != request.portfolio.position_snapshot.snapshot_id
+            ):
+                raise PortfolioOptimizationError(
+                    "portfolio optimization output identity drifted"
+                )
+            if output.scenario.scenario_id != request.scenario_id:
+                raise PortfolioOptimizationError(
+                    "portfolio optimization output scenario drifted"
+                )
+        except PortfolioOptimizationError:
+            raise
+        except (AttributeError, TypeError, ValueError, ValidationError) as exc:
+            raise PortfolioOptimizationError(
+                "portfolio optimization execution was refused"
             ) from exc
         return output
 

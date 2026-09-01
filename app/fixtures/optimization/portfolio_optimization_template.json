@@ -1,0 +1,245 @@
+{
+  "schema_version": "portfolio-optimization-template.v1",
+  "manifest_id": "portfolio-optimization-demo-i-001",
+  "owner_id": "demo-owner",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "methodology_version": "CAP_AND_REDISTRIBUTE_V1",
+  "scope_description": "offline synthetic five-asset target-structure replay",
+  "questionnaire": {
+    "schema_version": "risk-questionnaire.v1",
+    "questionnaire_id": "optimization-template-questionnaire-001",
+    "owner_id": "demo-owner",
+    "answered_at": "2026-09-02T00:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20",
+    "expected_return_range": null
+  },
+  "portfolio": {
+    "schema_version": "portfolio-import-bundle.v1",
+    "bundle_id": "optimization-template-bundle-001",
+    "owner_id": "demo-owner",
+    "created_at": "2026-09-02T00:00:00Z",
+    "position_snapshot": {
+      "schema_version": "position-snapshot.v1",
+      "snapshot_id": "optimization-template-position-snapshot-001",
+      "owner_id": "demo-owner",
+      "as_of": "2026-08-31T16:00:00Z",
+      "base_currency": "CNY",
+      "source": "synthetic-optimization-template",
+      "positions": [
+        {
+          "position_id": "optimization-position-etf-001",
+          "owner_id": "demo-owner",
+          "asset_id": "OPT_TECH_ASSET",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Technology Basket",
+          "quantity": "45",
+          "market_value": "4500",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-optimization-template"
+        },
+        {
+          "position_id": "optimization-position-health-001",
+          "owner_id": "demo-owner",
+          "asset_id": "OPT_HEALTH_ASSET",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Healthcare Basket",
+          "quantity": "25",
+          "market_value": "2500",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-optimization-template"
+        },
+        {
+          "position_id": "optimization-position-finance-001",
+          "owner_id": "demo-owner",
+          "asset_id": "OPT_FINANCE_ASSET",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Finance Basket",
+          "quantity": "15",
+          "market_value": "1500",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-optimization-template"
+        },
+        {
+          "position_id": "optimization-position-industrials-001",
+          "owner_id": "demo-owner",
+          "asset_id": "OPT_INDUSTRIALS_ASSET",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Industrials Basket",
+          "quantity": "10",
+          "market_value": "1000",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-optimization-template"
+        },
+        {
+          "position_id": "optimization-position-utilities-001",
+          "owner_id": "demo-owner",
+          "asset_id": "OPT_UTILITIES_ASSET",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Utilities Basket",
+          "quantity": "5",
+          "market_value": "500",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-optimization-template"
+        }
+      ]
+    },
+    "fund_holdings": [
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "optimization-holdings-tech-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "OPT_TECH_ASSET",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-optimization-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "optimization-holding-tech-001",
+            "parent_asset_id": "OPT_TECH_ASSET",
+            "underlying_asset_id": "OPT_TECH_ASSET",
+            "underlying_name": "Synthetic Technology Basket",
+            "asset_type": "STOCK",
+            "weight_pct": "100",
+            "sector": "Technology",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-optimization-template"
+          }
+        ]
+      },
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "optimization-holdings-health-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "OPT_HEALTH_ASSET",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-optimization-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "optimization-holding-health-001",
+            "parent_asset_id": "OPT_HEALTH_ASSET",
+            "underlying_asset_id": "OPT_HEALTH_ASSET",
+            "underlying_name": "Synthetic Healthcare Basket",
+            "asset_type": "STOCK",
+            "weight_pct": "100",
+            "sector": "Healthcare",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-optimization-template"
+          }
+        ]
+      },
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "optimization-holdings-finance-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "OPT_FINANCE_ASSET",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-optimization-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "optimization-holding-finance-001",
+            "parent_asset_id": "OPT_FINANCE_ASSET",
+            "underlying_asset_id": "OPT_FINANCE_ASSET",
+            "underlying_name": "Synthetic Finance Basket",
+            "asset_type": "STOCK",
+            "weight_pct": "100",
+            "sector": "Finance",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-optimization-template"
+          }
+        ]
+      },
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "optimization-holdings-industrials-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "OPT_INDUSTRIALS_ASSET",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-optimization-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "optimization-holding-industrials-001",
+            "parent_asset_id": "OPT_INDUSTRIALS_ASSET",
+            "underlying_asset_id": "OPT_INDUSTRIALS_ASSET",
+            "underlying_name": "Synthetic Industrials Basket",
+            "asset_type": "STOCK",
+            "weight_pct": "100",
+            "sector": "Industrials",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-optimization-template"
+          }
+        ]
+      },
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "optimization-holdings-utilities-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "OPT_UTILITIES_ASSET",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-optimization-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "optimization-holding-utilities-001",
+            "parent_asset_id": "OPT_UTILITIES_ASSET",
+            "underlying_asset_id": "OPT_UTILITIES_ASSET",
+            "underlying_name": "Synthetic Utilities Basket",
+            "asset_type": "STOCK",
+            "weight_pct": "100",
+            "sector": "Utilities",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-optimization-template"
+          }
+        ]
+      }
+    ]
+  },
+  "rules": [
+    {
+      "dimension": "ASSET",
+      "label": "单资产上限",
+      "description": "每个资产的目标权重不得超过画像对应上限。",
+      "limit_by_risk_level": {"CONSERVATIVE": "20", "BALANCED": "35", "GROWTH": "50"}
+    },
+    {
+      "dimension": "SECTOR",
+      "label": "行业上限",
+      "description": "每个行业的目标权重不得超过画像对应上限。",
+      "limit_by_risk_level": {"CONSERVATIVE": "30", "BALANCED": "45", "GROWTH": "60"}
+    },
+    {
+      "dimension": "TECHNOLOGY",
+      "label": "科技暴露上限",
+      "description": "Technology 暴露单独受画像风险预算约束。",
+      "limit_by_risk_level": {"CONSERVATIVE": "25", "BALANCED": "40", "GROWTH": "60"}
+    },
+    {
+      "dimension": "UNCLASSIFIED",
+      "label": "未分类暴露上限",
+      "description": "未分类暴露不会被猜测，出现时需要人工复核。",
+      "limit_by_risk_level": {"CONSERVATIVE": "10", "BALANCED": "20", "GROWTH": "35"}
+    }
+  ],
+  "scenarios": [
+    {"scenario_id": "BASELINE_READY", "label": "BASELINE_READY", "description": "complete multi-asset snapshot"},
+    {"scenario_id": "INFEASIBLE", "label": "INFEASIBLE", "description": "one-asset concentration cannot satisfy every configured cap"},
+    {"scenario_id": "SOURCE_PARTIAL", "label": "SOURCE_PARTIAL", "description": "fund look-through coverage is below 100 percent"}
+  ]
+}

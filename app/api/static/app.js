@@ -29,6 +29,9 @@
     convertibleBondResearchTemplate: null,
     convertibleBondResearchRun: null,
     convertibleBondResearchSequence: 0,
+    portfolioOptimizationTemplate: null,
+    portfolioOptimizationRun: null,
+    portfolioOptimizationSequence: 0,
   };
   const byId = (id) => document.getElementById(id);
 
@@ -91,6 +94,12 @@
 
   function setConvertibleBondResearchStatus(message, className = "") {
     const node = byId("convertible-bond-research-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function setPortfolioOptimizationStatus(message, className = "") {
+    const node = byId("portfolio-optimization-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
   }
@@ -239,6 +248,41 @@
     select.disabled = false;
   }
 
+  function clearPortfolioOptimizationScenarioOptions() {
+    const select = byId("portfolio-optimization-scenario");
+    clear(select);
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "读取场景目录…";
+    select.append(option);
+    select.disabled = true;
+  }
+
+  function renderPortfolioOptimizationScenarioOptions(scenarios) {
+    const select = byId("portfolio-optimization-scenario");
+    const previous = select.value;
+    clear(select);
+    const options = Array.isArray(scenarios) ? scenarios : [];
+    options.forEach((scenario) => {
+      const option = document.createElement("option");
+      option.value = text(scenario.scenario_id, "");
+      option.textContent = text(scenario.label, option.value);
+      option.title = text(scenario.description, "");
+      select.append(option);
+    });
+    if (!options.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "暂无可用场景";
+      select.append(option);
+      select.disabled = true;
+      return;
+    }
+    const known = options.some((scenario) => scenario.scenario_id === previous);
+    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.disabled = false;
+  }
+
   function stockRiskStatusClass(status) {
     return status === "CLEAR" ? "pass" : status === "WATCH" ? "review" : "blocked";
   }
@@ -261,6 +305,16 @@
 
   function convertibleBondRiskStatusLabel(status) {
     return stockRiskStatusLabel(status);
+  }
+
+  function optimizationStatusLabel(status) {
+    return status === "READY" ? "READY"
+      : status === "REVIEW_REQUIRED" ? "待复核"
+        : status === "BLOCKED" ? "已阻断" : text(status, "待运行");
+  }
+
+  function optimizationStatusClass(status) {
+    return status === "READY" ? "pass" : status === "REVIEW_REQUIRED" ? "review" : "blocked";
   }
 
   function statusClass(status) {
@@ -1685,6 +1739,117 @@
     if (chain.childElementCount) panel.append(chain);
   }
 
+  function renderPortfolioOptimization(result) {
+    const panel = byId("portfolio-optimization-content");
+    clear(panel);
+    if (!result) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "生成提案后查看当前→目标权重、约束上限、算术解释与失效条件。";
+      panel.append(empty);
+      return;
+    }
+
+    const summary = document.createElement("div");
+    summary.className = "portfolio-optimization-summary";
+    summary.append(
+      chip(optimizationStatusLabel(result.status), optimizationStatusClass(result.status)),
+      chip(text(result.risk_level), ""),
+    );
+    const summaryText = document.createElement("p");
+    summaryText.textContent = `${text(result.scenario && result.scenario.label)} · ${text(result.summary)} · owner ${text(result.owner_id)}`;
+    summary.append(summaryText);
+    panel.append(summary);
+
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Method", result.methodology_version);
+    addMetadata(metadata, "Profile", `${text(result.profile_id)} · v${text(result.profile_version)}`);
+    addMetadata(metadata, "Portfolio bundle", result.portfolio_bundle_id);
+    addMetadata(metadata, "Position snapshot", result.position_snapshot_id);
+    addMetadata(metadata, "Exposure report", result.exposure_report_id);
+    addMetadata(metadata, "Risk assessment", `${text(result.assessment_id)} · ${text(result.assessment_status)}`);
+    panel.append(metadata);
+
+    if (result.issues && result.issues.length) {
+      const notice = document.createElement("div");
+      notice.className = "notice error";
+      notice.textContent = result.status === "BLOCKED"
+        ? "目标约束无法闭合；没有生成可执行权重。"
+        : "输入数据尚未闭合；没有生成目标权重。";
+      panel.append(notice);
+      const issues = document.createElement("ul");
+      issues.className = "portfolio-optimization-issues";
+      result.issues.forEach((issue) => {
+        const item = document.createElement("li");
+        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issues.append(item);
+      });
+      panel.append(issues);
+    }
+
+    if (result.status === "READY") {
+      const targetHeading = document.createElement("h3");
+      targetHeading.textContent = "Current → deterministic target weights";
+      panel.append(targetHeading);
+      const targets = document.createElement("div");
+      targets.className = "portfolio-optimization-targets";
+      (result.targets || []).forEach((target) => {
+        const card = document.createElement("article");
+        card.className = "portfolio-optimization-target";
+        const header = document.createElement("header");
+        const title = document.createElement("strong");
+        title.textContent = `${text(target.asset_name)} · ${text(target.sector, "未分类")}`;
+        header.append(title);
+        card.append(header);
+        const grid = document.createElement("dl");
+        addMetadata(grid, "Current", `${text(target.current_weight_pct)}%`);
+        addMetadata(grid, "Target", `${text(target.target_weight_pct)}%`);
+        addMetadata(grid, "Delta", `${text(target.delta_pct)} pp`);
+        addMetadata(grid, "Asset cap", `${text(target.allowed_max_weight_pct)}%`);
+        card.append(grid);
+        const rationale = document.createElement("div");
+        rationale.className = "muted";
+        rationale.textContent = text(target.rationale);
+        card.append(rationale);
+        targets.append(card);
+      });
+      if (targets.childElementCount) panel.append(targets);
+
+      const constraintHeading = document.createElement("h3");
+      constraintHeading.textContent = "Constraint arithmetic";
+      panel.append(constraintHeading);
+      const constraints = document.createElement("div");
+      constraints.className = "portfolio-optimization-constraints";
+      (result.constraints || []).forEach((constraint) => {
+        const details = document.createElement("details");
+        const line = document.createElement("summary");
+        line.textContent = `${text(constraint.dimension)} · ${text(constraint.label)} · ${text(constraint.disposition)}`;
+        details.append(line);
+        const meta = document.createElement("div");
+        meta.className = "research-evidence-meta";
+        meta.textContent = `Current ${text(constraint.current_weight_pct)}% → Target ${text(constraint.target_weight_pct)}% · cap ${text(constraint.allowed_max_weight_pct)}% · delta ${text(constraint.delta_pct)} pp · ${text(constraint.rationale)}`;
+        details.append(meta);
+        constraints.append(details);
+      });
+      if (constraints.childElementCount) panel.append(constraints);
+    }
+
+    const invalidation = document.createElement("div");
+    invalidation.className = "invalidation";
+    const invalidationTitle = document.createElement("strong");
+    invalidationTitle.textContent = "提案失效条件";
+    invalidation.append(invalidationTitle);
+    const list = document.createElement("ul");
+    (result.invalidation_conditions || []).forEach((condition) => {
+      const item = document.createElement("li");
+      item.textContent = condition;
+      list.append(item);
+    });
+    invalidation.append(list);
+    panel.append(invalidation);
+  }
+
   async function loadEvent(eventId) {
     const requestOwner = state.ownerId;
     const templateSequence = state.templateSequence;
@@ -1956,6 +2121,20 @@
     return template;
   }
 
+  async function loadPortfolioOptimizationCatalog(ownerId) {
+    const sequence = ++state.portfolioOptimizationSequence;
+    const response = await fetch("/api/v1/advisor/portfolio-optimization-template", {
+      headers: { "X-Owner-ID": ownerId },
+    });
+    if (!response.ok) throw await apiError(response);
+    const template = await response.json();
+    if (state.ownerId !== ownerId || state.portfolioOptimizationSequence !== sequence) return null;
+    state.portfolioOptimizationTemplate = template;
+    renderPortfolioOptimizationScenarioOptions(template.scenarios);
+    byId("portfolio-optimization-template-meta").textContent = `Method ${text(template.methodology_version)} · ${text((template.rules || []).length, "0")} rules · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    return template;
+  }
+
   async function previewProfileProposal() {
     const requestOwner = byId("owner-id").value.trim();
     const raw = byId("profile-proposal-json").value.trim();
@@ -2209,6 +2388,13 @@
     clearConvertibleBondResearchScenarioOptions();
     setConvertibleBondResearchStatus("待运行");
     renderConvertibleBondResearch(null);
+    state.portfolioOptimizationTemplate = null;
+    state.portfolioOptimizationRun = null;
+    state.portfolioOptimizationSequence += 1;
+    byId("portfolio-optimization-template-meta").textContent = "运行时读取确定性 cap-and-redistribute 方法与合成组合模板。";
+    clearPortfolioOptimizationScenarioOptions();
+    setPortfolioOptimizationStatus("待运行");
+    renderPortfolioOptimization(null);
   }
 
   async function runAdvisorQuery(event) {
@@ -2534,6 +2720,80 @@
     }
   }
 
+  async function runPortfolioOptimization() {
+    const requestOwner = byId("owner-id").value.trim();
+    const submit = byId("run-portfolio-optimization");
+    const scenarioSelect = byId("portfolio-optimization-scenario");
+    if (!requestOwner) {
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (!state.portfolioOptimizationTemplate) {
+      try {
+        await loadPortfolioOptimizationCatalog(requestOwner);
+      } catch (error) {
+        setError(error.message || "读取组合优化模板失败");
+        return;
+      }
+    }
+    const template = state.portfolioOptimizationTemplate;
+    if (!template || state.ownerId !== requestOwner) return;
+    if (!state.profileContext || !state.profileContext.profile) {
+      setPortfolioOptimizationStatus("需先确认画像", "review");
+      setError("请先确认 Risk Profile，再生成组合目标结构。");
+      return;
+    }
+    const requestSequence = ++state.portfolioOptimizationSequence;
+    const scenarioId = scenarioSelect.value || "BASELINE_READY";
+    const questionnaire = state.profileContext && state.profileContext.questionnaire
+      ? state.profileContext.questionnaire
+      : template.questionnaire;
+    const portfolio = state.portfolioContext || template.portfolio;
+    submit.disabled = true;
+    scenarioSelect.disabled = true;
+    state.portfolioOptimizationRun = null;
+    renderPortfolioOptimization(null);
+    setPortfolioOptimizationStatus("运行中…");
+    setError("");
+    try {
+      const response = await fetch("/api/v1/advisor/portfolio-optimization-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "portfolio-optimization-request.v1",
+          request_id: "ui-portfolio-optimization-001",
+          owner_id: requestOwner,
+          generated_at: template.generated_at,
+          questionnaire,
+          portfolio,
+          scenario_id: scenarioId,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.portfolioOptimizationSequence !== requestSequence) return;
+      state.portfolioOptimizationRun = await response.json();
+      setPortfolioOptimizationStatus(
+        optimizationStatusLabel(state.portfolioOptimizationRun.status),
+        optimizationStatusClass(state.portfolioOptimizationRun.status),
+      );
+      renderPortfolioOptimization(state.portfolioOptimizationRun);
+    } catch (error) {
+      if (state.ownerId !== requestOwner || state.portfolioOptimizationSequence !== requestSequence) return;
+      state.portfolioOptimizationRun = null;
+      renderPortfolioOptimization(null);
+      setPortfolioOptimizationStatus("未运行", "blocked");
+      setError(error.message || "生成组合目标结构失败");
+    } finally {
+      submit.disabled = false;
+      if (state.ownerId === requestOwner && state.portfolioOptimizationSequence === requestSequence) {
+        scenarioSelect.disabled = !state.portfolioOptimizationTemplate;
+      }
+    }
+  }
+
   async function loadEvents() {
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
@@ -2613,6 +2873,16 @@
           }
         }
       }
+      if (state.ownerId === requestOwner && !state.portfolioOptimizationTemplate) {
+        try {
+          await loadPortfolioOptimizationCatalog(requestOwner);
+        } catch (error) {
+          if (state.ownerId === requestOwner) {
+            clearPortfolioOptimizationScenarioOptions();
+            setError(error.message || "读取组合优化场景目录失败");
+          }
+        }
+      }
       if (state.events.length) await loadEvent(state.events[0].event_id);
     } catch (error) {
       state.events = [];
@@ -2669,6 +2939,13 @@
     renderConvertibleBondResearch(null);
     setConvertibleBondResearchStatus("待运行");
   });
+  byId("run-portfolio-optimization").addEventListener("click", runPortfolioOptimization);
+  byId("portfolio-optimization-scenario").addEventListener("change", () => {
+    state.portfolioOptimizationRun = null;
+    state.portfolioOptimizationSequence += 1;
+    renderPortfolioOptimization(null);
+    setPortfolioOptimizationStatus("待运行");
+  });
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
   });
@@ -2684,6 +2961,10 @@
     byId(id).addEventListener("change", () => {
       clearAdvisorPlan();
       clearProfileProposal();
+      state.portfolioOptimizationRun = null;
+      state.portfolioOptimizationSequence += 1;
+      renderPortfolioOptimization(null);
+      setPortfolioOptimizationStatus("需重新运行", "review");
       if (!state.profileContext) return;
       state.profileContext = null;
       renderConfirmedProfile(null);

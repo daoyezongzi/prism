@@ -252,6 +252,22 @@ h2 { margin-bottom: 0; font: 700 21px/1.3 var(--serif); }
 .convertible-bond-formulas { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
 .convertible-bond-rules { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
 .convertible-bond-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
+.portfolio-optimization-panel { grid-column: 1 / -1; }
+.portfolio-optimization-content { display: grid; gap: 16px; margin-top: 18px; }
+.portfolio-optimization-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 13px 14px; border-left: 3px solid var(--sage); background: var(--sage-soft); }
+.portfolio-optimization-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.portfolio-optimization-targets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.portfolio-optimization-target { min-width: 0; padding: 12px 13px; border: 1px solid var(--outline); border-radius: 7px; background: var(--surface-muted); }
+.portfolio-optimization-target header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.portfolio-optimization-target strong { font: 700 14px var(--serif); overflow-wrap: anywhere; }
+.portfolio-optimization-target dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 13px; margin: 10px 0 0; }
+.portfolio-optimization-target dt { font-size: 10px; }
+.portfolio-optimization-target dd { margin: 0; font-size: 11px; }
+.portfolio-optimization-target .muted { margin-top: 9px; overflow-wrap: anywhere; }
+.portfolio-optimization-constraints { display: grid; gap: 8px; }
+.portfolio-optimization-constraints details { padding: 11px 13px; border: 1px solid var(--outline); border-radius: 7px; }
+.portfolio-optimization-constraints summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
+.portfolio-optimization-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
 .portfolio-content, .profile-context { display: grid; gap: 16px; }
 .portfolio-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 16px; padding: 13px 14px; background: var(--surface-muted); border: 1px solid var(--outline); border-radius: 7px; }
 .portfolio-summary dt { font-size: 10px; }
@@ -330,14 +346,14 @@ dd { margin: 1px 0 0; overflow-wrap: anywhere; font: 12px var(--mono); }
   .context-confirm-actions { grid-template-columns: 1fr; }
   .profile-conflict-values { grid-template-columns: 1fr; }
   .research-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stock-fact-grid, .fund-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stock-fact-grid, .fund-fact-grid, .portfolio-optimization-targets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portfolio-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .position-grid, .holding-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
   .research-grid { grid-template-columns: 1fr; }
-  .stock-fact-grid, .fund-fact-grid { grid-template-columns: 1fr; }
+  .stock-fact-grid, .fund-fact-grid, .portfolio-optimization-targets { grid-template-columns: 1fr; }
   .research-validation { grid-template-columns: 1fr; }
   .portfolio-summary { grid-template-columns: 1fr; }
 }
