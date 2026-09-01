@@ -6,8 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 20 implementation in the dedicated `D:\Github_Storage\prism-phase-20`
-> worktree; acceptance is pending.
+> Active phase: Phase 20 accepted locally in the dedicated `D:\Github_Storage\prism-phase-20`
+> worktree; the next phase must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -56,7 +56,7 @@
   keep READY research separate from Recommendation/Decision Receipt.
 - [x] Add the read-only Portfolio snapshot and Risk Profile questionnaire context views;
   keep template values owner-closed and defer CRUD/real account import.
-- [ ] Add structured Portfolio JSON and Risk Profile session confirmation before Advisor;
+- [x] Add structured Portfolio JSON and Risk Profile session confirmation before Advisor;
   keep real account upload, authentication and persistence deferred.
 - [ ] Verify the complete flagship flow in a real browser.
 - [x] Verify the Phase 15 form → API → HOLD/REDUCE → Evidence → owner isolation path in a
@@ -82,7 +82,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 20 is being implemented in the dedicated `D:\Github_Storage\prism-phase-20`
-worktree. Its plan must remain committed before implementation; after independent
-acceptance, create a new worktree for the next phase and keep real authentication,
-live Provider access and production persistence deferred.
+Phase 20 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-20`
+worktree. Create a new worktree for the next plan before implementation; keep real
+authentication, live Provider access and production persistence deferred.

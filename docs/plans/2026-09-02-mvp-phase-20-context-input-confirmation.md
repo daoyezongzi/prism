@@ -126,4 +126,25 @@ JSON 校验和 Risk Questionnaire 确认；确认结果只在当前浏览器会�
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record
+
+- Implementation commits: `912dedc` (context confirmation API/workbench) and
+  `35e27fd` (profile identity and adversarial boundary tests).
+- Phase-specific tests: `7 passed`; full regression: `283 passed`, with only the known
+  Starlette/httpx deprecation warning.
+- `compileall`, public imports, `node --check`, `git diff --check`, package wheel and
+  package-data checks passed. The final wheel contained 74 entries including both
+  context endpoints, static workbench assets and `profile_confirmation.py`.
+- Local ASGI 100-concurrency replay (one operation per owner) completed with zero
+  failures and zero owner mismatches for Template, Research and Advisor. Advisor wrote
+  100 expected DecisionEvents; Template/Research wrote none.
+- Real browser replay passed Portfolio JSON confirmation, Risk Profile confirmation,
+  diversified BALANCED `HOLD`, CONSERVATIVE `REDUCE`, expanded Evidence/Receipt, and
+  owner switch clearing of imported bundle, profile, textarea and status. Browser error
+  logs were empty.
+- Independent review found and fixed stale confirmed-context retention after invalid
+  Portfolio input; the final boundary keeps validation server-side, does not recalculate
+  financial values in the browser, and adds no authentication, external network, LLM,
+  order, or Recommendation path.

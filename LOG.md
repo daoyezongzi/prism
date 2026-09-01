@@ -720,3 +720,44 @@ worktree，并先提交计划书。
 
 Phase 19 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
 worktree，并先提交计划书。
+## 2026-09-02 — MVP Phase 20 结构化上下文确认
+
+### 计划与 worktree
+
+- 在已接受的 Phase 19 `1a0ccf3` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-20`，分支为
+  `codex/mvp-phase-20-context-input`。
+- 先提交计划书 `3e1fbbe`，明确 Portfolio/Risk Profile 结构化确认、复用边界、
+  产品差异化、做与不做项及验收门；真实账户上传、认证、Provider、LLM、生产持久化和
+  交易均延期。
+
+### 本地实现
+
+- 增加严格 `portfolio-context-request.v1` / `portfolio-context-response.v1` 与
+  `profile-context-request.v1` / `profile-context-response.v1` contracts；重新验证
+  owner、snapshot/position/fund parent/holding、ID、时区、数值和敏感/额外字段。
+- 增加 owner-scoped Portfolio/Profile 确认 API。Portfolio 只返回已验证 bundle 与
+  结构计数；Profile 只调用既有 `build_profile_draft`/`finalize_profile` scorer，确认
+  不写 DecisionEventStore、不生成 Recommendation。
+- 工作台增加本地粘贴 Portfolio JSON 与当前问卷确认动作；确认上下文只存浏览器会话，
+  Advisor 优先消费已确认 bundle，Receipt/DecisionEvent 绑定实际 bundle/snapshot。
+  owner 切换、模板失败、竞态和无效输入都会清空确认状态；动态内容保持 text-only
+  DOM/CSP 边界。
+- 新增 Phase 20 API、owner/敏感/额外字段/无时区、确定性画像、Advisor Receipt 绑定、
+  存储副作用和静态边界测试，并记录 [结构化上下文确认契约](docs/context-input.md)。
+
+### 独立审查与验收
+
+- 实现提交为 `912dedc`；复查后以 `35e27fd` 强化 Profile ID 对完整问卷内容的确定性
+  绑定，并补齐 Profile 敏感/额外字段、缺 owner 和变化输入测试。
+- 全量回归：`283 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开导入、`node --check`、`git diff --check`、wheel package-data
+  检查通过。
+- 本地 100 并发 ASGI replay（Template/Research/Advisor，各 1 op/owner）全部完成，
+  owner mismatch/error 均为 0；Advisor 写入 100 条预期事件，其他场景无副作用。
+- 真实本地浏览器完成 Portfolio JSON→确认、Risk Profile→确认、BALANCED `HOLD`、
+  CONSERVATIVE `REDUCE`、Evidence/Receipt 展开及 owner 切换清空旧 bundle/profile/
+  文本；浏览器错误日志为空。
+- 独立边界审查确认无前端金融重算、认证假象、跨 owner 泄露、Recommendation 伪造、
+  外部网络、LLM/Gemini、订单或交易路径。Phase 20 已接受，本地未 push；下一阶段必须
+  从本提交创建新 worktree 并先提交计划书。

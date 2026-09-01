@@ -68,7 +68,8 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   `PortfolioImportBundle` 与 `RiskQuestionnaire` 先经 owner 闭合、敏感/额外字段和
   timezone 校验，再进入既有 Advisor 纵切；确认不写库，实际 Advisor Receipt 绑定
   用户提交的 bundle/snapshot。工作台在 owner 切换或失败时清空确认状态；真实账户
-  上传、认证、Provider、LLM 与生产持久化仍未实现。
+  上传、认证、Provider、LLM 与生产持久化仍未实现。`283` 项回归、真实浏览器路径、
+  本地 100 并发基线和打包边界审查已通过。
 
 尚未实现：
 
