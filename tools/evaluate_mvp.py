@@ -43,6 +43,9 @@ from app.service import (
 
 _ROOT = Path(__file__).resolve().parents[1]
 _CASE_DIR = _ROOT / "eval_cases"
+if not _CASE_DIR.exists():
+    # ``setuptools.data-files`` installs the fixed set beside site-packages.
+    _CASE_DIR = Path(sys.prefix) / "eval_cases"
 _ADVISOR_ROOT = _ROOT / "app" / "fixtures" / "advisor"
 _DEFAULT_TEMPLATE = _ADVISOR_ROOT / "query_template.json"
 _DEFAULT_PROVIDER_DIR = _ADVISOR_ROOT / "providers"
@@ -153,6 +156,8 @@ class EvaluationCaseResult(ContractModel):
 
     @model_validator(mode="after")
     def validate_result(self) -> Self:
+        if self.actual_status not in _ALLOWED_OUTCOMES:
+            raise ValueError("evaluation result status is unsupported")
         if self.actual_status == "PASS" and not self.actual_receipt:
             raise ValueError("PASS evaluation result requires a receipt")
         if self.actual_status != "PASS" and self.actual_receipt:
@@ -190,6 +195,13 @@ class EvaluationReport(ContractModel):
             raise ValueError("selected case IDs must be unique")
         if {item.case_id for item in self.results} != set(self.selected_case_ids):
             raise ValueError("report results must cover selected cases exactly")
+        if sum(self.status_counts.values()) != len(self.results):
+            raise ValueError("report status counts do not cover results")
+        expected_errors = Counter(
+            item.error_code for item in self.results if item.error_code is not None
+        )
+        if dict(sorted(expected_errors.items())) != dict(sorted(self.error_counts.items())):
+            raise ValueError("report error counts do not cover results")
         serialized = self.model_dump_json().casefold()
         for forbidden in ("api_key", "authorization", "password", "private_key", "secret", "credential", "cookie"):
             if forbidden in serialized:
