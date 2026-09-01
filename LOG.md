@@ -277,3 +277,24 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - `python -m compileall -q app`, research import, `git diff --check`, fixture JSON and source/fixture sensitive-field scans passed.
 - Independent adversarial checks passed for repeated-lineage de-duplication, no-lineage insufficiency, support/contradiction conflicts, non-VERIFIED exclusion, scope mismatch, partial/failed nodes, forged result rejection, stable IDs and absence of recommendation/order/secret-shaped output fields.
 - Phase 6 is accepted in this worktree after the above review; the next bounded-orchestration/Evidence-integration plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 7 bounded orchestration plan
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-7` on branch `codex/mvp-phase-7-bounded-orchestration` from the accepted Phase 6 worktree.
+- Added `docs/plans/2026-09-01-mvp-phase-7-bounded-orchestration.md` before implementation.
+- The phase narrows orchestration to a pure, owner-scoped DAG/run state contract with explicit budget, deadline, dependency and degradation semantics; it does not execute a Provider or Agent.
+
+### Implemented locally
+
+- Added immutable `ResearchNodeSpec`, `ResearchPlan`, `ResearchNodeRun` and `ResearchRunState` contracts with deterministic topology, metadata closure and terminal-state invariants.
+- Added pure transitions for run creation/start, dependency-gated node results, required/optional degradation, deadline failure, blocked descendants and cancellation; old states remain unchanged and raw exceptions/payloads are not stored.
+- Added synthetic offline fixture, unit/integration counterexamples and `docs/bounded-orchestration.md`; no network, credentials, LLM, Provider, async executor, persistence, API, UI or recommendation path was introduced.
+
+### Independent review evidence
+
+- Full suite: `138 passed` (Phase 1–6's 122 tests remain green).
+- `python -m compileall -q app`, orchestration import, `git diff --check`, fixture JSON and secret-like assignment scans passed.
+- Independent adversarial checks passed for deterministic topology, request normalization, deadline rejection, active-node closure, required-node failure, dependency cancellation, forged state rejection, safe cancellation reasons and immutable source states.
+- Phase 7 is accepted in this worktree after the above review; the next Evidence-grounded Finding/compliance plan must use a new worktree.

@@ -1,6 +1,6 @@
 # MVP Phase 7 Working Plan：Bounded Research Orchestration Contract
 
-- Status：`READY`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target worktree：`D:\Github_Storage\prism-phase-7`

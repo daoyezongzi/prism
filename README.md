@@ -34,7 +34,8 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 3 已实现基于 Decimal 的直接/基金穿透暴露与数据覆盖结果。
 - Phase 4 已实现基于暴露结果的集中度指标与画像条件风险预算；相关性、优化和推荐仍未实现。
 - Phase 5 已实现画像条件 allocation envelope、逐约束前后影响和失效条件；最终 Recommendation、研究 DAG 编排、相关性和优化仍未实现。
-- Phase 6 已实现四态结构化研究节点、lineage-aware Cross-Validation 与冲突/缺失语义；真实 Provider、DAG 编排和 Evidence/Finding 连接仍未实现。
+- Phase 6 已实现四态结构化研究节点、lineage-aware Cross-Validation 与冲突/缺失语义；真实 Provider、DAG 执行器和 Evidence/Finding 连接仍未实现。
+- Phase 7 已实现 owner 隔离、依赖闭包、预算/deadline、required/optional 降级和可回放的研究 run 状态机；真实异步执行、Provider 与 Evidence/Finding 桥接仍未实现。
 
 尚未实现：
 
@@ -91,6 +92,8 @@ python -m pytest
 - [Phase 5 Allocation Envelope 契约](docs/allocation-envelope.md)
 - [Phase 6 Structured Research/Cross-Validation 计划](docs/plans/2026-09-01-mvp-phase-6-research-cross-validation.md)
 - [Phase 6 Structured Research/Cross-Validation 契约](docs/research-cross-validation.md)
+- [Phase 7 Bounded Orchestration 计划](docs/plans/2026-09-01-mvp-phase-7-bounded-orchestration.md)
+- [Phase 7 Bounded Orchestration 契约](docs/bounded-orchestration.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

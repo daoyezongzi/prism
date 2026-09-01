@@ -1,0 +1,41 @@
+{
+  "schema_version": "bounded-research-plan-fixture.v1",
+  "fixture_id": "bounded-research-plan-001",
+  "source": "offline-test-only",
+  "owner_id": "fixture-orchestration-owner-001",
+  "scope_description": "synthetic macro, industry, stock and fund research",
+  "nodes": [
+    {
+      "node_id": "macro",
+      "owner_id": "fixture-orchestration-owner-001",
+      "node_kind": "MACRO",
+      "required": true,
+      "dependencies": [],
+      "timeout_ms": 100
+    },
+    {
+      "node_id": "industry",
+      "owner_id": "fixture-orchestration-owner-001",
+      "node_kind": "INDUSTRY",
+      "required": true,
+      "dependencies": ["macro"],
+      "timeout_ms": 100
+    },
+    {
+      "node_id": "stock",
+      "owner_id": "fixture-orchestration-owner-001",
+      "node_kind": "STOCK",
+      "required": true,
+      "dependencies": ["industry"],
+      "timeout_ms": 100
+    },
+    {
+      "node_id": "fund",
+      "owner_id": "fixture-orchestration-owner-001",
+      "node_kind": "FUND",
+      "required": false,
+      "dependencies": [],
+      "timeout_ms": 100
+    }
+  ]
+}
