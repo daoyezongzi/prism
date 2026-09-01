@@ -45,6 +45,11 @@ from app.fund import (
     FundResearchResponse,
     FundResearchTemplateResponse,
 )
+from app.convertible_bond import (
+    ConvertibleBondResearchRequest,
+    ConvertibleBondResearchResponse,
+    ConvertibleBondResearchTemplateResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -65,6 +70,8 @@ from app.service import (
     StockResearchError,
     FixtureFundResearchService,
     FundResearchError,
+    FixtureConvertibleBondResearchService,
+    ConvertibleBondResearchError,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -158,6 +165,7 @@ def create_app(
     specialist_service: FixtureResearchSpecialistMatrixService | None = None,
     stock_service: FixtureStockResearchService | None = None,
     fund_service: FixtureFundResearchService | None = None,
+    convertible_bond_service: FixtureConvertibleBondResearchService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -172,6 +180,7 @@ def create_app(
     active_specialist = specialist_service or FixtureResearchSpecialistMatrixService()
     active_stock = stock_service or FixtureStockResearchService()
     active_fund = fund_service or FixtureFundResearchService()
+    active_convertible_bond = convertible_bond_service or FixtureConvertibleBondResearchService()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -249,6 +258,16 @@ def create_app(
         _: Request, __: FundResearchError
     ) -> JSONResponse:
         return _error_response(400, "FUND_RESEARCH_ERROR", "fund research was refused")
+
+    @api.exception_handler(ConvertibleBondResearchError)
+    async def convertible_bond_research_error_handler(
+        _: Request, __: ConvertibleBondResearchError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "CONVERTIBLE_BOND_RESEARCH_ERROR",
+            "convertible-bond research was refused",
+        )
 
     @api.exception_handler(ProfileConfirmationError)
     async def profile_confirmation_error_handler(
@@ -591,6 +610,57 @@ def create_app(
             raise
         except (AttributeError, TypeError, ValueError, ValidationError) as exc:
             raise FundResearchError("fund research execution was refused") from exc
+        return output
+
+    @api.get(
+        "/api/v1/advisor/convertible-bond-research-template",
+        response_model=ConvertibleBondResearchTemplateResponse,
+    )
+    def get_convertible_bond_research_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> ConvertibleBondResearchTemplateResponse:
+        return active_convertible_bond.template(owner_id)
+
+    @api.post(
+        "/api/v1/advisor/convertible-bond-research-runs",
+        response_model=ConvertibleBondResearchResponse,
+    )
+    async def create_convertible_bond_research_run(
+        request: ConvertibleBondResearchRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> ConvertibleBondResearchResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError(
+                "convertible-bond research request owner does not match owner scope"
+            )
+        try:
+            raw_output = await active_convertible_bond.run(request)
+            if not isinstance(raw_output, ConvertibleBondResearchResponse):
+                raise ConvertibleBondResearchError(
+                    "convertible-bond research output type was invalid"
+                )
+            output = ConvertibleBondResearchResponse.model_validate(
+                raw_output.model_dump(mode="python")
+            )
+            if output.owner_id != owner_id:
+                raise ConvertibleBondResearchError(
+                    "convertible-bond research output owner drifted"
+                )
+            if (
+                output.request_id != request.request_id
+                or output.subject != request.subject
+                or output.period != request.period
+                or output.scenario.scenario_id != request.scenario_id
+            ):
+                raise ConvertibleBondResearchError(
+                    "convertible-bond research output scope drifted"
+                )
+        except ConvertibleBondResearchError:
+            raise
+        except (AttributeError, TypeError, ValueError, ValidationError) as exc:
+            raise ConvertibleBondResearchError(
+                "convertible-bond research execution was refused"
+            ) from exc
         return output
 
     @api.get(

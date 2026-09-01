@@ -17,6 +17,7 @@ class ResearchNodeKind(StrEnum):
     INDUSTRY = "INDUSTRY"
     STOCK = "STOCK"
     FUND = "FUND"
+    CONVERTIBLE_BOND = "CONVERTIBLE_BOND"
 
 
 class ResearchNodeStatus(StrEnum):

@@ -26,6 +26,7 @@
           <a class="nav-item" href="#research-tracks">Research Tracks</a>
           <a class="nav-item" href="#stock-research">Stock Research</a>
           <a class="nav-item" href="#fund-research">ETF / Fund Research</a>
+          <a class="nav-item" href="#convertible-bond-research">Convertible Bond Research</a>
           <a class="nav-item" href="#evidence">Evidence</a>
           <a class="nav-item" href="#profile">Risk Profile</a>
         </nav>
@@ -240,6 +241,33 @@
             <p class="research-boundary">资产事实、集中度、费用、波动与回撤风险来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
             <div id="fund-research-content" class="fund-research-content" aria-live="polite">
               <div class="empty-state">运行 ETF / Fund 研究后查看资产事实、风险与 Evidence 闭合。</div>
+            </div>
+          </section>
+
+          <section class="panel convertible-bond-research-panel" id="convertible-bond-research" aria-labelledby="convertible-bond-research-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">DEMO H · CONVERTIBLE BOND RESEARCH</span>
+                <h2 id="convertible-bond-research-title">可转债资产 Evidence Card</h2>
+              </div>
+              <span id="convertible-bond-research-status" class="status-chip">待运行</span>
+            </div>
+            <div class="research-actions">
+              <div id="convertible-bond-research-template-meta" class="query-meta">
+                运行时读取固定合成可转债、确定性公式与风险规则；结果不写入决策回执。
+              </div>
+              <label class="research-scenario-picker" for="convertible-bond-research-scenario">
+                <span>回放场景</span>
+                <select id="convertible-bond-research-scenario" disabled>
+                  <option value="">读取场景目录…</option>
+                </select>
+                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+              </label>
+              <button id="run-convertible-bond-research" class="query-submit" type="button">运行可转债研究</button>
+            </div>
+            <p class="research-boundary">正股、转股价、转股价值、转股溢价率、债底、到期收益、信用和流动性均绑定 Evidence；公式由服务端确定性计算，退化场景不会升级为 Fact/Finding。</p>
+            <div id="convertible-bond-research-content" class="convertible-bond-research-content" aria-live="polite">
+              <div class="empty-state">运行可转债研究后查看最低资产事实、公式、风险与 Evidence 闭合。</div>
             </div>
           </section>
 

@@ -1,0 +1,142 @@
+{
+  "schema_version": "convertible-bond-research-manifest.v1",
+  "manifest_id": "convertible-bond-research-demo-h-001",
+  "subject": "PRISM_CONVERTIBLE_BOND_DEMO_H",
+  "period": "2026-Q2",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "budget_ms": 3000,
+  "scope_description": "offline synthetic convertible bond asset research replay",
+  "metrics": [
+    {
+      "metric": "bond_floor",
+      "label": "债底",
+      "unit": "CNY",
+      "expected_value": "76.00",
+      "finding_kind": "CONVERTIBLE_BOND_FLOOR_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对债底给出一致的期间数值。"
+    },
+    {
+      "metric": "bond_price",
+      "label": "转债价格",
+      "unit": "CNY",
+      "expected_value": "170.00",
+      "finding_kind": "CONVERTIBLE_BOND_PRICE_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对转债价格给出一致的期间数值。"
+    },
+    {
+      "metric": "conversion_premium_pct",
+      "label": "转股溢价率",
+      "unit": "pct",
+      "derived": true,
+      "formula": "(bond_price / conversion_value - 1) * 100",
+      "finding_kind": "CONVERTIBLE_CONVERSION_PREMIUM_FORMULA",
+      "finding_severity": "INFO",
+      "finding_statement": "转股溢价率由转债价格与转股价值按固定公式确定。"
+    },
+    {
+      "metric": "conversion_price",
+      "label": "转股价",
+      "unit": "CNY",
+      "expected_value": "10.00",
+      "finding_kind": "CONVERTIBLE_CONVERSION_PRICE_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对转股价给出一致的期间数值。"
+    },
+    {
+      "metric": "conversion_value",
+      "label": "转股价值",
+      "unit": "CNY",
+      "derived": true,
+      "formula": "underlying_stock_price / conversion_price * bond_par_value",
+      "finding_kind": "CONVERTIBLE_CONVERSION_VALUE_FORMULA",
+      "finding_severity": "INFO",
+      "finding_statement": "转股价值由正股价格、转股价和面值按固定公式确定。"
+    },
+    {
+      "metric": "credit_rating_rank",
+      "label": "信用情况（评级序数）",
+      "unit": "rating_rank",
+      "expected_value": "4",
+      "finding_kind": "CONVERTIBLE_CREDIT_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对信用评级序数给出一致的期间数值。"
+    },
+    {
+      "metric": "liquidity_score",
+      "label": "流动性等级序数",
+      "unit": "score",
+      "expected_value": "3",
+      "finding_kind": "CONVERTIBLE_LIQUIDITY_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对流动性等级序数给出一致的期间数值。"
+    },
+    {
+      "metric": "underlying_stock_price",
+      "label": "正股价格",
+      "unit": "CNY",
+      "expected_value": "12.50",
+      "finding_kind": "CONVERTIBLE_UNDERLYING_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对正股价格给出一致的期间数值。"
+    },
+    {
+      "metric": "yield_to_maturity_pct",
+      "label": "到期收益率",
+      "unit": "pct",
+      "expected_value": "-0.50",
+      "finding_kind": "CONVERTIBLE_YIELD_PROFILE",
+      "finding_severity": "INFO",
+      "finding_statement": "合成可转债来源对到期收益率给出一致的期间数值。"
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "convertible-bond-research-source-a",
+      "request_id": "convertible-bond-research-request-a",
+      "source": "convertible-bond-research-source-a",
+      "record_id": "convertible-bond-research-record-a",
+      "lineage_id": "convertible-bond-research-lineage-a",
+      "source_slot": "a",
+      "required_fields": [
+        "bond_floor",
+        "bond_price",
+        "conversion_price",
+        "credit_rating_rank",
+        "liquidity_score",
+        "underlying_stock_price",
+        "yield_to_maturity_pct"
+      ],
+      "parameters": {"period": "2026-Q2", "source_slot": "a"},
+      "timeout_ms": 1000
+    },
+    {
+      "node_id": "convertible-bond-research-source-b",
+      "request_id": "convertible-bond-research-request-b",
+      "source": "convertible-bond-research-source-b",
+      "record_id": "convertible-bond-research-record-b",
+      "lineage_id": "convertible-bond-research-lineage-b",
+      "source_slot": "b",
+      "required_fields": [
+        "bond_floor",
+        "bond_price",
+        "conversion_price",
+        "credit_rating_rank",
+        "liquidity_score",
+        "underlying_stock_price",
+        "yield_to_maturity_pct"
+      ],
+      "parameters": {"period": "2026-Q2", "source_slot": "b"},
+      "timeout_ms": 1000
+    }
+  ],
+  "bond_par_value": "100",
+  "conversion_premium_max_pct": "30",
+  "bond_floor_min": "80",
+  "negative_yield_min_pct": "0",
+  "credit_rating_min_risk_rank": "4",
+  "liquidity_min_risk_score": "3",
+  "credit_rating_labels": {"1": "AAA", "2": "AA+", "3": "AA", "4": "AA-", "5": "A+"},
+  "liquidity_labels": {"1": "高", "2": "中", "3": "低"}
+}

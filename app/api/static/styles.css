@@ -230,6 +230,28 @@ h2 { margin-bottom: 0; font: 700 21px/1.3 var(--serif); }
 .fund-available-evidence summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
 .fund-rules { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
 .fund-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
+.convertible-bond-research-panel { grid-column: 1 / -1; }
+.convertible-bond-research-content { display: grid; gap: 16px; margin-top: 18px; }
+.convertible-bond-research-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 13px 14px; border-left: 3px solid var(--clay); background: var(--surface-muted); }
+.convertible-bond-research-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.convertible-bond-fact-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.convertible-bond-fact-card { min-width: 0; padding: 12px 13px; border: 1px solid var(--outline); border-radius: 7px; background: var(--surface-muted); }
+.convertible-bond-fact-card strong { display: block; font: 700 14px var(--serif); overflow-wrap: anywhere; }
+.convertible-bond-fact-card .convertible-bond-fact-value { margin-top: 7px; font: 700 17px var(--mono); }
+.convertible-bond-fact-card .muted { margin-top: 3px; overflow-wrap: anywhere; }
+.convertible-bond-risk-summary { display: grid; gap: 8px; padding: 13px 14px; border: 1px solid var(--outline); border-radius: 7px; background: var(--yellow-soft); }
+.convertible-bond-risk-summary header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.convertible-bond-risk-summary strong { font: 700 15px var(--serif); }
+.convertible-bond-risk-summary p { margin: 0; color: var(--muted); font-size: 12px; }
+.convertible-bond-findings { display: grid; gap: 8px; }
+.convertible-bond-findings details { padding: 11px 13px; border: 1px solid var(--outline); border-radius: 7px; }
+.convertible-bond-findings summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
+.convertible-bond-available-evidence { display: grid; gap: 8px; }
+.convertible-bond-available-evidence details { padding: 11px 13px; border: 1px dashed var(--outline); border-radius: 7px; background: var(--surface-muted); }
+.convertible-bond-available-evidence summary { cursor: pointer; font: 700 13px var(--serif); overflow-wrap: anywhere; }
+.convertible-bond-formulas { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
+.convertible-bond-rules { display: grid; gap: 6px; color: var(--muted); font: 11px var(--mono); }
+.convertible-bond-issues { margin: 0; padding-left: 18px; color: #8a2f1b; font-size: 12px; }
 .portfolio-content, .profile-context { display: grid; gap: 16px; }
 .portfolio-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 16px; padding: 13px 14px; background: var(--surface-muted); border: 1px solid var(--outline); border-radius: 7px; }
 .portfolio-summary dt { font-size: 10px; }

@@ -58,6 +58,9 @@ _ALLOWED_OPERATIONS: dict[ResearchNodeKind, frozenset[ProviderOperation]] = {
         {ProviderOperation.COMPANY_DATA, ProviderOperation.MARKET_DATA}
     ),
     ResearchNodeKind.FUND: frozenset({ProviderOperation.FUND_DATA}),
+    ResearchNodeKind.CONVERTIBLE_BOND: frozenset(
+        {ProviderOperation.CONVERTIBLE_BOND_DATA}
+    ),
 }
 
 

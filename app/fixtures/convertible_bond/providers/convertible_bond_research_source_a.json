@@ -1,0 +1,50 @@
+{
+  "request": {
+    "operation": "CONVERTIBLE_BOND_DATA",
+    "subject": "PRISM_CONVERTIBLE_BOND_DEMO_H",
+    "required_fields": [
+      "bond_floor",
+      "bond_price",
+      "conversion_price",
+      "credit_rating_rank",
+      "liquidity_score",
+      "underlying_stock_price",
+      "yield_to_maturity_pct"
+    ],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [
+      {
+        "source": "convertible-bond-research-source-a",
+        "record_id": "convertible-bond-research-record-a",
+        "fields": {
+          "bond_floor": "76.00",
+          "bond_price": "170.00",
+          "conversion_price": "10.00",
+          "credit_rating_rank": "4",
+          "liquidity_score": "3",
+          "underlying_stock_price": "12.50",
+          "yield_to_maturity_pct": "-0.50"
+        },
+        "units": {
+          "bond_floor": "CNY",
+          "bond_price": "CNY",
+          "conversion_price": "CNY",
+          "credit_rating_rank": "rating_rank",
+          "liquidity_score": "score",
+          "underlying_stock_price": "CNY",
+          "yield_to_maturity_pct": "pct"
+        },
+        "period": "2026-Q2",
+        "observed_at": "2026-08-01T00:00:00Z",
+        "lineage_id": "convertible-bond-research-lineage-a"
+      }
+    ],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

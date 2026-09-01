@@ -26,6 +26,9 @@
     fundResearchTemplate: null,
     fundResearchRun: null,
     fundResearchSequence: 0,
+    convertibleBondResearchTemplate: null,
+    convertibleBondResearchRun: null,
+    convertibleBondResearchSequence: 0,
   };
   const byId = (id) => document.getElementById(id);
 
@@ -82,6 +85,12 @@
 
   function setFundResearchStatus(message, className = "") {
     const node = byId("fund-research-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function setConvertibleBondResearchStatus(message, className = "") {
+    const node = byId("convertible-bond-research-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
   }
@@ -195,6 +204,41 @@
     select.disabled = false;
   }
 
+  function clearConvertibleBondResearchScenarioOptions() {
+    const select = byId("convertible-bond-research-scenario");
+    clear(select);
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "读取场景目录…";
+    select.append(option);
+    select.disabled = true;
+  }
+
+  function renderConvertibleBondResearchScenarioOptions(scenarios) {
+    const select = byId("convertible-bond-research-scenario");
+    const previous = select.value;
+    clear(select);
+    const options = Array.isArray(scenarios) ? scenarios : [];
+    options.forEach((scenario) => {
+      const option = document.createElement("option");
+      option.value = text(scenario.scenario_id, "");
+      option.textContent = text(scenario.label, option.value);
+      option.title = text(scenario.description, "");
+      select.append(option);
+    });
+    if (!options.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "暂无可用场景";
+      select.append(option);
+      select.disabled = true;
+      return;
+    }
+    const known = options.some((scenario) => scenario.scenario_id === previous);
+    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.disabled = false;
+  }
+
   function stockRiskStatusClass(status) {
     return status === "CLEAR" ? "pass" : status === "WATCH" ? "review" : "blocked";
   }
@@ -208,6 +252,14 @@
   }
 
   function fundRiskStatusLabel(status) {
+    return stockRiskStatusLabel(status);
+  }
+
+  function convertibleBondRiskStatusClass(status) {
+    return stockRiskStatusClass(status);
+  }
+
+  function convertibleBondRiskStatusLabel(status) {
     return stockRiskStatusLabel(status);
   }
 
@@ -1388,6 +1440,250 @@
     if (chain.childElementCount) panel.append(chain);
   }
 
+  function renderConvertibleBondResearch(result) {
+    const panel = byId("convertible-bond-research-content");
+    clear(panel);
+    if (!result) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "运行可转债研究后查看最低资产事实、公式、风险与 Evidence 闭合。";
+      panel.append(empty);
+      return;
+    }
+
+    const summary = document.createElement("div");
+    summary.className = "convertible-bond-research-summary";
+    summary.append(
+      chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
+      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+      chip(convertibleBondRiskStatusLabel(result.risk && result.risk.status), convertibleBondRiskStatusClass(result.risk && result.risk.status)),
+    );
+    const summaryText = document.createElement("p");
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summary.append(summaryText);
+    if (result.scenario) {
+      const scenarioText = document.createElement("p");
+      scenarioText.textContent = `${text(result.scenario.label)} · ${text(result.scenario.description)}`;
+      summary.append(scenarioText);
+    }
+    panel.append(summary);
+
+    const nodeHeading = document.createElement("h3");
+    nodeHeading.textContent = "Source nodes";
+    panel.append(nodeHeading);
+    const nodeGrid = document.createElement("div");
+    nodeGrid.className = "research-grid";
+    (result.nodes || []).forEach((node) => {
+      const card = document.createElement("article");
+      card.className = "research-card";
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = text(node.node_id);
+      header.append(title, chip(researchStatusLabel(node.status), researchStatusClass(node.status)));
+      card.append(header);
+      const metadata = document.createElement("dl");
+      addMetadata(metadata, "Status", researchStatusLabel(node.status));
+      if (node.missing_fields && node.missing_fields.length) addMetadata(metadata, "Missing", node.missing_fields.join(", "));
+      card.append(metadata);
+      if (node.scope_description) {
+        const scope = document.createElement("div");
+        scope.className = "muted";
+        scope.textContent = node.scope_description;
+        card.append(scope);
+      }
+      (node.issues || []).forEach((issue) => {
+        const issueLine = document.createElement("div");
+        issueLine.className = "muted";
+        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        card.append(issueLine);
+      });
+      nodeGrid.append(card);
+    });
+    if (nodeGrid.childElementCount) panel.append(nodeGrid);
+
+    const validationHeading = document.createElement("h3");
+    validationHeading.textContent = "Source validation";
+    panel.append(validationHeading);
+    const validations = document.createElement("div");
+    validations.className = "research-validations";
+    (result.validations || []).forEach((validation) => {
+      const row = document.createElement("article");
+      row.className = "research-validation";
+      const title = document.createElement("strong");
+      title.textContent = `${text(validation.metric)} · ${text(validation.period)}`;
+      row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
+      const meta = document.createElement("div");
+      meta.className = "validation-meta";
+      meta.textContent = `${text(validation.independent_lineage_count, "0")} independent lineages · support ${text((validation.supporting_evidence_ids || []).length, "0")} · contradict ${text((validation.contradicting_evidence_ids || []).length, "0")} · unresolved ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
+      row.append(meta);
+      (validation.issues || []).forEach((issue) => {
+        const issueLine = document.createElement("div");
+        issueLine.className = "muted";
+        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        row.append(issueLine);
+      });
+      validations.append(row);
+    });
+    if (validations.childElementCount) panel.append(validations);
+
+    if (result.pipeline_status !== "READY") {
+      const notice = document.createElement("div");
+      notice.className = "notice error";
+      notice.textContent = "证据链未闭合；Evidence 仍可审计，但不会升级为 Fact/Finding，也不会给出风险结论。";
+      panel.append(notice);
+      const issues = document.createElement("ul");
+      issues.className = "convertible-bond-issues";
+      (result.issues || []).forEach((issue) => {
+        const item = document.createElement("li");
+        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issues.append(item);
+      });
+      if (issues.childElementCount) panel.append(issues);
+      const availableHeading = document.createElement("h3");
+      availableHeading.textContent = "Available Evidence · not promoted to Fact";
+      panel.append(availableHeading);
+      const available = document.createElement("div");
+      available.className = "convertible-bond-available-evidence";
+      (result.trace && result.trace.evidence || []).forEach((evidence) => {
+        const details = document.createElement("details");
+        const line = document.createElement("summary");
+        line.textContent = `${text(evidence.field)} · ${text(evidence.source)} · ${text(evidence.quality_status)}`;
+        details.append(line);
+        const metadata = document.createElement("div");
+        metadata.className = "research-evidence-meta";
+        [
+          `Evidence: ${text(evidence.evidence_id)}`,
+          `Value: ${text(evidence.value)} ${text(evidence.unit, "")}`,
+          `Period: ${text(evidence.period)}`,
+          `Lineage: ${text(evidence.lineage_id)}`,
+        ].forEach((lineText) => {
+          const item = document.createElement("div");
+          item.textContent = lineText;
+          metadata.append(item);
+        });
+        details.append(metadata);
+        available.append(details);
+      });
+      if (available.childElementCount) panel.append(available);
+      return;
+    }
+
+    const factHeading = document.createElement("h3");
+    factHeading.textContent = "Verified convertible-bond facts";
+    panel.append(factHeading);
+    const template = state.convertibleBondResearchTemplate;
+    const metricLabels = new Map((template && template.metrics || []).map((item) => [item.metric, item.label]));
+    const factGrid = document.createElement("div");
+    factGrid.className = "convertible-bond-fact-grid";
+    const creditLabels = (template && template.credit_rating_labels) || {};
+    const liquidityLabels = (template && template.liquidity_labels) || {};
+    (result.facts || []).forEach((fact) => {
+      const card = document.createElement("article");
+      card.className = "convertible-bond-fact-card";
+      const title = document.createElement("strong");
+      title.textContent = text(metricLabels.get(fact.metric), fact.metric);
+      const value = document.createElement("div");
+      value.className = "convertible-bond-fact-value";
+      let displayValue = text(fact.value);
+      if (fact.metric === "credit_rating_rank") displayValue = `${text(creditLabels[String(fact.value)], "未知评级")} · rank ${displayValue}`;
+      if (fact.metric === "liquidity_score") displayValue = `${text(liquidityLabels[String(fact.value)], "未知流动性")} · score ${displayValue}`;
+      value.textContent = `${displayValue} ${text(fact.unit, "")}`;
+      const period = document.createElement("div");
+      period.className = "muted";
+      period.textContent = `${text(fact.metric)} · ${text(fact.period)} · ${text(fact.status)}`;
+      card.append(title, value, period);
+      factGrid.append(card);
+    });
+    if (factGrid.childElementCount) panel.append(factGrid);
+
+    const formulaHeading = document.createElement("h3");
+    formulaHeading.textContent = "Deterministic formulas";
+    panel.append(formulaHeading);
+    const formulas = document.createElement("div");
+    formulas.className = "convertible-bond-formulas";
+    (template && template.metrics || []).filter((item) => item.derived).forEach((item) => {
+      const line = document.createElement("div");
+      line.textContent = `${text(item.label, item.metric)} · ${text(item.formula)}`;
+      formulas.append(line);
+    });
+    if (formulas.childElementCount) panel.append(formulas);
+
+    const risk = document.createElement("section");
+    risk.className = "convertible-bond-risk-summary";
+    const riskHeader = document.createElement("header");
+    const riskTitle = document.createElement("strong");
+    riskTitle.textContent = "Deterministic convertible-bond risk summary";
+    riskHeader.append(riskTitle, chip(convertibleBondRiskStatusLabel(result.risk && result.risk.status), convertibleBondRiskStatusClass(result.risk && result.risk.status)));
+    risk.append(riskHeader);
+    const riskText = document.createElement("p");
+    riskText.textContent = text(result.risk && result.risk.summary);
+    risk.append(riskText);
+    const rules = document.createElement("div");
+    rules.className = "convertible-bond-rules";
+    (template && template.risk_rules || []).forEach((rule) => {
+      const line = document.createElement("div");
+      line.textContent = `${text(rule.label)} · ${text(rule.operator)} ${text(rule.threshold)} ${text(rule.unit)}`;
+      rules.append(line);
+    });
+    if (rules.childElementCount) risk.append(rules);
+    panel.append(risk);
+
+    const findingHeading = document.createElement("h3");
+    findingHeading.textContent = "Deterministic convertible-bond risks";
+    panel.append(findingHeading);
+    const findings = document.createElement("div");
+    findings.className = "convertible-bond-findings";
+    (result.findings || []).filter((finding) => finding.severity !== "INFO").forEach((finding) => {
+      const details = document.createElement("details");
+      details.open = true;
+      const line = document.createElement("summary");
+      line.textContent = `${text(finding.kind)} · ${text(finding.statement)}`;
+      details.append(line);
+      const meta = document.createElement("div");
+      meta.className = "research-evidence-meta";
+      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${text(finding.methodology)}`;
+      details.append(meta);
+      findings.append(details);
+    });
+    if (findings.childElementCount) panel.append(findings);
+
+    const chainHeading = document.createElement("h3");
+    chainHeading.textContent = "Finding → Fact → Evidence";
+    panel.append(chainHeading);
+    const chain = document.createElement("div");
+    chain.className = "convertible-bond-findings";
+    const evidenceById = new Map((result.trace && result.trace.evidence || []).map((item) => [item.evidence_id, item]));
+    const factsById = new Map((result.trace && result.trace.facts || []).map((item) => [item.fact_id, item]));
+    (result.findings || []).forEach((finding) => {
+      const details = document.createElement("details");
+      const line = document.createElement("summary");
+      line.textContent = `${text(finding.kind)} · ${text(finding.statement)}`;
+      details.append(line);
+      const metadata = document.createElement("div");
+      metadata.className = "research-evidence-meta";
+      const findingLine = document.createElement("div");
+      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      metadata.append(findingLine);
+      (finding.fact_ids || []).forEach((factId) => {
+        const fact = factsById.get(factId);
+        if (!fact) return;
+        const factLine = document.createElement("div");
+        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        metadata.append(factLine);
+        (fact.evidence_ids || []).forEach((evidenceId) => {
+          const evidence = evidenceById.get(evidenceId);
+          if (!evidence) return;
+          const evidenceLine = document.createElement("div");
+          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          metadata.append(evidenceLine);
+        });
+      });
+      details.append(metadata);
+      chain.append(details);
+    });
+    if (chain.childElementCount) panel.append(chain);
+  }
+
   async function loadEvent(eventId) {
     const requestOwner = state.ownerId;
     const templateSequence = state.templateSequence;
@@ -1645,6 +1941,20 @@
     return template;
   }
 
+  async function loadConvertibleBondResearchCatalog(ownerId) {
+    const sequence = ++state.convertibleBondResearchSequence;
+    const response = await fetch("/api/v1/advisor/convertible-bond-research-template", {
+      headers: { "X-Owner-ID": ownerId },
+    });
+    if (!response.ok) throw await apiError(response);
+    const template = await response.json();
+    if (state.ownerId !== ownerId || state.convertibleBondResearchSequence !== sequence) return null;
+    state.convertibleBondResearchTemplate = template;
+    renderConvertibleBondResearchScenarioOptions(template.scenarios);
+    byId("convertible-bond-research-template-meta").textContent = `Convertible Bond ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} metrics · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    return template;
+  }
+
   async function previewProfileProposal() {
     const requestOwner = byId("owner-id").value.trim();
     const raw = byId("profile-proposal-json").value.trim();
@@ -1891,6 +2201,13 @@
     clearFundResearchScenarioOptions();
     setFundResearchStatus("待运行");
     renderFundResearch(null);
+    state.convertibleBondResearchTemplate = null;
+    state.convertibleBondResearchRun = null;
+    state.convertibleBondResearchSequence += 1;
+    byId("convertible-bond-research-template-meta").textContent = "运行时读取固定合成可转债、确定性公式与风险规则；结果不写入决策回执。";
+    clearConvertibleBondResearchScenarioOptions();
+    setConvertibleBondResearchStatus("待运行");
+    renderConvertibleBondResearch(null);
   }
 
   async function runAdvisorQuery(event) {
@@ -2150,6 +2467,72 @@
     }
   }
 
+  async function runConvertibleBondResearch() {
+    const nextOwnerId = byId("owner-id").value.trim();
+    const ownerChanged = nextOwnerId !== state.ownerId;
+    state.ownerId = nextOwnerId;
+    if (ownerChanged || !state.ownerId) resetOwnerScopedViews();
+    const requestOwner = state.ownerId;
+    let sequence = ++state.convertibleBondResearchSequence;
+    const submit = byId("run-convertible-bond-research");
+    const scenarioSelect = byId("convertible-bond-research-scenario");
+    if (!state.ownerId) {
+      setError("请输入 owner 标识。");
+      return;
+    }
+    setError("");
+    submit.disabled = true;
+    scenarioSelect.disabled = true;
+    state.convertibleBondResearchRun = null;
+    renderConvertibleBondResearch(null);
+    setConvertibleBondResearchStatus("运行中…");
+    try {
+      let template = state.convertibleBondResearchTemplate;
+      if (!template) {
+        template = await loadConvertibleBondResearchCatalog(requestOwner);
+        sequence = state.convertibleBondResearchSequence;
+      }
+      if (!template) return;
+      if (state.ownerId !== requestOwner || state.convertibleBondResearchSequence !== sequence) return;
+      const scenarioId = scenarioSelect.value || "BASELINE_READY";
+      const response = await fetch("/api/v1/advisor/convertible-bond-research-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "convertible-bond-research-request.v1",
+          request_id: "ui-convertible-bond-research-001",
+          owner_id: requestOwner,
+          subject: template.subject,
+          period: template.period,
+          generated_at: template.generated_at,
+          scenario_id: scenarioId,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.convertibleBondResearchSequence !== sequence) return;
+      state.convertibleBondResearchRun = await response.json();
+      setConvertibleBondResearchStatus(
+        researchStatusLabel(state.convertibleBondResearchRun.pipeline_status),
+        researchStatusClass(state.convertibleBondResearchRun.pipeline_status),
+      );
+      renderConvertibleBondResearch(state.convertibleBondResearchRun);
+    } catch (error) {
+      if (state.ownerId !== requestOwner || state.convertibleBondResearchSequence !== sequence) return;
+      state.convertibleBondResearchRun = null;
+      renderConvertibleBondResearch(null);
+      setConvertibleBondResearchStatus("未运行", "blocked");
+      setError(error.message || "运行可转债研究失败");
+    } finally {
+      submit.disabled = false;
+      if (state.ownerId === requestOwner && state.convertibleBondResearchSequence === sequence) {
+        scenarioSelect.disabled = !state.convertibleBondResearchTemplate;
+      }
+    }
+  }
+
   async function loadEvents() {
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
@@ -2219,6 +2602,16 @@
           }
         }
       }
+      if (state.ownerId === requestOwner && !state.convertibleBondResearchTemplate) {
+        try {
+          await loadConvertibleBondResearchCatalog(requestOwner);
+        } catch (error) {
+          if (state.ownerId === requestOwner) {
+            clearConvertibleBondResearchScenarioOptions();
+            setError(error.message || "读取可转债研究场景目录失败");
+          }
+        }
+      }
       if (state.events.length) await loadEvent(state.events[0].event_id);
     } catch (error) {
       state.events = [];
@@ -2267,6 +2660,13 @@
     state.fundResearchSequence += 1;
     renderFundResearch(null);
     setFundResearchStatus("待运行");
+  });
+  byId("run-convertible-bond-research").addEventListener("click", runConvertibleBondResearch);
+  byId("convertible-bond-research-scenario").addEventListener("change", () => {
+    state.convertibleBondResearchRun = null;
+    state.convertibleBondResearchSequence += 1;
+    renderConvertibleBondResearch(null);
+    setConvertibleBondResearchStatus("待运行");
   });
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();

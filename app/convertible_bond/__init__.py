@@ -1,0 +1,41 @@
+"""Strict contracts for the fixture-first convertible-bond research card."""
+
+from app.convertible_bond.contracts import (
+    CONVERTIBLE_BOND_METRIC_UNITS,
+    CONVERTIBLE_BOND_RAW_METRICS,
+    ConvertibleBondMetricResponse,
+    ConvertibleBondResearchIssue,
+    ConvertibleBondResearchManifest,
+    ConvertibleBondResearchManifestNode,
+    ConvertibleBondResearchMetricSpec,
+    ConvertibleBondResearchNodeResponse,
+    ConvertibleBondResearchRequest,
+    ConvertibleBondResearchResponse,
+    ConvertibleBondResearchScenarioDefinition,
+    ConvertibleBondResearchScenarioId,
+    ConvertibleBondResearchScenarioResponse,
+    ConvertibleBondResearchTemplateResponse,
+    ConvertibleBondRiskRuleResponse,
+    ConvertibleBondRiskStatus,
+    ConvertibleBondRiskSummary,
+)
+
+__all__ = [
+    "CONVERTIBLE_BOND_METRIC_UNITS",
+    "CONVERTIBLE_BOND_RAW_METRICS",
+    "ConvertibleBondMetricResponse",
+    "ConvertibleBondResearchIssue",
+    "ConvertibleBondResearchManifest",
+    "ConvertibleBondResearchManifestNode",
+    "ConvertibleBondResearchMetricSpec",
+    "ConvertibleBondResearchNodeResponse",
+    "ConvertibleBondResearchRequest",
+    "ConvertibleBondResearchResponse",
+    "ConvertibleBondResearchScenarioDefinition",
+    "ConvertibleBondResearchScenarioId",
+    "ConvertibleBondResearchScenarioResponse",
+    "ConvertibleBondResearchTemplateResponse",
+    "ConvertibleBondRiskRuleResponse",
+    "ConvertibleBondRiskStatus",
+    "ConvertibleBondRiskSummary",
+]

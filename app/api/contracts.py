@@ -36,6 +36,12 @@ from app.fund import (
     FundResearchNodeResponse,
     FundResearchTemplateResponse,
 )
+from app.convertible_bond import (
+    ConvertibleBondResearchRequest,
+    ConvertibleBondResearchResponse,
+    ConvertibleBondResearchNodeResponse,
+    ConvertibleBondResearchTemplateResponse,
+)
 from app.profile import (
     ConflictResolution,
     ProfileDraft,
@@ -464,4 +470,8 @@ __all__ = [
     "FundResearchResponse",
     "FundResearchNodeResponse",
     "FundResearchTemplateResponse",
+    "ConvertibleBondResearchRequest",
+    "ConvertibleBondResearchResponse",
+    "ConvertibleBondResearchNodeResponse",
+    "ConvertibleBondResearchTemplateResponse",
 ]
