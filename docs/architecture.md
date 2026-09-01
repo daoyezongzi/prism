@@ -121,7 +121,8 @@ Provider 统一返回四类结果：
 已经实现 Evidence、Provider、画像/持仓、暴露/风险、研究、合规闸门、
 Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/首个
 解释工作台、Phase 14 的 API 触发 fixture-first Advisor 纵切、Phase 15 的结构化
-Query 工作台、Phase 16 的四轨道研究节点矩阵和 Phase 17 的 Research Tracks API/UI
-切片。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整
-Portfolio/Advisor/Evidence/Risk Profile 工作台交互和外部浏览器旗舰流仍未完成；
-README 与 TODO 必须持续保持这一事实边界。
+Query 工作台、Phase 16 的四轨道研究节点矩阵、Phase 17 的 Research Tracks API/UI
+切片，以及 Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图。真实
+SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、Portfolio/Risk
+Profile CRUD、真实持仓导入和外部真实旗舰流仍未完成；README 与 TODO 必须持续保持
+这一事实边界。

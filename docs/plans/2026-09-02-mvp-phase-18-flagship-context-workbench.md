@@ -102,4 +102,33 @@ Portfolio 快照、Risk Profile 约束、四轨道研究和最终 Receipt 放在
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record (2026-09-02)
+
+- Worktree: `D:\Github_Storage\prism-phase-18`, branch
+  `codex/mvp-phase-18-flagship-flow`; plan commit `599d37f` preceded
+  implementation. Implementation commit: `2d40112`.
+- Added read-only Portfolio Snapshot and Risk Profile template context views. They
+  consume only the validated owner-rebound `query-template` response, display the
+  bundle/snapshot/questionnaire identities and source values, and use text-only DOM
+  rendering. No new backend calculation, CRUD, recommendation, order, network or
+  LLM path was introduced.
+- Owner-scope review fixed direct Advisor/Research actions after an owner edit: the
+  previous owner context is cleared, template failures clear context safely, and
+  template/event responses are guarded by owner and sequence before rendering.
+- Full regression: `python -m pytest -o addopts=` → `267 passed`, with only the
+  known Starlette/httpx deprecation warning. `compileall`, public imports,
+  `node --check`, `git diff --check`, and the 100-template replay test pass.
+- Wheel package-data check confirms the static workbench and Advisor/Research
+  fixtures are included. Boundary scan confirms only same-origin API fetches,
+  with no external URL, LLM/Gemini, credentials, recalculation, transaction,
+  order or trade path in the Phase 18 changes.
+- Real local browser acceptance passes: owner template loads show the Portfolio
+  positions/look-through holdings and Risk Profile questionnaire; balanced Advisor
+  returns `HOLD`, conservative Advisor returns `REDUCE`, Research Tracks returns
+  `READY` with eight nodes and Finding → Fact → Evidence, and switching owner clears
+  prior events/receipt/context before rebinding. Browser error logs are empty.
+- Independent adversarial review found no cross-owner render path, XSS sink or
+  Recommendation/Receipt fabrication. Phase 18 is accepted locally; no push was
+  performed. Phase 19 must start in a new worktree with a plan-only commit.

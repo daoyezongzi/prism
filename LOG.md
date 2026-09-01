@@ -637,3 +637,44 @@ Independent post-commit adversarial review and final acceptance are still pendin
 
 Phase 17 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
 worktree，并先提交计划书。
+
+## 2026-09-02 — MVP Phase 18 旗舰上下文工作台
+
+### 计划与 worktree
+
+- 在已接受的 Phase 17 `30c6926` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-18`，分支为
+  `codex/mvp-phase-18-flagship-flow`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `599d37f`；本阶段继续保持 fixture-first，不接入真实 Provider、认证、LLM、
+  生产持久化或交易。
+
+### 本地实现
+
+- 在现有工作台增加只读 Portfolio Snapshot 区域，消费已验证的
+  `GET /api/v1/advisor/query-template`，显示 owner、bundle/snapshot、as-of、
+  基准币种、持仓和基金/ETF look-through 原值。
+- 在 Risk Profile 区域增加同一模板的问卷上下文，显示 questionnaire/owner/回答
+  时间、承受分数、期限、流动性、经验、收益预期和最大回撤，并保留原有 Receipt
+  绑定元数据。
+- 增加统一 owner 上下文清理、模板错误安全清空和 owner/sequence 异步保护；直接
+  从 Advisor/Research 操作新 owner 也不会保留上一 owner 的上下文。动态值继续使用
+  `textContent`，不增加计算、CRUD、外部网络或订单入口。
+- 新增 Phase 18 API/静态/重放测试与
+  [Portfolio/Risk Profile 上下文工作台契约](docs/flagship-context-workbench.md)。
+
+### 独立审查与验收
+
+- 实现提交为 `2d40112`；独立复查后补强直接 owner 切换、模板失败清空、事件详情
+  异步 owner 保护并通过浏览器复验。
+- 全量回归：`267 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开导入、`node --check`、`git diff --check`、100 次模板重放和
+  wheel package-data 检查通过。
+- 真实本地浏览器验证 Portfolio 持仓/基金穿透、Risk Profile 问卷、Advisor
+  BALANCED `HOLD`、CONSERVATIVE `REDUCE`、Research Tracks `READY`/8 节点/
+  Finding → Fact → Evidence 及 owner 切换清空；浏览器错误日志为空。
+- adversarial review 确认没有跨 owner 渲染、XSS sink、前端金融重算、
+  Recommendation/Receipt 伪造、LLM/Gemini、外部网络、订单或交易路径。
+
+Phase 18 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
+worktree，并先提交计划书。

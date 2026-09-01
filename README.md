@@ -55,13 +55,18 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   READY/REVIEW/BLOCKED 节点状态、独立 lineage 验证和 Finding → Fact → Evidence
   展开均复用既有 pipeline；研究结果不写入 DecisionEvent，也不产生 Recommendation。
   `264` 项回归、100 次 API 重放、真实浏览器 owner 隔离与 Advisor HOLD/REDUCE 回归通过。
+- Phase 18 已把同一 owner-scoped Advisor 模板中的 Portfolio 持仓快照和 Risk Profile
+  问卷上下文接入旗舰工作台：显示 bundle/snapshot/questionnaire 身份、持仓与基金穿透
+  原值，并在 owner 切换或异步失败时清空旧上下文；不新增计算、CRUD、交易或外部
+  Provider。`267` 项回归、100 次模板重放、真实浏览器 Portfolio/Risk/Advisor/Research
+  路径和静态边界审查通过。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
 - Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
-- 完整 Portfolio/Advisor/Evidence/Risk Profile 工作台交互与真实端到端场景；
+- 完整 Portfolio/Risk Profile CRUD、真实持仓导入和真实端到端场景；
 - 宏观、行业、个股、ETF/Fund 的真实 SkillHub Provider、实时数据和完整工作台消费；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -135,6 +140,8 @@ python -m pytest
 - [Phase 16 研究节点矩阵计划与验收](docs/plans/2026-09-02-mvp-phase-16-research-node-matrix.md)
 - [Phase 17 Research Tracks 工作台](docs/research-workbench.md)
 - [Phase 17 研究工作台计划与验收](docs/plans/2026-09-02-mvp-phase-17-research-workbench.md)
+- [Phase 18 Portfolio/Risk Profile 上下文工作台](docs/flagship-context-workbench.md)
+- [Phase 18 旗舰上下文工作台计划与验收](docs/plans/2026-09-02-mvp-phase-18-flagship-context-workbench.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

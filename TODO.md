@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 17 accepted locally; the next phase plan must start in a new worktree.
+> Active phase: Phase 18 accepted locally; the next phase plan must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -52,6 +52,8 @@
 - [x] Trigger the fixture-first Advisor vertical slice from a structured API request and persist an idempotent DecisionEvent.
 - [x] Add the owner-scoped Research Tracks template/run API and four-track workbench view;
   keep READY research separate from Recommendation/Decision Receipt.
+- [x] Add the read-only Portfolio snapshot and Risk Profile questionnaire context views;
+  keep template values owner-closed and defer CRUD/real account import.
 - [ ] Verify the complete flagship flow in a real browser.
 - [x] Verify the Phase 15 form → API → HOLD/REDUCE → Evidence → owner isolation path in a
   real browser.
@@ -76,7 +78,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 17 is accepted locally at the current `HEAD` in the dedicated
-`D:\Github_Storage\prism-phase-17` worktree. Create a new worktree for the next
+Phase 18 is accepted locally at the current `HEAD` in the dedicated
+`D:\Github_Storage\prism-phase-18` worktree. Create a new worktree for the next
 plan before implementation; keep real authentication, live Provider access and
 production persistence deferred.
