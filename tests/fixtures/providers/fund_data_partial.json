@@ -1,0 +1,49 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "FUND_FIXTURE_001_PARTIAL",
+    "required_fields": [
+      "fund_name",
+      "technology_weight_pct",
+      "top10_concentration_pct"
+    ],
+    "parameters": {
+      "period": "2026-06-30"
+    }
+  },
+  "result": {
+    "provider": "fixture-provider",
+    "status": "PARTIAL",
+    "records": [
+      {
+        "source": "fund-holdings-fixture",
+        "fields": {
+          "fund_name": "Synthetic Tech Growth Fund",
+          "technology_weight_pct": 63.5
+        },
+        "units": {
+          "technology_weight_pct": "pct"
+        },
+        "period": "2026-06-30",
+        "observed_at": "2026-07-15T00:00:00Z",
+        "lineage_id": "lineage:fixture:fund:001:partial"
+      }
+    ],
+    "missing_fields": [
+      "top10_concentration_pct"
+    ],
+    "issues": [
+      {
+        "code": "INVALID_RESPONSE",
+        "stage": "parse",
+        "safe_message": "Field top10_concentration_pct is missing from provider response",
+        "retriable": false,
+        "diagnostics": {
+          "missing_field": "top10_concentration_pct"
+        }
+      }
+    ],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

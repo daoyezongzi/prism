@@ -15,9 +15,9 @@
 - [x] Produce and verify the upstream Reuse Matrix.
 - [x] Implement the first Evidence/Fact/Finding/Recommendation contract.
 - [x] Test missing data, stale evidence, reference closure and blocked decisions.
-- [ ] Define a fixture-first Provider Protocol with distinct `SUCCESS`, `PARTIAL`, `EMPTY`, and `FAILED` results.
-- [ ] Add per-call correlation IDs, deterministic request fingerprints, time budgets and redacted diagnostics.
-- [ ] Add recorded, synthetic Wencai/Tushare fixtures without credentials or private data.
+- [x] Define a fixture-first Provider Protocol with distinct `SUCCESS`, `PARTIAL`, `EMPTY`, and `FAILED` results.
+- [x] Add per-call correlation IDs, deterministic request fingerprints, time budgets and redacted diagnostics.
+- [x] Add recorded, synthetic Wencai/Tushare fixtures without credentials or private data.
 - [ ] Define schema versioning and Decision Receipt content hashes.
 - [ ] Add PostgreSQL-oriented storage models and migrations for owner-isolated profiles, evidence and decision events.
 - [ ] Add an early load-test harness before implementing the full research graph.
@@ -62,4 +62,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Dispatch the [MVP Phase 1 execution contract](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md) to Gemini. After Gemini returns, independently review its allowed-file scope, contract invariants, tests, commit and clean repository state before accepting Phase 1.
+Dispatch Phase 1B (persistence & storage contracts) or Phase 2 (user profile & portfolio import contracts) according to the execution route.

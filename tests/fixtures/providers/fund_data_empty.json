@@ -1,0 +1,21 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "FUND_FIXTURE_EMPTY",
+    "required_fields": [
+      "fund_name"
+    ],
+    "parameters": {
+      "period": "1990-01-01"
+    }
+  },
+  "result": {
+    "provider": "fixture-provider",
+    "status": "EMPTY",
+    "records": [],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": "No fund holdings data recorded for FUND_FIXTURE_EMPTY in period 1990-01-01",
+    "latency_ms": 5
+  }
+}

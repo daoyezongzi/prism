@@ -1,0 +1,32 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "FUND_FIXTURE_DOWN",
+    "required_fields": [
+      "fund_name"
+    ],
+    "parameters": {
+      "period": "2026-06-30"
+    }
+  },
+  "result": {
+    "provider": "fixture-provider",
+    "status": "FAILED",
+    "records": [],
+    "missing_fields": [],
+    "issues": [
+      {
+        "code": "TRANSPORT_ERROR",
+        "stage": "transport",
+        "safe_message": "Simulated upstream provider connection failure",
+        "retriable": true,
+        "retry_after_ms": 1000,
+        "diagnostics": {
+          "endpoint": "fixture://fund_data_down"
+        }
+      }
+    ],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

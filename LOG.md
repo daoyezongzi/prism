@@ -68,3 +68,54 @@ This verifies only the initial domain contract. No real SkillHub request, financ
 - Python compilation: passed.
 - Local Markdown link validation: passed.
 - Staged diff check: passed.
+
+## 2026-09-01 — MVP Phase 1 fixture-first provider protocol
+
+### Decisions
+
+- Implemented the fixture-first Provider Protocol strictly adhering to `docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md`.
+- Enforced strict four-state execution invariants: `SUCCESS`, `PARTIAL`, `EMPTY`, and `FAILED` cannot be interchanged or masqueraded.
+- Separated per-call correlation (`request_id`) from deterministic canonical SHA-256 semantic query fingerprints (`request_fingerprint`).
+- Hardened contract safety based on review feedback:
+  - Added `FrozenDict` deep immutability to prevent runtime parameter mutation and fingerprint drift;
+  - Added recursive forbidden key detection (`_find_forbidden_key`) traversing nested dictionaries and sequences;
+  - Enforced per-record required field validation in `SUCCESS` (requiring all records to have all required fields with non-None values);
+  - Enforced veracity checking on `PARTIAL.missing_fields` (ensuring missing fields were actually requested and actually missing in records);
+  - Added record identity to `evidence_id` (`ev:{provider}:{source}:{record_identity}:{field}:{period}`) to prevent duplicate Evidence IDs across multiple records and ensure DecisionTrace closure;
+  - Added fixture template validation and duplicate fingerprint detection at FixtureProvider initialization.
+- Created purely synthetic, credential-free fixtures covering all four result states.
+- Normalization safely converts `SUCCESS` to `VERIFIED` Evidence, `PARTIAL` to `PARTIAL` Evidence with quality notes, and `EMPTY`/`FAILED` to zero Evidence (preventing false zeros).
+- Standard library `asyncio` execution budget wrapper maps timeouts and internal errors safely without leaking stack traces or credentials.
+- 100-concurrent request in-memory smoke test verified request ID isolation and fingerprint stability.
+
+### Implemented
+
+- `app/providers/contracts.py`: ProviderOperation, ProviderStatus, ProviderIssueCode, FrozenDict, ProviderRequest, ProviderRecord, ProviderIssue, ProviderResult, FinancialProvider protocol, and validate_result_for_request.
+- `app/providers/fingerprint.py`: canonical JSON request dictionary, SHA-256 fingerprinting, and recursive redaction.
+- `app/providers/fixture.py`: FixtureFinancialProvider with in-memory fingerprint indexing, template validation, and deterministic execution.
+- `app/providers/runtime.py`: execute_with_budget async wrapper with timeout and error mapping.
+- `app/providers/normalization.py`: normalize_result_to_evidence converter to Evidence domain model with record-identity-aware Evidence IDs.
+- `app/providers/__init__.py`: package exports.
+- `tests/fixtures/providers/*.json`: synthetic test fixtures (fund_data_success, fund_data_partial, fund_data_empty, fund_data_failed).
+- `tests/unit/test_provider_contract.py`, `tests/unit/test_provider_fingerprint.py`, `tests/integration/test_fixture_provider.py`: 35 new tests covering all 21 acceptance cases and 6 review hardening items (43 total tests in repo).
+- `docs/provider-protocol.md`: comprehensive documentation of the provider protocol.
+
+### Verification
+
+```text
+python -m pytest
+43 passed in 0.33s
+
+python -m compileall -q app
+passed
+
+python -c "from app.providers import FinancialProvider, FixtureFinancialProvider; print('provider-import-ok')"
+provider-import-ok
+
+git diff --check
+passed
+```
+
+### Current evidence boundary
+
+- Live SkillHub network requests, production credentials, storage persistence, user profiles, research DAG, and UI workbench remain un-implemented and are explicitly out-of-scope for Phase 1.

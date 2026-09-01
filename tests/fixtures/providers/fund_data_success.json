@@ -1,0 +1,39 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "FUND_FIXTURE_001",
+    "required_fields": [
+      "fund_name",
+      "technology_weight_pct",
+      "top10_concentration_pct"
+    ],
+    "parameters": {
+      "period": "2026-06-30"
+    }
+  },
+  "result": {
+    "provider": "fixture-provider",
+    "status": "SUCCESS",
+    "records": [
+      {
+        "source": "fund-holdings-fixture",
+        "fields": {
+          "fund_name": "Synthetic Tech Growth Fund",
+          "technology_weight_pct": 63.5,
+          "top10_concentration_pct": 58.2
+        },
+        "units": {
+          "technology_weight_pct": "pct",
+          "top10_concentration_pct": "pct"
+        },
+        "period": "2026-06-30",
+        "observed_at": "2026-07-15T00:00:00Z",
+        "lineage_id": "lineage:fixture:fund:001"
+      }
+    ],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

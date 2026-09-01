@@ -28,14 +28,15 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 独立 Git 仓库与 Python 工程基础；
 - Evidence/Fact/Finding/Recommendation 的首版领域契约；
 - 决策链闭包、缺失数据语义和可行动建议约束测试；
-- 架构 ADR、复用矩阵和分阶段实施计划。
+- 架构 ADR、复用矩阵和分阶段实施计划；
+- Provider Protocol、四态结果不变量、确定性语义指纹、脱敏与合成 Fixture Provider。
 
 尚未实现：
 
-- 同花顺问财 SkillHub Provider；
+- 真实同花顺问财 SkillHub Provider 网络接入；
 - 用户画像、研究编排、组合、风险和合规模块；
 - Web 工作台与真实端到端场景；
-- 100 并发、3 秒响应和长期可用性验证。
+- 真实外部 100 并发、3 秒响应和长期可用性验证。
 
 ## 核心不变量
 
@@ -69,6 +70,7 @@ python -m pytest
 - [主项目规范](Prism.md)
 - [实施架构](docs/architecture.md)
 - [Evidence Contract](docs/evidence-contract.md)
+- [Provider Protocol](docs/provider-protocol.md)
 - [复用矩阵](docs/reuse-matrix.md)
 - [架构决策 ADR-0001](docs/adr/0001-modular-monolith.md)
 - [当前实施计划](docs/plans/2026-09-01-foundation.md)
