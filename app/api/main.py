@@ -14,6 +14,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from app.api.contracts import (
+    AdvisorPortfolioContextRequest,
+    AdvisorPortfolioContextResponse,
+    AdvisorProfileContextRequest,
+    AdvisorProfileContextResponse,
     AdvisorQueryResponse,
     AdvisorQueryTemplateResponse,
     DecisionEventListResponse,
@@ -33,7 +37,11 @@ from app.service import (
     FixtureResearchSpecialistMatrixService,
     SpecialistMatrixError,
     SpecialistMatrixOutput,
+    ProfileConfirmationError,
+    confirm_questionnaire,
 )
+from app.portfolio import PortfolioImportBundle
+from app.profile import RiskQuestionnaire
 from app.store import (
     DecisionEvent,
     DecisionEventStore,
@@ -193,6 +201,16 @@ def create_app(
     ) -> JSONResponse:
         return _error_response(400, "RESEARCH_MATRIX_ERROR", "research matrix was refused")
 
+    @api.exception_handler(ProfileConfirmationError)
+    async def profile_confirmation_error_handler(
+        _: Request, __: ProfileConfirmationError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "PROFILE_CONTEXT_ERROR",
+            "risk profile confirmation was refused",
+        )
+
     @api.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
         if exc.status_code == 404:
@@ -279,6 +297,53 @@ def create_app(
             generated_at=template.generated_at,
             questionnaire=template.questionnaire,
             portfolio=template.portfolio,
+        )
+
+    @api.post(
+        "/api/v1/advisor/context/portfolio",
+        response_model=AdvisorPortfolioContextResponse,
+    )
+    def confirm_portfolio_context(
+        request: AdvisorPortfolioContextRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorPortfolioContextResponse:
+        if request.portfolio.owner_id != owner_id:
+            raise StoreOwnerError("portfolio context owner does not match owner scope")
+        try:
+            portfolio = PortfolioImportBundle.model_validate(
+                request.portfolio.model_dump(mode="python")
+            )
+            return AdvisorPortfolioContextResponse(
+                portfolio=portfolio,
+                position_count=len(portfolio.position_snapshot.positions),
+                fund_snapshot_count=len(portfolio.fund_holdings),
+                holding_count=sum(
+                    len(snapshot.holdings) for snapshot in portfolio.fund_holdings
+                ),
+            )
+        except (ValidationError, ValueError) as exc:
+            raise AdvisorQueryError("portfolio context was refused") from exc
+
+    @api.post(
+        "/api/v1/advisor/context/profile",
+        response_model=AdvisorProfileContextResponse,
+    )
+    def confirm_profile_context(
+        request: AdvisorProfileContextRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorProfileContextResponse:
+        if request.questionnaire.owner_id != owner_id:
+            raise StoreOwnerError("profile context owner does not match owner scope")
+        try:
+            questionnaire = RiskQuestionnaire.model_validate(
+                request.questionnaire.model_dump(mode="python")
+            )
+        except (ValidationError, ValueError) as exc:
+            raise ProfileConfirmationError("risk profile confirmation was refused") from exc
+        profile = confirm_questionnaire(questionnaire)
+        return AdvisorProfileContextResponse(
+            questionnaire=questionnaire,
+            profile=profile,
         )
 
     @api.get(

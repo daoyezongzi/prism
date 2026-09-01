@@ -22,7 +22,7 @@ from app.research import (
 )
 from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
-from app.profile import RiskQuestionnaire
+from app.profile import RiskProfile, RiskQuestionnaire
 from app.service import (
     AdvisorQueryRequest,
 )
@@ -92,6 +92,110 @@ class AdvisorQueryTemplateResponse(ContractModel):
             raise ValueError("generated_at must be timezone-aware")
         if self.questionnaire.owner_id != self.portfolio.owner_id:
             raise ValueError("template response owners must match")
+        return self
+
+
+_CONTEXT_SENSITIVE_SUBSTRINGS = (
+    "api_key",
+    "apikey",
+    "authorization",
+    "password",
+    "private_key",
+    "secret",
+    "token",
+    "credential",
+    "cookie",
+)
+
+
+def _validate_context_payload_safety(serialized: str, label: str) -> None:
+    normalized = serialized.casefold().replace("-", "_")
+    if any(item in normalized for item in _CONTEXT_SENSITIVE_SUBSTRINGS):
+        raise ValueError(f"{label} must not contain sensitive fields")
+
+
+class AdvisorPortfolioContextRequest(ContractModel):
+    """Strict, owner-scoped Portfolio confirmation input."""
+
+    schema_version: Literal["portfolio-context-request.v1"] = (
+        "portfolio-context-request.v1"
+    )
+    portfolio: PortfolioImportBundle
+
+    @model_validator(mode="after")
+    def validate_request(self) -> Self:
+        _validate_context_payload_safety(
+            self.model_dump_json(), "portfolio context request"
+        )
+        return self
+
+
+class AdvisorPortfolioContextResponse(ContractModel):
+    """Validated Portfolio context with structural, non-financial metadata."""
+
+    schema_version: Literal["portfolio-context-response.v1"] = (
+        "portfolio-context-response.v1"
+    )
+    portfolio: PortfolioImportBundle
+    position_count: int = Field(ge=1)
+    fund_snapshot_count: int = Field(ge=0)
+    holding_count: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def validate_response(self) -> Self:
+        expected_positions = len(self.portfolio.position_snapshot.positions)
+        expected_funds = len(self.portfolio.fund_holdings)
+        expected_holdings = sum(
+            len(snapshot.holdings) for snapshot in self.portfolio.fund_holdings
+        )
+        if self.position_count != expected_positions:
+            raise ValueError("portfolio context position_count is not authoritative")
+        if self.fund_snapshot_count != expected_funds:
+            raise ValueError("portfolio context fund_snapshot_count is not authoritative")
+        if self.holding_count != expected_holdings:
+            raise ValueError("portfolio context holding_count is not authoritative")
+        _validate_context_payload_safety(
+            self.model_dump_json(), "portfolio context response"
+        )
+        return self
+
+
+class AdvisorProfileContextRequest(ContractModel):
+    """Strict, owner-scoped Risk Questionnaire confirmation input."""
+
+    schema_version: Literal["profile-context-request.v1"] = (
+        "profile-context-request.v1"
+    )
+    questionnaire: RiskQuestionnaire
+
+    @model_validator(mode="after")
+    def validate_request(self) -> Self:
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile context request"
+        )
+        return self
+
+
+class AdvisorProfileContextResponse(ContractModel):
+    """Deterministic profile confirmation result without persistence."""
+
+    schema_version: Literal["profile-context-response.v1"] = (
+        "profile-context-response.v1"
+    )
+    questionnaire: RiskQuestionnaire
+    profile: RiskProfile
+
+    @model_validator(mode="after")
+    def validate_response(self) -> Self:
+        if self.questionnaire.owner_id != self.profile.owner_id:
+            raise ValueError("profile context owners must match")
+        if self.questionnaire.questionnaire_id != self.profile.questionnaire_id:
+            raise ValueError("profile context questionnaire does not match profile")
+        if self.questionnaire.answered_at != self.profile.created_at:
+            raise ValueError("profile context timestamps must match")
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile context response"
+        )
         return self
 
 
@@ -208,6 +312,10 @@ __all__ = [
     "DecisionEventWriteResponse",
     "AdvisorQueryResponse",
     "AdvisorQueryTemplateResponse",
+    "AdvisorPortfolioContextRequest",
+    "AdvisorPortfolioContextResponse",
+    "AdvisorProfileContextRequest",
+    "AdvisorProfileContextResponse",
     "ResearchMatrixTemplateResponse",
     "ResearchMatrixIssueResponse",
     "ResearchMatrixNodeResponse",

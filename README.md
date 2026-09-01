@@ -64,6 +64,11 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   三场景通过 `asyncio`/`httpx.ASGITransport` 输出 P50/P95/P99、错误分类、owner
   闭合和 DecisionEvent 副作用；100 并发合成基线已记录，但不外推为真实外部 SLA。
   `276` 项回归、CLI smoke、打包和边界审查通过。
+- Phase 20 已加入严格的结构化 Portfolio/Risk Profile 会话确认：粘贴的
+  `PortfolioImportBundle` 与 `RiskQuestionnaire` 先经 owner 闭合、敏感/额外字段和
+  timezone 校验，再进入既有 Advisor 纵切；确认不写库，实际 Advisor Receipt 绑定
+  用户提交的 bundle/snapshot。工作台在 owner 切换或失败时清空确认状态；真实账户
+  上传、认证、Provider、LLM 与生产持久化仍未实现。
 
 尚未实现：
 
@@ -148,6 +153,8 @@ python -m pytest
 - [Phase 18 旗舰上下文工作台计划与验收](docs/plans/2026-09-02-mvp-phase-18-flagship-context-workbench.md)
 - [Phase 19 早期负载测试工具](docs/load-test.md)
 - [Phase 19 负载测试计划与验收](docs/plans/2026-09-02-mvp-phase-19-load-test-harness.md)
+- [Phase 20 结构化上下文确认](docs/context-input.md)
+- [Phase 20 上下文确认计划与验收](docs/plans/2026-09-02-mvp-phase-20-context-input-confirmation.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

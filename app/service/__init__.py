@@ -14,6 +14,10 @@ from app.service.specialist_matrix import (
     SpecialistMatrixError,
     SpecialistMatrixOutput,
 )
+from app.service.profile_confirmation import (
+    ProfileConfirmationError,
+    confirm_questionnaire,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -24,4 +28,6 @@ __all__ = [
     "FixtureResearchSpecialistMatrixService",
     "SpecialistMatrixError",
     "SpecialistMatrixOutput",
+    "ProfileConfirmationError",
+    "confirm_questionnaire",
 ]

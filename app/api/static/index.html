@@ -170,7 +170,16 @@
                 <span class="eyebrow clay">PORTFOLIO SNAPSHOT</span>
                 <h2 id="portfolio-title">当前持仓</h2>
               </div>
-              <span class="muted">只读 · 合成模板</span>
+              <span id="portfolio-context-label" class="muted">只读 · 合成模板</span>
+            </div>
+            <div class="context-import">
+              <label for="portfolio-json">粘贴已脱敏的 Portfolio JSON</label>
+              <textarea id="portfolio-json" rows="7" autocomplete="off" spellcheck="false" placeholder="仅粘贴 portfolio-import-bundle.v1；当前会话只读，不代表真实账户"></textarea>
+              <div class="context-import-actions">
+                <button id="confirm-portfolio" class="query-submit" type="button">验证并加载 Portfolio</button>
+                <span id="portfolio-context-status" class="status-chip">未确认</span>
+              </div>
+              <small>本地同源校验，不上传文件、不保存原文；owner 必须与上方隔离标识一致。</small>
             </div>
             <div id="portfolio-content" class="portfolio-content" aria-live="polite">
               <div class="empty-state">读取 owner 模板后查看持仓快照与基金穿透范围。</div>
@@ -210,8 +219,21 @@
                 <h2 id="profile-title">约束上下文</h2>
               </div>
             </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>确认当前风险问卷</strong>
+                <small>沿用现有表单与确定性 scorer；确认只在当前会话生效。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="confirm-profile" class="query-submit" type="button">确认 Risk Profile</button>
+                <span id="profile-context-status" class="status-chip">未确认</span>
+              </div>
+            </div>
             <div id="profile-template-content" class="profile-context" aria-live="polite">
               <div class="empty-state">读取 owner 模板后查看风险问卷约束。</div>
+            </div>
+            <div id="profile-confirmation-content" class="profile-confirmation" aria-live="polite">
+              <div class="empty-state">确认问卷后查看确定性画像结果。</div>
             </div>
             <div id="profile-content" class="profile-content">
               <div class="empty-state">回执会绑定画像版本、持仓快照和风险预算。</div>

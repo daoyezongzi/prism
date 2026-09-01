@@ -109,6 +109,22 @@ h2 { margin-bottom: 0; font: 700 21px/1.3 var(--serif); }
 }
 .query-submit:hover { background: #bd6044; }
 .query-submit:disabled { cursor: wait; opacity: .65; }
+.context-import, .context-confirm-actions {
+  display: grid; gap: 9px; margin: 0 0 18px; padding: 14px 16px;
+  background: var(--surface-muted); border: 1px solid var(--outline); border-radius: 7px;
+}
+.context-import label, .context-confirm-actions strong { color: var(--muted); font-size: 11px; }
+.context-import textarea {
+  width: 100%; min-height: 120px; resize: vertical; padding: 9px 10px;
+  border: 1px solid var(--outline); border-radius: 5px; color: var(--ink);
+  background: var(--surface); font: 11px/1.5 var(--mono); outline: none;
+}
+.context-import textarea:focus { border-color: var(--clay); box-shadow: 0 0 0 2px var(--clay-soft); }
+.context-import small, .context-confirm-actions small { color: var(--muted); font-size: 11px; }
+.context-import-actions { display: flex; align-items: center; gap: 10px; }
+.context-confirm-actions { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.context-confirm-actions > div:first-child { display: grid; gap: 3px; }
+.profile-confirmation { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--outline); }
 .research-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; background: var(--surface-muted); border: 1px solid var(--outline); border-radius: 7px; }
 .research-boundary { margin: 12px 0 0; color: var(--muted); font-size: 11px; }
 .research-content { display: grid; gap: 16px; margin-top: 18px; }
@@ -205,6 +221,7 @@ dd { margin: 1px 0 0; overflow-wrap: anywhere; font: 12px var(--mono); }
   .query-fields { grid-template-columns: 1fr; }
   .query-form-actions { align-items: flex-start; flex-direction: column; }
   .research-actions { align-items: flex-start; flex-direction: column; }
+  .context-confirm-actions { grid-template-columns: 1fr; }
   .research-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .portfolio-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .position-grid, .holding-grid { grid-template-columns: 1fr; }

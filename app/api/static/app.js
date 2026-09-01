@@ -8,6 +8,8 @@
     queryTemplate: null,
     templateContext: null,
     templateSequence: 0,
+    portfolioContext: null,
+    profileContext: null,
     researchTemplate: null,
     researchRun: null,
     researchSequence: 0,
@@ -123,7 +125,8 @@
     container.append(item);
   }
 
-  function renderPortfolio(portfolio) {
+  function renderPortfolio(portfolio, sourceLabel = "只读 · 合成模板") {
+    byId("portfolio-context-label").textContent = sourceLabel;
     const panel = byId("portfolio-content");
     clear(panel);
     if (!portfolio) {
@@ -235,6 +238,39 @@
       expected ? `${text(expected.minimum_pct)}% — ${text(expected.maximum_pct)}%` : "未设置",
     );
     panel.append(metadata);
+  }
+
+  function renderConfirmedProfile(profile) {
+    const panel = byId("profile-confirmation-content");
+    clear(panel);
+    if (!profile) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "确认问卷后查看确定性画像结果。";
+      panel.append(empty);
+      return;
+    }
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Confirmed profile", profile.profile_id);
+    addMetadata(metadata, "Questionnaire", profile.questionnaire_id);
+    addMetadata(metadata, "Risk score", profile.risk_score);
+    addMetadata(metadata, "Risk level", profile.risk_level);
+    addMetadata(metadata, "Profile version", profile.profile_version);
+    addMetadata(metadata, "Confirmed at", profile.created_at);
+    panel.append(metadata);
+  }
+
+  function setPortfolioContextStatus(message, className = "") {
+    const node = byId("portfolio-context-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function setProfileContextStatus(message, className = "") {
+    const node = byId("profile-context-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
   }
 
   function renderProfile(receipt) {
@@ -547,10 +583,161 @@
     }
   }
 
-  function clearTemplateContext() {
+  function buildQuestionnaire(template) {
+    const queryId = byId("query-id").value.trim() || "ui-profile-confirmation";
+    return {
+      ...template.questionnaire,
+      questionnaire_id: `${queryId}-questionnaire`,
+      owner_id: state.ownerId,
+      answered_at: template.questionnaire.answered_at,
+      loss_tolerance_score: Number(byId("loss-tolerance").value),
+      investment_horizon: byId("investment-horizon").value,
+      liquidity_need: byId("liquidity-need").value,
+      experience_level: byId("experience-level").value,
+      return_expectation: byId("return-expectation").value,
+      max_drawdown_tolerance_pct: byId("max-drawdown").value,
+    };
+  }
+
+  async function confirmPortfolioContext() {
+    const requestOwner = byId("owner-id").value.trim();
+    const raw = byId("portfolio-json").value.trim();
+    const submit = byId("confirm-portfolio");
+    if (!requestOwner) {
+      state.portfolioContext = null;
+      renderPortfolio(state.queryTemplate?.portfolio || null);
+      setPortfolioContextStatus("需要 owner", "blocked");
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (!raw) {
+      state.portfolioContext = null;
+      renderPortfolio(state.queryTemplate?.portfolio || null);
+      setPortfolioContextStatus("未提供 JSON", "blocked");
+      setError("请粘贴已脱敏的 Portfolio JSON。");
+      return;
+    }
+    let portfolio;
+    try {
+      portfolio = JSON.parse(raw);
+      if (!portfolio || typeof portfolio !== "object" || Array.isArray(portfolio)) {
+        throw new Error("not an object");
+      }
+    } catch (_) {
+      state.portfolioContext = null;
+      renderPortfolio(state.queryTemplate?.portfolio || null);
+      setPortfolioContextStatus("JSON 无效", "blocked");
+      setError("Portfolio JSON 无法解析；输入原文不会写入错误信息。");
+      return;
+    }
+    if (requestOwner !== state.ownerId) {
+      state.ownerId = requestOwner;
+      resetOwnerScopedViews();
+      byId("portfolio-json").value = raw;
+    }
+    const contextSequence = state.templateSequence;
+    setError("");
+    submit.disabled = true;
+    setPortfolioContextStatus("验证中…");
+    try {
+      const response = await fetch("/api/v1/advisor/context/portfolio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "portfolio-context-request.v1",
+          portfolio,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== contextSequence) return;
+      const result = await response.json();
+      state.portfolioContext = result.portfolio;
+      renderPortfolio(state.portfolioContext, "已确认 · 当前会话只读");
+      setPortfolioContextStatus(
+        `已确认 · ${text(result.position_count)} positions`,
+        "pass",
+      );
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.templateSequence === contextSequence) {
+        state.portfolioContext = null;
+        setPortfolioContextStatus("未确认", "blocked");
+        renderPortfolio(state.queryTemplate?.portfolio || null);
+      }
+      setError(error.message || "Portfolio 校验失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  async function confirmProfileContext() {
+    const requestOwner = byId("owner-id").value.trim();
+    const submit = byId("confirm-profile");
+    if (!requestOwner) {
+      state.profileContext = null;
+      renderConfirmedProfile(null);
+      setProfileContextStatus("需要 owner", "blocked");
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (requestOwner !== state.ownerId) {
+      state.ownerId = requestOwner;
+      resetOwnerScopedViews();
+    }
+    const contextSequence = ++state.templateSequence;
+    setError("");
+    submit.disabled = true;
+    setProfileContextStatus("确认中…");
+    try {
+      const template = state.queryTemplate || await loadTemplateContext(requestOwner, contextSequence);
+      if (!template) return;
+      const questionnaire = buildQuestionnaire(template);
+      const response = await fetch("/api/v1/advisor/context/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "profile-context-request.v1",
+          questionnaire,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== contextSequence) return;
+      const result = await response.json();
+      state.profileContext = result;
+      renderProfileContext(result.questionnaire);
+      renderConfirmedProfile(result.profile);
+      setProfileContextStatus(`已确认 · ${text(result.profile.risk_level)}`, "pass");
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.templateSequence === contextSequence) {
+        state.profileContext = null;
+        renderConfirmedProfile(null);
+        setProfileContextStatus("未确认", "blocked");
+      }
+      setError(error.message || "Risk Profile 确认失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  function clearConfirmedContexts() {
+    state.portfolioContext = null;
+    state.profileContext = null;
+    byId("portfolio-json").value = "";
+    setPortfolioContextStatus("未确认");
+    setProfileContextStatus("未确认");
+    renderConfirmedProfile(null);
+  }
+
+  function clearTemplateContext({ clearConfirmed = false } = {}) {
     state.queryTemplate = null;
     state.templateContext = null;
     byId("query-template-meta").textContent = "运行时读取合成持仓模板；不会提交自然语言或订单。";
+    if (clearConfirmed) clearConfirmedContexts();
     renderPortfolio(null);
     renderProfileContext(null);
   }
@@ -566,17 +753,23 @@
       state.templateContext = template;
       state.queryTemplate = template;
       byId("query-template-meta").textContent = `Fixture ${text(template.fixture_id)} · generated_at ${text(template.generated_at)} · 合成持仓模板`;
-      renderPortfolio(template.portfolio);
-      renderProfileContext(template.questionnaire);
+      renderPortfolio(
+        state.portfolioContext || template.portfolio,
+        state.portfolioContext ? "已确认 · 当前会话只读" : "只读 · 合成模板",
+      );
+      renderProfileContext(state.profileContext?.questionnaire || template.questionnaire);
+      renderConfirmedProfile(state.profileContext?.profile || null);
       return template;
     } catch (error) {
-      if (state.ownerId === ownerId && state.templateSequence === sequence) clearTemplateContext();
+      if (state.ownerId === ownerId && state.templateSequence === sequence) {
+        clearTemplateContext({ clearConfirmed: true });
+      }
       throw error;
     }
   }
 
   function resetOwnerScopedViews() {
-    clearTemplateContext();
+    clearTemplateContext({ clearConfirmed: true });
     setQueryStatus("待运行");
     state.events = [];
     state.selected = null;
@@ -620,28 +813,17 @@
     submit.disabled = true;
     setQueryStatus("运行中…");
     try {
-      const template = await loadTemplateContext(requestOwner, templateSequence);
+      const template = state.queryTemplate || await loadTemplateContext(requestOwner, templateSequence);
       if (!template) return;
 
-      const questionnaire = {
-        ...template.questionnaire,
-        questionnaire_id: `${queryId}-questionnaire`,
-        owner_id: state.ownerId,
-        answered_at: template.generated_at,
-        loss_tolerance_score: Number(byId("loss-tolerance").value),
-        investment_horizon: byId("investment-horizon").value,
-        liquidity_need: byId("liquidity-need").value,
-        experience_level: byId("experience-level").value,
-        return_expectation: byId("return-expectation").value,
-        max_drawdown_tolerance_pct: byId("max-drawdown").value,
-      };
+      const questionnaire = buildQuestionnaire(template);
       const payload = {
         schema_version: "advisor-query.v1",
         query_id: queryId,
         fixture_id: template.fixture_id,
         generated_at: template.generated_at,
         questionnaire,
-        portfolio: template.portfolio,
+        portfolio: state.portfolioContext || template.portfolio,
       };
       const response = await fetch("/api/v1/advisor/queries", {
         method: "POST",
@@ -787,9 +969,27 @@
 
   byId("load-events").addEventListener("click", loadEvents);
   byId("advisor-query-form").addEventListener("submit", runAdvisorQuery);
+  byId("confirm-portfolio").addEventListener("click", confirmPortfolioContext);
+  byId("confirm-profile").addEventListener("click", confirmProfileContext);
   byId("run-research-matrix").addEventListener("click", runResearchMatrix);
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
+  });
+  [
+    "query-id",
+    "loss-tolerance",
+    "investment-horizon",
+    "liquidity-need",
+    "experience-level",
+    "return-expectation",
+    "max-drawdown",
+  ].forEach((id) => {
+    byId(id).addEventListener("change", () => {
+      if (!state.profileContext) return;
+      state.profileContext = null;
+      renderConfirmedProfile(null);
+      setProfileContextStatus("需重新确认", "review");
+    });
   });
   checkHealth();
   loadEvents();
