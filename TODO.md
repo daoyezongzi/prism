@@ -6,8 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 22 implementation is in review in the dedicated
-> `D:\Github_Storage\prism-phase-22` worktree; acceptance must precede the next new worktree.
+> Active phase: Phase 22 is accepted locally in the dedicated
+> `D:\Github_Storage\prism-phase-22` worktree; Phase 23 must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -63,7 +63,7 @@
 - [x] Add explicit owner-scoped investment intent contracts and a read-only four-track task
   plan preview; keep natural-language understanding, LLM/Gemini and research execution
   deferred.
-- [ ] Verify the complete flagship flow in a real browser.
+- [x] Verify the complete flagship flow in a real browser.
 - [x] Verify the Phase 15 form → API → HOLD/REDUCE → Evidence → owner isolation path in a
   real browser.
 
@@ -87,7 +87,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 22 is under independent review in the dedicated `D:\Github_Storage\prism-phase-22`
-worktree. Do not create Phase 23 until its implementation, browser path, and regression
-evidence are accepted; keep real authentication, live Provider access and production
-persistence deferred.
+Phase 22 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-22`
+worktree. Create a new worktree for Phase 23 and submit its plan before implementation;
+keep real authentication, live Provider access and production persistence deferred.

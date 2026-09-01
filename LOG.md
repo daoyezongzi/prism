@@ -799,3 +799,43 @@ worktree，并先提交计划书。
 - 独立审查确认评测指标没有冒充市场准确率/收益/SLA，且无前端金融重算、认证假象、
   Recommendation 伪造、外部网络、LLM/Gemini、订单/交易或持久化路径。Phase 21 已接受，
   本地未 push；下一阶段必须从本提交创建新 worktree 并先提交计划书。
+
+## 2026-09-02 — MVP Phase 22 结构化投资意图与任务计划预览
+
+### 计划与 worktree
+
+- 在已接受的 Phase 21 `f86c73f` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-22`，分支为
+  `codex/mvp-phase-22-intent-planning`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `9393226`；本阶段继续保持 fixture-first，不接入自然语言理解、LLM/Gemini、
+  SkillHub、认证、生产持久化或交易。
+
+### 本地实现
+
+- 新增 `InvestmentIntentType`、`advisor-intent-request.v1` 和
+  `advisor-plan-response.v1`，严格校验 owner、ID、时区、敏感字段、角色覆盖和
+  稳定 plan ID。
+- 新增 owner-scoped `POST /api/v1/advisor/plans`，只复用现有
+  `FixtureResearchSpecialistMatrixService.matrix_template` 生成四轨道计划元数据；
+  不执行 Provider/Research、不写 DecisionEvent、不生成 Recommendation。
+- Advisor 工作台增加科技暴露复核/组合风险复核选择和计划预览；计划随 owner、
+  Portfolio/Risk Profile、问卷、意图或异步序列变化清理，动态值继续 text-only。
+- 新增 [Intent/Plan 契约](docs/intent-planning.md) 与 Phase 22 integration tests；
+  Advisor 原有 HOLD/REDUCE、Evidence/Receipt 链保持不变。
+
+### 独立审查与验收
+
+- 实现提交为 `4f7786b`，无 push；公共 API 导出、静态边界和错误脱敏均通过。
+- Phase-specific tests `5 passed`；全量回归 `293 passed`，仅已知
+  Starlette/httpx deprecation warning。`compileall`、公开导入、`node --check`、
+  `git diff --check`、100 次 `mvp-evaluation` replay、wheel package-data 与运行时
+  范围扫描均通过。
+- 三场景本地 ASGI 100 并发均 100/100、error/owner mismatch 为 0；Advisor 写入
+  100 条预期事件，Template/Research 仍为 0 条；这些是 fixture 基线，不代表生产 SLA。
+- 真实本地浏览器完成 Technology Exposure → 计划 → BALANCED `HOLD`、Portfolio
+  Risk → 计划 → CONSERVATIVE `REDUCE`、Evidence/Receipt 展开与 owner 切换清空，
+  浏览器错误日志为空。
+- 独立审查确认无自然语言/LLM/Gemini 假象、前端金融重算、跨 owner 泄露、
+  Recommendation 伪造、外部网络、订单/交易或新的持久化路径。Phase 22 已接受，
+  下一阶段必须从本提交创建新 worktree 并先提交计划书。

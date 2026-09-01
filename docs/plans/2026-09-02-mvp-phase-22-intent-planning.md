@@ -106,6 +106,27 @@ fixture-first 计算链。这样可以让用户看到 Prism 如何把问题拆�
   仍等待官方文档、授权与配额后另立阶段。
 - Phase 23 只能从 Phase 22 接受提交创建新 worktree，并先提交计划书。
 
+## Independent review and acceptance
+
+- Implementation commit: `4f7786b` on branch
+  `codex/mvp-phase-22-intent-planning`; no push.
+- Phase-specific tests: `5 passed`; full regression: `293 passed`, with only the
+  existing Starlette/httpx deprecation warning.
+- `compileall`, public imports, `node --check`, `git diff --check`, and the
+  runtime-scope/DOM-sink scans passed. The local wheel contains the new service,
+  static assets, existing tools, and all 9 evaluator cases.
+- `python -m tools.evaluate_mvp --repeat 100 --json` passed all 9 cases with
+  case/profile/risk/compliance/evidence/replay metrics equal to `1.0`.
+- Local ASGI load replay at 100 concurrent owners remained 100/100 with zero
+  errors and zero owner mismatches for Template, Research and Advisor; the
+  measurements remain non-production fixture baselines.
+- Real local browser verification completed both intent previews, the balanced
+  `HOLD` and conservative `REDUCE` Advisor paths, expanded Evidence/Receipt,
+  owner-switch clearing, and an empty browser error log.
+- Review found no natural-language/LLM/Gemini façade, frontend financial
+  recalculation, cross-owner data path, Recommendation fabrication, external
+  network, order, or persistence side effect in the new planning boundary.
+
 ## Status
 
-`PLANNED`
+`ACCEPTED`

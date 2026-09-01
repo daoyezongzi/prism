@@ -79,6 +79,8 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   复核，预览复用既有 Macro/Industry/Stock/ETF-Fund 四轨道的确定性任务计划，再
   显式运行原有 HOLD/REDUCE 纵切；计划不运行 Provider、不写 DecisionEvent，也不把
   自然语言或 LLM/Gemini 当作问题理解。详见 [Intent/Plan 契约](docs/intent-planning.md)。
+  Phase 22 最终 `293` 项回归、100 次固定评测回放、三场景 100 并发本地基线和真实
+  浏览器验收均通过；这些 fixture/ASGI 数字不代表真实市场准确率或生产 SLA。
 
 尚未实现：
 
