@@ -1,0 +1,17 @@
+{
+  "schema_version": "allocation-envelope-fixture.v1",
+  "fixture_id": "allocation-envelope-case-001",
+  "purpose": "synthetic profile-conditioned constraint envelope",
+  "source": "offline-test-only",
+  "expected_invalidation_conditions": [
+    "风险画像版本变化",
+    "持仓或基金成分快照变化",
+    "穿透覆盖率或基准币种变化"
+  ],
+  "forbidden_fields": [
+    "recommendation",
+    "order",
+    "target_price",
+    "expected_return"
+  ]
+}

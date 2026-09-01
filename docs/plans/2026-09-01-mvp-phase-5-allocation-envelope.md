@@ -1,6 +1,6 @@
 # MVP Phase 5 Working Plan：Profile-conditioned Allocation Envelope
 
-- Status：`READY`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target worktree：`D:\Github_Storage\prism-phase-5`

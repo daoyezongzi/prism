@@ -235,3 +235,24 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - Final full suite: `92 passed` (Phase 1/2/3's 79 tests remain green).
 - Compilation, import, `git diff --check`, fixture scan and post-commit independent adversarial checks all passed.
 - Phase 4 was accepted in the single local implementation commit recorded by this worktree; the final commit hash is reported by `git log -1` and the handoff message. The next optimization/recommendation plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 5 allocation-envelope implementation
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-5` on branch `codex/mvp-phase-5-minimal-adjustment` from the accepted Phase 4 worktree.
+- Added `docs/plans/2026-09-01-mvp-phase-5-allocation-envelope.md` before implementation.
+- The phase is limited to deterministic profile-conditioned constraint bands and per-constraint impact; it does not create executable recommendations or modify the Evidence Contract.
+
+### Implemented locally
+
+- Added immutable `AllocationBand`, `ConstraintImpact`, `AllocationEnvelope` and `AllocationResult` contracts with owner/profile/report closure and `READY`/`REVIEW_REQUIRED`/`BLOCKED` semantics.
+- Added deterministic asset, sector, technology and unclassified bands using the fixed Phase 4 budget; partial inputs stay `UNRESOLVED`, and each impact is explicitly constraint-only without cross-dimension reallocation.
+- Added a synthetic offline fixture, unit/integration counterexamples and `docs/allocation-envelope.md`; no network, credentials, LLM, persistence, API, UI, order, price, quantity or return calculation was introduced.
+
+### Independent review evidence
+
+- Full suite: `103 passed` (Phase 1–4's 92 tests remain green).
+- `python -m compileall -q app`, allocation import, `git diff --check`, fixture JSON and source/fixture sensitive-field scans passed.
+- Independent adversarial checks passed for deterministic repeatability, partial/failed propagation, stale/tampered budget breaches, blocked outputs and absence of recommendation/order/secret-shaped output fields.
+- Phase 5 is accepted in this worktree after the above review; the next structured-research/cross-validation plan must use a new worktree.

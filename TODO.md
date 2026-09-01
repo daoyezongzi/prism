@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 4 Concentration/Risk Budget](docs/plans/2026-09-01-mvp-phase-4-concentration-risk-budget.md)
+> Active phase: [MVP Phase 5 Allocation Envelope](docs/plans/2026-09-01-mvp-phase-5-allocation-envelope.md)
 
 ## P0 — Foundation
 
@@ -29,9 +29,9 @@
 - [x] Define portfolio and fund/ETF position import contracts.
 - [x] Calculate look-through technology exposure and data coverage.
 - [x] Implement concentration and profile-conditioned risk-budget findings; correlation, liquidity and optimization remain deferred.
-- [ ] Generate conservative, balanced and growth-oriented allocation ranges.
-- [ ] Show pre/post impact and recommendation invalidation conditions.
-- [ ] Prove that the same evidence produces materially different valid outputs for different profiles.
+- [x] Generate conservative, balanced and growth-oriented allocation ranges (constraint envelope; final Recommendation remains deferred).
+- [x] Show deterministic per-constraint pre/post impact and profile/snapshot invalidation conditions.
+- [x] Prove that the same evidence produces materially different valid outputs for different profiles.
 
 ## P0 — Structured research and UI
 
@@ -62,4 +62,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Complete the independent Phase 2 review gate. Only after it passes, write and execute the next phase plan for deterministic look-through exposure and risk inputs.
+Phase 5 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for structured research and cross-validation contracts.
