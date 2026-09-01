@@ -1,0 +1,112 @@
+{
+  "schema_version": "stock-research-manifest.v1",
+  "manifest_id": "stock-research-demo-f-001",
+  "subject": "PRISM_STOCK_DEMO_F",
+  "period": "2026-Q2",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "budget_ms": 3000,
+  "scope_description": "offline synthetic stock research Demo F",
+  "metrics": [
+    {
+      "metric": "accounts_receivable_cny",
+      "label": "应收账款",
+      "unit": "CNY",
+      "expected_value": "8.00",
+      "finding_kind": "STOCK_ACCOUNTS_RECEIVABLE_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期应收账款给出一致的合成数值。"
+    },
+    {
+      "metric": "debt_ratio_pct",
+      "label": "资产负债率",
+      "unit": "pct",
+      "expected_value": "78.00",
+      "finding_kind": "STOCK_DEBT_RATIO_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期资产负债率给出一致的合成数值。"
+    },
+    {
+      "metric": "gross_margin_pct",
+      "label": "毛利率",
+      "unit": "pct",
+      "expected_value": "42.00",
+      "finding_kind": "STOCK_GROSS_MARGIN_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期毛利率给出一致的合成数值。"
+    },
+    {
+      "metric": "net_profit_cny",
+      "label": "净利润",
+      "unit": "CNY",
+      "expected_value": "2.00",
+      "finding_kind": "STOCK_NET_PROFIT_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期净利润给出一致的合成数值。"
+    },
+    {
+      "metric": "operating_cash_flow_cny",
+      "label": "经营活动现金流",
+      "unit": "CNY",
+      "expected_value": "0.50",
+      "finding_kind": "STOCK_OPERATING_CASHFLOW_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期经营活动现金流给出一致的合成数值。"
+    },
+    {
+      "metric": "revenue_cny",
+      "label": "营业收入",
+      "unit": "CNY",
+      "expected_value": "10.00",
+      "finding_kind": "STOCK_REVENUE_FACT",
+      "finding_severity": "INFO",
+      "finding_statement": "独立来源对报告期营业收入给出一致的合成数值。"
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "stock-company-source-a",
+      "request_id": "stock-research-request-a",
+      "source": "stock-research-source-a",
+      "record_id": "stock-research-record-a",
+      "lineage_id": "stock-research-lineage-a",
+      "source_slot": "a",
+      "required_fields": [
+        "accounts_receivable_cny",
+        "debt_ratio_pct",
+        "gross_margin_pct",
+        "net_profit_cny",
+        "operating_cash_flow_cny",
+        "revenue_cny"
+      ],
+      "parameters": {
+        "period": "2026-Q2",
+        "source_slot": "a"
+      },
+      "timeout_ms": 1000
+    },
+    {
+      "node_id": "stock-company-source-b",
+      "request_id": "stock-research-request-b",
+      "source": "stock-research-source-b",
+      "record_id": "stock-research-record-b",
+      "lineage_id": "stock-research-lineage-b",
+      "source_slot": "b",
+      "required_fields": [
+        "accounts_receivable_cny",
+        "debt_ratio_pct",
+        "gross_margin_pct",
+        "net_profit_cny",
+        "operating_cash_flow_cny",
+        "revenue_cny"
+      ],
+      "parameters": {
+        "period": "2026-Q2",
+        "source_slot": "b"
+      },
+      "timeout_ms": 1000
+    }
+  ],
+  "cashflow_quality_min_pct": "80.00",
+  "receivable_ratio_max_pct": "60.00",
+  "debt_ratio_max_pct": "70.00"
+}

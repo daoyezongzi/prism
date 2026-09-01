@@ -1,0 +1,47 @@
+{
+  "request": {
+    "operation": "COMPANY_DATA",
+    "subject": "PRISM_STOCK_DEMO_F",
+    "required_fields": [
+      "accounts_receivable_cny",
+      "debt_ratio_pct",
+      "gross_margin_pct",
+      "net_profit_cny",
+      "operating_cash_flow_cny",
+      "revenue_cny"
+    ],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [
+      {
+        "source": "stock-research-source-a",
+        "record_id": "stock-research-record-a",
+        "fields": {
+          "accounts_receivable_cny": "8.00",
+          "debt_ratio_pct": "78.00",
+          "gross_margin_pct": "42.00",
+          "net_profit_cny": "2.00",
+          "operating_cash_flow_cny": "0.50",
+          "revenue_cny": "10.00"
+        },
+        "units": {
+          "accounts_receivable_cny": "CNY",
+          "debt_ratio_pct": "pct",
+          "gross_margin_pct": "pct",
+          "net_profit_cny": "CNY",
+          "operating_cash_flow_cny": "CNY",
+          "revenue_cny": "CNY"
+        },
+        "period": "2026-Q2",
+        "observed_at": "2026-08-01T00:00:00Z",
+        "lineage_id": "stock-research-lineage-a"
+      }
+    ],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

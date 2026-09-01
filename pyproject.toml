@@ -38,6 +38,8 @@ app = [
   "fixtures/advisor/providers/*.json",
   "fixtures/research/*.json",
   "fixtures/research/providers/*.json",
+  "fixtures/stock/*.json",
+  "fixtures/stock/providers/*.json",
 ]
 
 [tool.pytest.ini_options]

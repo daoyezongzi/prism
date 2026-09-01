@@ -35,6 +35,11 @@ from app.api.contracts import (
 )
 from app.recommendation import RecommendationCompositionResult
 from app.research import ResearchSpecialistMatrixRequest
+from app.stock import (
+    StockResearchRequest,
+    StockResearchResponse,
+    StockResearchTemplateResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -51,6 +56,8 @@ from app.service import (
     ProfileProposalError,
     build_profile_proposal,
     confirm_profile_proposal,
+    FixtureStockResearchService,
+    StockResearchError,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -142,6 +149,7 @@ def create_app(
     clock: Callable[[], datetime] | None = None,
     advisor_service: FixtureAdvisorQueryService | None = None,
     specialist_service: FixtureResearchSpecialistMatrixService | None = None,
+    stock_service: FixtureStockResearchService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -154,6 +162,7 @@ def create_app(
     active_clock = clock or (lambda: datetime.now(UTC))
     active_advisor = advisor_service or FixtureAdvisorQueryService()
     active_specialist = specialist_service or FixtureResearchSpecialistMatrixService()
+    active_stock = stock_service or FixtureStockResearchService()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -219,6 +228,12 @@ def create_app(
         _: Request, __: SpecialistMatrixError
     ) -> JSONResponse:
         return _error_response(400, "RESEARCH_MATRIX_ERROR", "research matrix was refused")
+
+    @api.exception_handler(StockResearchError)
+    async def stock_research_error_handler(
+        _: Request, __: StockResearchError
+    ) -> JSONResponse:
+        return _error_response(400, "STOCK_RESEARCH_ERROR", "stock research was refused")
 
     @api.exception_handler(ProfileConfirmationError)
     async def profile_confirmation_error_handler(
@@ -490,6 +505,35 @@ def create_app(
             raise
         except (AttributeError, KeyError, TypeError, ValidationError, ValueError) as exc:
             raise SpecialistMatrixError("specialist matrix output was refused") from exc
+
+    @api.get(
+        "/api/v1/advisor/stock-research-template",
+        response_model=StockResearchTemplateResponse,
+    )
+    def get_stock_research_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> StockResearchTemplateResponse:
+        return active_stock.template(owner_id)
+
+    @api.post(
+        "/api/v1/advisor/stock-research-runs",
+        response_model=StockResearchResponse,
+    )
+    async def create_stock_research_run(
+        request: StockResearchRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> StockResearchResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("stock research request owner does not match owner scope")
+        try:
+            output = await active_stock.run(request)
+        except StockResearchError:
+            raise
+        except Exception as exc:
+            raise StockResearchError("stock research execution was refused") from exc
+        if output.owner_id != owner_id:
+            raise StockResearchError("stock research output owner drifted")
+        return output
 
     @api.get(
         "/api/v1/decision-events",

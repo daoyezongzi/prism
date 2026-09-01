@@ -30,6 +30,10 @@ from app.service.profile_proposal import (
     build_profile_proposal,
     confirm_profile_proposal,
 )
+from app.service.stock_research import (
+    FixtureStockResearchService,
+    StockResearchError,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -50,4 +54,6 @@ __all__ = [
     "ProfileProposalError",
     "build_profile_proposal",
     "confirm_profile_proposal",
+    "FixtureStockResearchService",
+    "StockResearchError",
 ]

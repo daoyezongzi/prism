@@ -24,6 +24,7 @@
           <a class="nav-item" href="#advisor">Advisor</a>
           <a class="nav-item" href="#portfolio">Portfolio</a>
           <a class="nav-item" href="#research-tracks">Research Tracks</a>
+          <a class="nav-item" href="#stock-research">Stock Research</a>
           <a class="nav-item" href="#evidence">Evidence</a>
           <a class="nav-item" href="#profile">Risk Profile</a>
         </nav>
@@ -184,6 +185,33 @@
             <p class="research-boundary">Macro、Industry、Stock、ETF/Fund 只展示结构化研究状态与证据链；READY 不代表可交易建议，退化场景不会升级为 Fact/Finding。</p>
             <div id="research-matrix-content" class="research-content" aria-live="polite">
               <div class="empty-state">运行矩阵后查看四类节点、独立来源验证与 Finding → Fact → Evidence。</div>
+            </div>
+          </section>
+
+          <section class="panel stock-research-panel" id="stock-research" aria-labelledby="stock-research-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">DEMO F · STOCK RESEARCH</span>
+                <h2 id="stock-research-title">个股研究 Evidence Card</h2>
+              </div>
+              <span id="stock-research-status" class="status-chip">待运行</span>
+            </div>
+            <div class="research-actions">
+              <div id="stock-research-template-meta" class="query-meta">
+                运行时读取固定合成个股与风险规则；结果不写入决策回执。
+              </div>
+              <label class="research-scenario-picker" for="stock-research-scenario">
+                <span>回放场景</span>
+                <select id="stock-research-scenario" disabled>
+                  <option value="">读取场景目录…</option>
+                </select>
+                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+              </label>
+              <button id="run-stock-research" class="query-submit" type="button">运行个股研究</button>
+            </div>
+            <p class="research-boundary">财务事实、异常和风险均来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
+            <div id="stock-research-content" class="stock-research-content" aria-live="polite">
+              <div class="empty-state">运行个股研究后查看财务事实、异常、风险与 Evidence 闭合。</div>
             </div>
           </section>
 

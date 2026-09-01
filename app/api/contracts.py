@@ -24,6 +24,11 @@ from app.research import (
 from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
 from app.providers import FrozenDict
+from app.stock import (
+    StockResearchRequest,
+    StockResearchResponse,
+    StockResearchTemplateResponse,
+)
 from app.profile import (
     ConflictResolution,
     ProfileDraft,
@@ -444,4 +449,7 @@ __all__ = [
     "AdvisorQueryRequest",
     "InvestmentIntentType",
     "ResearchSpecialistMatrixRequest",
+    "StockResearchRequest",
+    "StockResearchResponse",
+    "StockResearchTemplateResponse",
 ]
