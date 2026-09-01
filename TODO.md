@@ -27,7 +27,7 @@
 - [x] Implement deterministic risk questionnaire scoring.
 - [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
 - [x] Define portfolio and fund/ETF position import contracts.
-- [ ] Calculate look-through technology exposure and data coverage (Phase 3 plan ready; implementation not started).
+- [x] Calculate look-through technology exposure and data coverage.
 - [ ] Implement concentration, correlation, liquidity and risk-budget findings.
 - [ ] Generate conservative, balanced and growth-oriented allocation ranges.
 - [ ] Show pre/post impact and recommendation invalidation conditions.

@@ -2,6 +2,7 @@
 
 from app.portfolio.contracts import (
     AssetType,
+    CurrencyCode,
     FundHoldingSnapshot,
     LookThroughHolding,
     PortfolioImportBundle,
@@ -12,9 +13,20 @@ from app.portfolio.contracts import (
     PositionImportStatus,
     PositionSnapshot,
 )
+from app.portfolio.exposure import (
+    ExposureBasis,
+    ExposureContribution,
+    ExposureIssue,
+    ExposureIssueCode,
+    ExposureReport,
+    ExposureResult,
+    ExposureStatus,
+    calculate_exposure,
+)
 
 __all__ = [
     "AssetType",
+    "CurrencyCode",
     "FundHoldingSnapshot",
     "LookThroughHolding",
     "PortfolioImportBundle",
@@ -24,4 +36,12 @@ __all__ = [
     "PositionImportResult",
     "PositionImportStatus",
     "PositionSnapshot",
+    "ExposureBasis",
+    "ExposureContribution",
+    "ExposureIssue",
+    "ExposureIssueCode",
+    "ExposureReport",
+    "ExposureResult",
+    "ExposureStatus",
+    "calculate_exposure",
 ]

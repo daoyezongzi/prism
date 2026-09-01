@@ -193,3 +193,18 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 
 - No Phase 3 implementation or real data-source access has started.
 - The Phase 3 plan is ready for implementation after its plan commit; Phase 2 artifacts remain unchanged.
+
+## 2026-09-01 — MVP Phase 3 look-through exposure implementation
+
+### Implemented locally
+
+- Added immutable `ExposureContribution`, `ExposureReport`, `ExposureIssue` and `ExposureResult` contracts with complete/partial/failed invariants.
+- Added deterministic Decimal attribution for direct positions, valid fund/ETF holdings and explicit unlooked-through residuals.
+- Added non-base-currency and future-snapshot safety issues, fixed technology-sector classification, contribution closure and deterministic IDs.
+- Added synthetic multi-position fixture and unit/integration counterexamples; no network, FX, LLM, persistence, risk or recommendation code was introduced.
+
+### Current review evidence
+
+- Final full suite: `79 passed` (Phase 1/2's 69 tests remain green).
+- Compilation, import, `git diff --check`, fixture JSON/sensitive-field scan and post-commit independent adversarial checks all passed.
+- Phase 3 was accepted in the single local implementation commit `e340cf8`; the next concentration/risk plan must use a new worktree.

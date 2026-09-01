@@ -31,6 +31,7 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 架构 ADR、复用矩阵和分阶段实施计划；
 - Provider Protocol、四态结果不变量、确定性语义指纹、脱敏与合成 Fixture Provider。
 - Phase 2 用户画像契约、确定性问卷评分、结构化提取冲突确认，以及 owner 隔离的持仓/基金穿透原始导入契约。
+- Phase 3 已实现基于 Decimal 的直接/基金穿透暴露与数据覆盖结果；集中度、风险预算和推荐仍未实现。
 
 尚未实现：
 
@@ -80,6 +81,7 @@ python -m pytest
 - [Phase 2 Profile/Portfolio 计划](docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md)
 - [Phase 2 Profile/Portfolio 契约](docs/profile-portfolio-contracts.md)
 - [Phase 3 Look-through Exposure 计划](docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md)
+- [Phase 3 Portfolio Exposure 契约](docs/portfolio-exposure.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

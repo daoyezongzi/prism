@@ -1,6 +1,6 @@
 # MVP Phase 3 Working Plan：Deterministic Look-through Exposure
 
-- Status：`READY_FOR_IMPLEMENTATION`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target worktree：`D:\Github_Storage\prism-phase-3`
