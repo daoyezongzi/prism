@@ -16,6 +16,7 @@ from pydantic import Field, model_validator
 from app.contracts.evidence import ContractModel, NonEmptyStr
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskLevel, RiskQuestionnaire
+from app.providers import FrozenDict
 from app.risk import BudgetAssessmentStatus
 
 
@@ -99,14 +100,15 @@ class OptimizationRuleResponse(ContractModel):
     dimension: OptimizationDimension
     label: NonEmptyStr
     description: NonEmptyStr
-    limit_by_risk_level: dict[RiskLevel, Decimal]
+    limit_by_risk_level: FrozenDict
 
     @model_validator(mode="after")
     def validate_rule(self) -> Self:
-        if set(self.limit_by_risk_level) != set(RiskLevel):
+        normalized_levels = {RiskLevel(str(key)) for key in self.limit_by_risk_level}
+        if normalized_levels != set(RiskLevel):
             raise ValueError("optimization rule must define every risk level")
         for risk_level, value in self.limit_by_risk_level.items():
-            _pct(value, f"limit_by_risk_level[{risk_level.value}]")
+            _pct(Decimal(str(value)), f"limit_by_risk_level[{risk_level}]")
         if _sensitive(self.model_dump_json()):
             raise ValueError("optimization rule must not contain sensitive metadata")
         return self
@@ -315,6 +317,8 @@ class PortfolioOptimizationResponse(ContractModel):
         target_ids = [item.target_id for item in self.targets]
         if target_ids != sorted(target_ids) or len(target_ids) != len(set(target_ids)):
             raise ValueError("optimization targets must be unique and sorted")
+        if any(tuple(item.constraint_ids) != tuple(sorted(item.constraint_ids)) for item in self.targets):
+            raise ValueError("optimization target constraint IDs must be sorted")
         constraint_ids = [item.constraint_id for item in self.constraints]
         if constraint_ids != sorted(constraint_ids) or len(constraint_ids) != len(set(constraint_ids)):
             raise ValueError("optimization constraints must be unique and sorted")
@@ -363,7 +367,10 @@ class PortfolioOptimizationResponse(ContractModel):
                 raise ValueError("optimization sector constraints are required")
 
             def _sector_key(value: str | None) -> str:
-                return value.strip().casefold() if value else "UNCLASSIFIED"
+                if not value or not value.strip():
+                    return "UNCLASSIFIED"
+                normalized = value.strip().casefold()
+                return "UNCLASSIFIED" if normalized == "unclassified" else normalized
 
             target_sector_totals: dict[str, Decimal] = {}
             for target in self.targets:
@@ -376,6 +383,9 @@ class PortfolioOptimizationResponse(ContractModel):
 
             technology = aggregate_constraints[OptimizationDimension.TECHNOLOGY]
             unclassified = aggregate_constraints[OptimizationDimension.UNCLASSIFIED]
+
+            if set(sector_constraints) != set(target_sector_totals):
+                raise ValueError("optimization sector constraints must cover every target sector")
 
             for target_id, target in targets_by_id.items():
                 constraint = asset_constraints[target_id]
@@ -394,12 +404,20 @@ class PortfolioOptimizationResponse(ContractModel):
                 sector_constraint = sector_constraints.get(sector_key)
                 if sector_constraint is None or sector_constraint.constraint_id not in target.constraint_ids:
                     raise ValueError("optimization target must reference its sector constraint")
+                expected_constraint_ids = {
+                    constraint.constraint_id,
+                    sector_constraint.constraint_id,
+                }
                 if sector_key in {"technology", "information technology", "tech"}:
                     if technology.constraint_id not in target.constraint_ids:
                         raise ValueError("technology target must reference its aggregate constraint")
+                    expected_constraint_ids.add(technology.constraint_id)
                 if sector_key == "UNCLASSIFIED":
                     if unclassified.constraint_id not in target.constraint_ids:
                         raise ValueError("unclassified target must reference its aggregate constraint")
+                    expected_constraint_ids.add(unclassified.constraint_id)
+                if set(target.constraint_ids) != expected_constraint_ids:
+                    raise ValueError("optimization target constraint references are not exact")
 
             for sector_key, constraint in sector_constraints.items():
                 if constraint.target_weight_pct != target_sector_totals.get(sector_key, Decimal("0")):
@@ -430,6 +448,36 @@ class PortfolioOptimizationResponse(ContractModel):
                 or unclassified.current_weight_pct != expected_unclassified_current
             ):
                 raise ValueError("aggregate constraint weights do not close target rows")
+            referenced_constraint_ids = {
+                constraint_id
+                for target in self.targets
+                for constraint_id in target.constraint_ids
+            }
+            represented_technology = any(
+                _sector_key(target.sector)
+                in {"technology", "information technology", "tech"}
+                for target in self.targets
+            )
+            represented_unclassified = any(
+                _sector_key(target.sector) == "UNCLASSIFIED" for target in self.targets
+            )
+            zero_only_aggregate_ids = {
+                aggregate.constraint_id
+                for represented, aggregate in (
+                    (represented_technology, technology),
+                    (represented_unclassified, unclassified),
+                )
+                if not represented
+            }
+            for aggregate_id in zero_only_aggregate_ids:
+                aggregate = constraints_by_id[aggregate_id]
+                if (
+                    aggregate.current_weight_pct != Decimal("0.00")
+                    or aggregate.target_weight_pct != Decimal("0.00")
+                ):
+                    raise ValueError("unrepresented aggregate constraint must be zero")
+            if referenced_constraint_ids | zero_only_aggregate_ids != set(constraints_by_id):
+                raise ValueError("optimization constraints must be fully referenced by targets")
             has_current_breach = any(
                 item.current_weight_pct > item.allowed_max_weight_pct
                 for item in self.constraints
@@ -444,6 +492,8 @@ class PortfolioOptimizationResponse(ContractModel):
         else:
             if self.targets:
                 raise ValueError("non-ready optimization must not expose targets")
+            if self.constraints:
+                raise ValueError("non-ready optimization must not expose constraints")
             if not self.issues:
                 raise ValueError("non-ready optimization requires an issue")
         if _sensitive(self.model_dump_json()):

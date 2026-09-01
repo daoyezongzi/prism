@@ -8,7 +8,6 @@ from datetime import datetime
 from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP
 from hashlib import sha256
 from pathlib import Path
-from typing import Iterable
 
 from app.optimization import (
     METHODOLOGY_VERSION,
@@ -49,7 +48,7 @@ from app.service.profile_confirmation import confirm_questionnaire
 _DEFAULT_ROOT = Path(__file__).resolve().parent.parent / "fixtures" / "optimization"
 _DEFAULT_TEMPLATE = _DEFAULT_ROOT / "portfolio_optimization_template.json"
 _CENT = Decimal("0.01")
-_HUNDRED = Decimal("100")
+_UNCLASSIFIED_SECTOR = "UNCLASSIFIED"
 _TECHNOLOGY_SECTORS = {"technology", "information technology", "tech"}
 
 
@@ -75,7 +74,10 @@ def _from_cents(value: int) -> Decimal:
 
 
 def _normal_key(value: str | None) -> str:
-    return value.strip().casefold() if value else "UNCLASSIFIED"
+    if not value or not value.strip():
+        return _UNCLASSIFIED_SECTOR
+    normalized = value.strip().casefold()
+    return _UNCLASSIFIED_SECTOR if normalized == "unclassified" else normalized
 
 
 def _is_technology(sector: str | None) -> bool:
@@ -389,7 +391,14 @@ class FixturePortfolioOptimizationService:
                 assessment_status=assessment.status,
                 contribution_ids=tuple(sorted(item.exposure_id for item in report.contributions)),
             )
-        if report.unclassified_market_value > Decimal("0") or concentration_report.unclassified_weight_pct > Decimal("0"):
+        if (
+            report.unclassified_market_value > Decimal("0")
+            or concentration_report.unclassified_weight_pct > Decimal("0")
+            or any(
+                _normal_key(contribution.sector) == _UNCLASSIFIED_SECTOR
+                for contribution in report.contributions
+            )
+        ):
             return self._failure_response(
                 request,
                 portfolio,
@@ -456,19 +465,23 @@ class FixturePortfolioOptimizationService:
 
         current_cents = _largest_remainder_weights(asset_values, report.total_market_value)
         sectors: dict[str, dict[str, Decimal]] = defaultdict(dict)
-        sector_values: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
         for asset_id in sorted(asset_values):
             sector = _normal_key(asset_sectors[asset_id])
             sectors[sector][asset_id] = asset_values[asset_id]
-            sector_values[sector] += asset_values[asset_id]
-        sector_cents = _largest_remainder_weights(sector_values, report.total_market_value)
+        # Close sector current weights from the already rounded asset cents;
+        # independently rounding both levels could otherwise create a one-cent
+        # mismatch between the target rows and their sector constraint.
+        sector_cents = {
+            sector: sum((current_cents[asset_id] for asset_id in values), 0)
+            for sector, values in sectors.items()
+        }
         budget = assessment.budget
         sector_caps: dict[str, int] = {}
         for sector, values in sectors.items():
             cap = budget.max_sector_weight_pct
             if sector in _TECHNOLOGY_SECTORS:
                 cap = min(cap, budget.max_technology_weight_pct)
-            if sector == "UNCLASSIFIED":
+            if sector == _UNCLASSIFIED_SECTOR:
                 cap = budget.max_unclassified_weight_pct
             cap_cents = min(_cents(cap), len(values) * _cents(budget.max_single_asset_weight_pct))
             sector_caps[sector] = cap_cents
@@ -497,7 +510,6 @@ class FixturePortfolioOptimizationService:
                 reduction_left -= reduction
                 if not reduction_left:
                     break
-            technology_initial = technology_cap_cents
         released = 10000 - sum(initial_sector.values())
         while released:
             candidates = [
@@ -570,7 +582,7 @@ class FixturePortfolioOptimizationService:
             aggregate_ids = [asset_constraint_id, sector_constraint_id]
             if sector in _TECHNOLOGY_SECTORS:
                 aggregate_ids.append(_stable_id("optimization-constraint", "TECHNOLOGY"))
-            if sector == "UNCLASSIFIED":
+            if sector == _UNCLASSIFIED_SECTOR:
                 aggregate_ids.append(_stable_id("optimization-constraint", "UNCLASSIFIED"))
             constraints.append(
                 OptimizationConstraint(
@@ -598,7 +610,11 @@ class FixturePortfolioOptimizationService:
                     target_id=asset_id,
                     owner_id=request.owner_id,
                     asset_name=asset_labels[asset_id],
-                    sector=(asset_sectors[asset_id] if asset_sectors[asset_id] != "UNCLASSIFIED" else None),
+                    sector=(
+                        asset_sectors[asset_id]
+                        if _normal_key(asset_sectors[asset_id]) != _UNCLASSIFIED_SECTOR
+                        else None
+                    ),
                     current_weight_pct=current,
                     target_weight_pct=target,
                     delta_pct=_quantize(target - current),
@@ -616,7 +632,7 @@ class FixturePortfolioOptimizationService:
             cap = budget.max_sector_weight_pct
             if sector in _TECHNOLOGY_SECTORS:
                 cap = min(cap, budget.max_technology_weight_pct)
-            if sector == "UNCLASSIFIED":
+            if sector == _UNCLASSIFIED_SECTOR:
                 cap = budget.max_unclassified_weight_pct
             cid = _stable_id("optimization-constraint", "SECTOR", sector)
             constraints.append(
@@ -648,11 +664,11 @@ class FixturePortfolioOptimizationService:
             0,
         )
         unclassified_current = sum(
-            (current_cents[asset_id] for asset_id in asset_values if _normal_key(asset_sectors[asset_id]) == "UNCLASSIFIED"),
+            (current_cents[asset_id] for asset_id in asset_values if _normal_key(asset_sectors[asset_id]) == _UNCLASSIFIED_SECTOR),
             0,
         )
         unclassified_target = sum(
-            (target_cents[asset_id] for asset_id in asset_values if _normal_key(asset_sectors[asset_id]) == "UNCLASSIFIED"),
+            (target_cents[asset_id] for asset_id in asset_values if _normal_key(asset_sectors[asset_id]) == _UNCLASSIFIED_SECTOR),
             0,
         )
         for dimension, current_cents_value, target_cents_value, cap in (

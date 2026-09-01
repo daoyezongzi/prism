@@ -115,6 +115,13 @@ def test_template_is_owner_closed_safe_and_sorted() -> None:
     store.close()
 
 
+def test_template_rule_limits_are_deeply_immutable() -> None:
+    _, template = _template()
+    limits = template.rules[0].limit_by_risk_level
+    with pytest.raises(TypeError):
+        limits["CONSERVATIVE"] = "99"
+
+
 def test_baseline_is_deterministic_closed_and_no_store_side_effect() -> None:
     service, template = _template()
     request = _request(template)
@@ -189,6 +196,36 @@ def test_multiple_technology_labels_still_respect_global_technology_cap() -> Non
     )
     assert technology.target_weight_pct <= technology.allowed_max_weight_pct
     assert technology.target_weight_pct == Decimal("40.00")
+
+
+def test_partial_replay_cannot_silently_become_ready_without_look_through_input() -> None:
+    service, template = _template()
+    direct_portfolio = template.portfolio.model_copy(update={"fund_holdings": ()})
+    request = _request(template, request_id="partial-without-fund")
+    request = request.model_copy(update={"portfolio": direct_portfolio})
+    result = asyncio.run(
+        service.run(request.model_copy(update={"scenario_id": OptimizationScenarioId.SOURCE_PARTIAL}))
+    )
+    assert result.status == OptimizationStatus.REVIEW_REQUIRED
+    assert result.targets == ()
+    assert result.issues[0].code.value == "INPUT_PARTIAL"
+
+
+def test_explicit_unclassified_sector_is_reviewed_instead_of_treated_as_known() -> None:
+    service, template = _template()
+    funds = []
+    for fund in template.portfolio.fund_holdings:
+        if fund.parent_asset_id == "OPT_FINANCE_ASSET":
+            holding = fund.holdings[0].model_copy(update={"sector": "UNCLASSIFIED"})
+            fund = fund.model_copy(update={"holdings": (holding,)})
+        funds.append(fund)
+    request = _request(template, request_id="explicit-unclassified").model_copy(
+        update={"portfolio": template.portfolio.model_copy(update={"fund_holdings": tuple(funds)})}
+    )
+    result = asyncio.run(service.run(request))
+    assert result.status == OptimizationStatus.REVIEW_REQUIRED
+    assert result.targets == ()
+    assert result.issues[0].code.value == "INPUT_UNCLASSIFIED"
 
 
 @pytest.mark.parametrize(
@@ -321,6 +358,90 @@ def test_api_revalidates_injected_output_and_maps_safe_error() -> None:
     store.close()
 
 
+class _ProfileDriftOptimizationService:
+    def __init__(self) -> None:
+        self._delegate = FixturePortfolioOptimizationService()
+
+    def template(self, owner_id: str):
+        return self._delegate.template(owner_id)
+
+    async def run(self, request):
+        output = await self._delegate.run(request)
+        return output.model_copy(
+            update={
+                "profile_id": "forged-profile",
+                "trace": output.trace.model_copy(update={"profile_id": "forged-profile"}),
+            }
+        )
+
+
+def test_api_rejects_injected_profile_drift_even_when_response_shape_is_valid() -> None:
+    client, store = _client(optimization_service=_ProfileDriftOptimizationService())
+    template = client.get(
+        "/api/v1/advisor/portfolio-optimization-template",
+        headers={"X-Owner-ID": "phase28-profile-drift"},
+    ).json()
+    payload = {
+        "schema_version": "portfolio-optimization-request.v1",
+        "request_id": "phase28-profile-drift-run",
+        "owner_id": "phase28-profile-drift",
+        "generated_at": template["generated_at"],
+        "questionnaire": template["questionnaire"],
+        "portfolio": template["portfolio"],
+        "scenario_id": "BASELINE_READY",
+    }
+    response = client.post(
+        "/api/v1/advisor/portfolio-optimization-runs",
+        headers={"X-Owner-ID": "phase28-profile-drift"},
+        json=payload,
+    )
+    assert response.status_code == 400
+    assert response.json()["error_code"] == "PORTFOLIO_OPTIMIZATION_ERROR"
+    store.close()
+
+
+class _BundleDriftOptimizationService:
+    def __init__(self) -> None:
+        self._delegate = FixturePortfolioOptimizationService()
+
+    def template(self, owner_id: str):
+        return self._delegate.template(owner_id)
+
+    async def run(self, request):
+        output = await self._delegate.run(request)
+        return output.model_copy(
+            update={
+                "portfolio_bundle_id": "forged-bundle",
+                "trace": output.trace.model_copy(update={"portfolio_bundle_id": "forged-bundle"}),
+            }
+        )
+
+
+def test_api_rejects_injected_portfolio_identity_drift() -> None:
+    client, store = _client(optimization_service=_BundleDriftOptimizationService())
+    template = client.get(
+        "/api/v1/advisor/portfolio-optimization-template",
+        headers={"X-Owner-ID": "phase28-bundle-drift"},
+    ).json()
+    payload = {
+        "schema_version": "portfolio-optimization-request.v1",
+        "request_id": "phase28-bundle-drift-run",
+        "owner_id": "phase28-bundle-drift",
+        "generated_at": template["generated_at"],
+        "questionnaire": template["questionnaire"],
+        "portfolio": template["portfolio"],
+        "scenario_id": "BASELINE_READY",
+    }
+    response = client.post(
+        "/api/v1/advisor/portfolio-optimization-runs",
+        headers={"X-Owner-ID": "phase28-bundle-drift"},
+        json=payload,
+    )
+    assert response.status_code == 400
+    assert response.json()["error_code"] == "PORTFOLIO_OPTIMIZATION_ERROR"
+    store.close()
+
+
 def test_response_rejects_forged_target_total_and_recommendation_like_fields() -> None:
     service, template = _template()
     result = asyncio.run(service.run(_request(template)))
@@ -334,6 +455,50 @@ def test_response_rejects_forged_target_total_and_recommendation_like_fields() -
     payload = result.model_dump(mode="python")
     payload["recommendations"] = []
     with pytest.raises(ValidationError):
+        PortfolioOptimizationResponse.model_validate(payload)
+
+
+def test_response_rejects_unreferenced_ready_constraint() -> None:
+    service, template = _template()
+    result = asyncio.run(service.run(_request(template)))
+    unclassified = next(
+        item for item in result.constraints if item.dimension == OptimizationDimension.UNCLASSIFIED
+    )
+    extra = unclassified.model_copy(update={"constraint_id": "zz-unreferenced"})
+    payload = result.model_dump(mode="python")
+    payload["constraints"] = tuple(sorted((*result.constraints, extra), key=lambda item: item.constraint_id))
+    with pytest.raises(ValidationError, match="fully referenced"):
+        PortfolioOptimizationResponse.model_validate(payload)
+
+
+def test_response_rejects_non_ready_constraints() -> None:
+    service, template = _template()
+    result = asyncio.run(
+        service.run(
+            _request(
+                template,
+                scenario=OptimizationScenarioId.SOURCE_PARTIAL,
+                request_id="non-ready-constraint",
+            )
+        )
+    )
+    payload = result.model_dump(mode="python")
+    payload["constraints"] = (
+        {
+            "constraint_id": "forged",
+            "owner_id": result.owner_id,
+            "dimension": "ASSET",
+            "target_id": "asset",
+            "label": "asset",
+            "current_weight_pct": "0",
+            "target_weight_pct": "0",
+            "allowed_max_weight_pct": "1",
+            "delta_pct": "0",
+            "disposition": "WITHIN_LIMIT",
+            "rationale": "forged",
+        },
+    )
+    with pytest.raises(ValidationError, match="must not expose constraints"):
         PortfolioOptimizationResponse.model_validate(payload)
 
 
