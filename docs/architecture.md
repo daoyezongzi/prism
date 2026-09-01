@@ -41,6 +41,13 @@ Provider、lineage-aware Cross-Validation 和 Evidence/Finding bridge，基线�
 财务 Fact 并由 deterministic `Decimal` 规则计算风险；来源分歧、PARTIAL、EMPTY 和
 FAILED 只保留 Evidence 与节点降级原因，不产生 Fact/Finding/Recommendation。该卡
 通过 owner-scoped API 和静态工作台展示，仍不接入网络、LLM/Gemini、认证或生产存储。
+Phase 26 在不改动既有四轨道矩阵的前提下，增加独立的 Demo G ETF/Fund 资产研究
+Evidence Card：两个 `FUND_DATA` fixture 节点复用同一 bounded run、Provider 四态、
+lineage-aware Cross-Validation 和 Evidence/Finding bridge，基线闭合科技权重、前十
+大集中度、费率、波动、回撤和跟踪误差六个 Fact，并以 deterministic `Decimal` 规则
+生成五类资产风险 Finding；来源冲突、PARTIAL、EMPTY 和 FAILED 只返回 Evidence 与
+节点 reason，不升级 Fact/Finding/风险。该卡通过 owner-scoped API 与静态工作台展示，
+不写 DecisionEvent、不生成 Recommendation，仍不接入网络、LLM/Gemini、认证或生产存储。
 
 ## 数据流
 
@@ -129,6 +136,8 @@ Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/�
 Query 工作台、Phase 16 的四轨道研究节点矩阵、Phase 17 的 Research Tracks API/UI
 切片、Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图、Phase 19
 的本地 fixture 负载测试骨架，以及 Phase 25 的个股研究 Evidence Card API/UI。
+Phase 26 的 ETF/Fund 资产研究 Evidence Card API/UI 也已完成，并保留非 READY
+阻断和双 lineage Evidence 展开语义。
 真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
 专用多研究 Agent、Portfolio/Risk Profile CRUD、真实持仓导入、云压测和外部真实
 旗舰流/SLA 仍未完成；README 与 TODO 必须持续保持这一事实边界。

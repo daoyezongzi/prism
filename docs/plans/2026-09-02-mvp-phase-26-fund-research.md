@@ -149,9 +149,39 @@
 
 ## Independent review and acceptance
 
-待 Phase 26 实现、独立审查、修复和验证后填写。
+- 计划提交：`975cfe6`；首版实现：`5a32d4f`。
+- 独立审查发现 Fund 节点投影只校验时间排序，可能接受 COMPLETE 携带缺失/问题、
+  PARTIAL/FAILED 无原因以及不合适的运行中状态；`d076ff2` 对齐底层 run 状态机的
+  PENDING/RUNNING/COMPLETE/PARTIAL/EMPTY/FAILED/CANCELLED 不变量，并增加 11 条
+  对抗性回归。
+- 第二项审查发现可注入服务的 `model_copy(update=...)` 可以绕过输出模型且不检查
+  request subject/period/scenario 闭合；`bcb77a2` 在 API 边界重新验证
+  `FundResearchResponse`、拒绝类型/owner/范围漂移，并增加安全错误映射测试。
+- 第三项审查发现风险摘要只检查 finding ID 存在，可能把触发 WARNING/CRITICAL 的
+  卡伪装成 CLEAR；`6efa834` 要求 READY 的 WATCH/HIGH_RISK 覆盖全部非 INFO Finding，
+  CLEAR 不得隐藏风险，并增加风险闭合回归。
+- Phase-specific tests `24 passed`；全量回归 `349 passed`（仅已知 Starlette/httpx
+  deprecation warning）。`compileall`、公开导入、`node --check`、`git diff --check`
+  通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json` 为 9/9，所有评测指标为 `1.0`。
+  本地 ASGI 100 并发基线：template 100/100，P50/P95/P99
+  `89.246/105.397/110.999 ms`；research 100/100，`633.268/846.385/858.832 ms`；
+  advisor 100 logical operations（200 requests），`939.101/1478.687/1520.639 ms`；
+  error 与 owner mismatch 均为 0，Advisor 预期写入 100 条，另两场景无写入。以上仅为
+  fixture/ASGI 基线，不外推生产 SLA。
+- wheel 复核为 `100` entries，包含 fund manifest、双 provider fixture、service/contracts
+  和静态资源；运行时范围扫描确认没有上游运行时导入、外网、LLM/Gemini、凭据、HTML
+  sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成模板与五场景回放：基线显示六个 VERIFIED Fact、五类确定性
+  Finding/HIGH_RISK；分歧显示双方科技权重 Evidence 与 lineage；PARTIAL/EMPTY/FAILED
+  显示各自状态、缺失/范围/安全 issue 且没有 Fact/Finding；展开链路可见
+  Finding → Fact → Evidence；owner 切换清空旧 run。浏览器 console error 为 `[]`，页面
+  只发同源请求。
+
+结论：Phase 26 验收通过，提交链为 `975cfe6` → `5a32d4f` → `d076ff2` → `bcb77a2`
+→ `6efa834`；本地未 push。下一阶段必须从 `6efa834` 创建新 worktree 并先提交
+计划书。
 
 ## Status
 
-`PLANNED`
-
+`ACCEPTED`

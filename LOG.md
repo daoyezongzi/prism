@@ -980,3 +980,65 @@ worktree，并先提交 Phase 25 计划书。
 
 Phase 25 已在本地 worktree 接受，未 push；下一阶段必须从本提交创建新 worktree，
 并先提交 Phase 26 计划书。
+
+## 2026-09-02 — MVP Phase 26 ETF/Fund 资产研究 Evidence Card（Demo G）
+
+### 计划与 worktree
+
+- 在已接受的 Phase 25 `956d753` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-26`，分支为
+  `codex/mvp-phase-26-fund-research`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `975cfe6`；本阶段继续保持 fixture-first，不接入真实 SkillHub/同花顺网络、在线
+  鉴权、LLM/Gemini、组合调仓或 Recommendation。
+
+### 本地实现
+
+- 新增 `FundResearchRequest`、manifest/template/response、节点状态、五个安全场景和
+  `FundRiskSummary` 严格契约；六个指标为科技权重、前十大集中度、费率、年化波动率、
+  最大回撤和跟踪误差。请求/结果绑定 owner、subject、period、timezone-aware 时间，
+  拒绝 extra、敏感字段、未知场景和跨 scope。
+- 新增两条独立 `FUND_DATA` lineage 的合成基金 fixture 与
+  `FixtureFundResearchService`。它复用既有 Provider 四态校验、bounded run、
+  Cross-Validation、Evidence/Finding bridge 和 DecisionTrace；场景 overlay 只重建
+  并重新验证 `ProviderResult`。
+- READY 基线形成六个 VERIFIED Fact；服务端 `Decimal` 确定性计算科技集中度、前十
+  大集中度、波动、回撤和费率 Finding，并生成 HIGH_RISK 摘要。分歧、PARTIAL、EMPTY、
+  FAILED 均保留 Evidence 与节点降级原因，不泄露 Fact/Finding，不写 DecisionEvent，
+  不生成 Recommendation。
+- 新增 owner-scoped `/api/v1/advisor/fund-research-template` 与
+  `/api/v1/advisor/fund-research-runs`，接入 Demo G 静态工作台；动态值只用节点
+  API/`textContent`，同源 fetch，owner/场景/序列切换清理旧结果。新增
+  [ETF/Fund 资产研究 Evidence Card](docs/fund-research-card.md)，同步架构、README
+  和 TODO。
+
+### 独立审查与验收
+
+- 首版实现提交为 `5a32d4f`。审查发现 Fund 节点投影未覆盖状态不变量，
+  `d076ff2` 对齐底层 PENDING/RUNNING/COMPLETE/PARTIAL/EMPTY/FAILED/CANCELLED
+  语义，并增加 11 条对抗性回归。
+- 第二项审查发现注入服务可通过 `model_copy(update=...)` 绕过输出校验，且缺少
+  request subject/period/scenario 闭合；`bcb77a2` 在 API 边界重新验证输出、拒绝漂移，
+  并将错误安全映射为 `FUND_RESEARCH_ERROR`。
+- 第三项审查发现风险摘要可能隐藏已触发的 WARNING/CRITICAL Finding；`6efa834` 要求
+  READY 风险状态与全部非 INFO Finding 闭合，并增加风险伪造回归。
+- Phase-specific tests：`24 passed`；全量回归：`349 passed`，仅已知 Starlette/httpx
+  deprecation warning。`compileall`、公开导入、`node --check`、`git diff --check`
+  通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9 case 通过，所有指标为
+  `1.0`。本地 ASGI 100 并发基线为：`template` 100/100，P50/P95/P99
+  `89.246/105.397/110.999 ms`；`research` 100/100，`633.268/846.385/858.832 ms`；
+  `advisor` 100 logical operations（200 requests），`939.101/1478.687/1520.639 ms`；
+  三场景 error、owner mismatch 均为 0，Advisor 写入 100 条预期事件，另两场景为 0。
+  这些仍是 fixture/ASGI 基线，不外推生产 SLA。
+- wheel 复核为 `100` entries，包含 fund manifest、双 provider fixture、service/contracts
+  和静态资源；运行时范围扫描确认没有上游运行时导入、外网、LLM/Gemini、凭据、HTML
+  sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成模板与五场景：基线显示六个 Fact、五类确定性 Finding 和
+  HIGH_RISK；分歧显示双方科技权重 Evidence 与 lineage；PARTIAL/EMPTY/FAILED 显示
+  节点状态、缺失/范围/安全 issue 且没有 Fact/Finding；展开 Finding → Fact → Evidence
+  链路；owner 切换清空旧卡；console error 为 `[]`。
+
+Phase 26 已在本地 worktree 接受，未 push；下一阶段必须从 `6efa834` 创建新 worktree，
+并先提交 Phase 27 计划书。下一阶段优先补齐 Prism.md 明确要求的最低可转债资产卡，
+继续保持真实 Provider、认证、生产持久化和交易执行延期。

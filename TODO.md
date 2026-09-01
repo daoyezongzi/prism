@@ -6,8 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 25 is accepted locally in the dedicated
-> `D:\Github_Storage\prism-phase-25` worktree; Phase 26 must start in a new worktree.
+> Active phase: Phase 26 ETF/Fund Evidence Card is under independent review in the
+> dedicated `D:\Github_Storage\prism-phase-26` worktree; Phase 27 starts only after
+> this phase is accepted and a new worktree is created.
 
 ## P0 — Foundation
 
@@ -74,6 +75,10 @@
 - [x] Add the independent Demo F stock research Evidence Card with six financial claims,
   deterministic quality/leverage Findings, five safe replay scenarios and visible node
   degradation reasons; keep live market data, valuation and Recommendation effects deferred.
+- [x] Add the independent Demo G ETF/Fund asset research Evidence Card with six fund claims,
+  deterministic concentration/cost/volatility/drawdown Findings, five safe replay scenarios
+  and visible node degradation reasons; keep live market data, portfolio adjustment and
+  Recommendation effects deferred.
 
 ## External inputs / decisions
 
@@ -95,6 +100,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 25 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-25`
-worktree. Create a new worktree for Phase 26 and submit its plan before implementation;
-keep real authentication, live Provider access and production persistence deferred.
+Phase 26 is in independent review in the dedicated `D:\Github_Storage\prism-phase-26`
+worktree. Finish its review, documentation and verification, then create a new worktree
+for Phase 27 and submit that phase's plan before implementation; keep real authentication,
+live Provider access and production persistence deferred.
