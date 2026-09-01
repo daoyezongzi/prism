@@ -199,6 +199,24 @@ class ResearchSpecialistMatrix(ContractModel):
             for dependency in node.dependencies
         ):
             raise ValueError("specialist node must not depend on itself")
+        indegree = {node_id: 0 for node_id in node_ids}
+        children: dict[str, list[str]] = {node_id: [] for node_id in node_ids}
+        for node in self.nodes:
+            for dependency in node.dependencies:
+                indegree[node.node_id] += 1
+                children[dependency].append(node.node_id)
+        ready = sorted(node_id for node_id, degree in indegree.items() if degree == 0)
+        visited = 0
+        while ready:
+            current = ready.pop(0)
+            visited += 1
+            for child in sorted(children[current]):
+                indegree[child] -= 1
+                if indegree[child] == 0:
+                    ready.append(child)
+            ready.sort()
+        if visited != len(node_ids):
+            raise ValueError("specialist node dependencies contain a cycle")
 
         required_kinds = {
             ResearchNodeKind.MACRO,

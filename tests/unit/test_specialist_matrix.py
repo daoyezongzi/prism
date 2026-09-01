@@ -76,6 +76,13 @@ def test_matrix_rejects_missing_kind_duplicate_lineage_and_claim_drift() -> None
     with pytest.raises(ValueError, match="inconsistent source metadata"):
         ResearchSpecialistMatrix.model_validate(drift)
 
+    cycle = matrix.model_dump(mode="python")
+    cycle["nodes"] = list(cycle["nodes"])
+    cycle["nodes"][0]["dependencies"] = (cycle["nodes"][1]["node_id"],)
+    cycle["nodes"][1]["dependencies"] = (cycle["nodes"][0]["node_id"],)
+    with pytest.raises(ValueError, match="cycle"):
+        ResearchSpecialistMatrix.model_validate(cycle)
+
 
 def test_matrix_template_and_forged_request_refuse_sensitive_owner() -> None:
     with pytest.raises(SpecialistMatrixError, match="refused"):

@@ -167,6 +167,46 @@ def test_conflicting_source_stays_review_and_never_becomes_ready() -> None:
         temp.cleanup()
 
 
+def test_completed_source_identity_drift_is_refused() -> None:
+    temp, provider_dir = _copy_provider_fixtures()
+    try:
+        path = provider_dir / "industry_source_a.json"
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload["result"]["records"][0]["lineage_id"] = "unexpected-lineage"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
+        with pytest.raises(SpecialistMatrixError, match="execution|evidence"):
+            asyncio.run(
+                FixtureResearchSpecialistMatrixService(provider_dir=provider_dir).run(
+                    _request(request_id="matrix-identity-drift-001")
+                )
+            )
+    finally:
+        temp.cleanup()
+
+
+def test_wrong_provider_identity_degrades_without_findings(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.service.specialist_matrix as module
+    from app.providers import FixtureFinancialProvider
+
+    class WrongIdentityProvider(FixtureFinancialProvider):
+        @property
+        def name(self):
+            return "fixture-provider"
+
+        async def execute(self, request):
+            result = await super().execute(request)
+            return result.model_copy(update={"provider": "unexpected-provider"})
+
+    monkeypatch.setattr(module, "FixtureFinancialProvider", WrongIdentityProvider)
+    output = asyncio.run(
+        FixtureResearchSpecialistMatrixService().run(_request(request_id="matrix-provider-identity-001"))
+    )
+    assert output.pipeline.status.value == "REVIEW_REQUIRED"
+    assert output.pipeline.trace.facts == ()
+    assert output.pipeline.trace.findings == ()
+
+
 def test_unknown_matrix_and_sensitive_request_fail_without_provider_details() -> None:
     service = FixtureResearchSpecialistMatrixService()
     with pytest.raises(SpecialistMatrixError, match="unavailable"):
