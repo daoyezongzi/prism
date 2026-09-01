@@ -762,6 +762,50 @@ worktree，并先提交计划书。
   外部网络、LLM/Gemini、订单或交易路径。Phase 20 已接受，本地未 push；下一阶段必须
   从本提交创建新 worktree 并先提交计划书。
 
+## 2026-09-02 — MVP Phase 24 研究场景与不确定性可见化
+
+### 计划与 worktree
+
+- 在已接受的 Phase 23 `063111c` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-24`，分支为
+  `codex/mvp-phase-24-research-scenarios`。
+- 先提交计划书 `f0937e5`，明确只做离线 fixture-first 场景目录、Provider 四态回放
+  与 Research Tracks 可见化；真实 SkillHub、LLM/Gemini、认证、生产持久化、交易和
+  Recommendation 旁路均不做。
+
+### 本地实现
+
+- 增加严格 `ResearchScenarioId`/场景定义与模板 catalog，覆盖
+  `BASELINE_READY`、`SOURCE_DISAGREEMENT`、`SOURCE_PARTIAL`、`SOURCE_EMPTY`、
+  `SOURCE_FAILED`；请求可选 `scenario_id`，旧请求默认基线，响应闭合回显安全场景
+  元数据。
+- 在既有 `FixtureFinancialProvider` 外增加只读 scenario overlay，所有变体重新经过
+  `ProviderResult`/请求校验、bounded executor、四态节点、lineage Cross-Validation
+  和 Evidence/Finding pipeline。分歧保留双方 Evidence 但不升级 Fact/Finding；缺失、
+  无结果和失败分别保留对应状态并安全降级。
+- Research Tracks 工作台从 API 加载场景选择器，非 READY 显示 validation、支持/反对
+  证据和未升级 Evidence；owner/场景切换和异步竞态仍清空旧结果，动态值保持
+  text-only DOM/CSP 边界。新增 [研究场景契约](docs/research-scenarios.md)。
+
+### 独立审查与验收
+
+- 实现提交为 `773b636`；独立复查发现同一 request ID 跨场景复用 run ID，随后以
+  `2003a1e` 将场景纳入确定性 run identity，并补充场景目录初始加载与回放测试。
+- Phase-specific tests `15 passed`；全量回归 `314 passed`，仅已知 Starlette/httpx
+  deprecation warning。`compileall`、公开导入、`node --check`、`git diff --check`、
+  DOM/runtime 范围扫描通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json` 仍为 9/9，全部 case/profile/
+  risk/compliance/evidence/replay 指标为 `1.0`；Template/Research/Advisor 本地
+  100 并发均 100/100、error/owner mismatch 为 0，P50/P95/P99 分别为
+  `86.095/99.482/104.064 ms`、`584.614/814.973/825.665 ms`、
+  `917.155/1489.606/1523.550 ms`，不外推为生产 SLA。
+- wheel 复核为 88 entries，包含场景-aware service/contracts/static 和现有 evaluator/
+  9 cases；真实本地浏览器完成场景目录、READY、分歧双方值、PARTIAL/EMPTY/FAILED
+  降级、无 Fact/Finding、owner 清理，错误日志为空。
+
+Phase 24 已在本地 worktree 接受，未 push；下一阶段必须从本接受提交创建新
+worktree，并先提交 Phase 25 计划书。
+
 ## 2026-09-02 — MVP Phase 21 固定评测集与语义回放
 
 ### 计划与 worktree

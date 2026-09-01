@@ -86,6 +86,11 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   服务端重建 draft 后生成保留冲突审计的确定性 Profile；不解析自然语言、不保存原文、
   不写 DecisionEvent。`299` 项回归、100 次评测回放、三场景 100 并发本地基线和真实
   浏览器路径均通过。详见 [画像提案契约](docs/profile-proposal-confirmation.md)。
+- Phase 24 已把 Research Tracks 的不确定性做成可回放工作台：场景目录覆盖基线一致、
+  来源分歧、PARTIAL、EMPTY 和 FAILED；分歧显示双方 lineage Evidence，退化结果
+  保留节点/run/pipeline 状态但不升级为 Fact/Finding/Recommendation。`314` 项回归、
+  100 次固定评测回放、三场景 100 并发本地基线、wheel 和真实浏览器五场景路径均通过；
+  这些仍是离线 fixture/ASGI 证据。详见 [研究场景契约](docs/research-scenarios.md)。
 
 尚未实现：
 
@@ -178,6 +183,8 @@ python -m pytest
 - [Phase 22 结构化意图与任务计划预览计划](docs/plans/2026-09-02-mvp-phase-22-intent-planning.md)
 - [Phase 23 画像提案确认契约](docs/profile-proposal-confirmation.md)
 - [Phase 23 结构化画像提案与冲突确认计划](docs/plans/2026-09-02-mvp-phase-23-profile-confirmation.md)
+- [Phase 24 Research Tracks 场景回放契约](docs/research-scenarios.md)
+- [Phase 24 研究场景与不确定性计划](docs/plans/2026-09-02-mvp-phase-24-research-scenarios.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

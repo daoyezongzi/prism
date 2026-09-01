@@ -130,6 +130,34 @@
 - 真实 SkillHub、在线鉴权和生产 SLA 仍是外部输入，不因本阶段的离线回放而宣称完成。
 - Phase 25 只能从 Phase 24 接受提交创建新 worktree，并先提交下一阶段计划书。
 
+## Independent review and acceptance
+
+- Plan commit: `f0937e5`; implementation commit: `773b636`; independent review fix:
+  `2003a1e` on branch `codex/mvp-phase-24-research-scenarios` in
+  `D:\Github_Storage\prism-phase-24`; no push.
+- Phase-specific tests: `15 passed`; full regression: `314 passed`, with only the
+  existing Starlette/httpx deprecation warning. `compileall`, public imports,
+  `node --check` and `git diff --check` passed.
+- API replay proved all five scenarios: baseline `COMPLETED/READY`; disagreement
+  `COMPLETED/REVIEW_REQUIRED` with one supporting and one contradicting macro Evidence;
+  PARTIAL/EMPTY/FAILED each retained the corresponding node state and
+  `FAILED/REVIEW_REQUIRED` run boundary without Facts/Findings/Recommendations.
+  Replaying each scenario is byte-stable, and using the same request ID across scenarios
+  produces distinct run IDs.
+- `python -m tools.evaluate_mvp --repeat 100 --json` still passed all 9 fixed cases with
+  every reported coverage/replay metric equal to `1.0`. Local 100-concurrent ASGI
+  baselines completed 100/100 with zero errors and owner mismatches: Template P50/P95/P99
+  `86.095/99.482/104.064 ms`, Research `584.614/814.973/825.665 ms`, Advisor
+  `917.155/1489.606/1523.550 ms`; these remain fixture baselines, not production SLA.
+- Wheel review produced an 88-entry package containing the scenario-aware service,
+  contracts and static assets together with the existing evaluator and 9 cases.
+- Real local browser verification loaded the scenario catalog before the first run;
+  exercised READY, SOURCE_DISAGREEMENT (both `2.50` and `3.25` values), SOURCE_PARTIAL,
+  SOURCE_EMPTY and SOURCE_FAILED, confirmed no Fact/Finding promotion in degraded cases,
+  owner clearing, and an empty browser error log. Static/adversarial review found no
+  external network, LLM/Gemini, credentials, raw fixture leak, DOM HTML sink, order or
+  Recommendation bypass.
+
 ## Status
 
-`PLANNED`
+`ACCEPTED`

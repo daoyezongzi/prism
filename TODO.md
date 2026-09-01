@@ -6,8 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 23 is accepted locally in the dedicated
-> `D:\Github_Storage\prism-phase-23` worktree; Phase 24 must start in a new worktree.
+> Active phase: Phase 24 is accepted locally in the dedicated
+> `D:\Github_Storage\prism-phase-24` worktree; Phase 25 must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -68,6 +68,9 @@
   real browser.
 - [x] Add the typed ProfileExtractionProposal preview and explicit conflict confirmation;
   keep natural-language parsing, LLM/Gemini and raw-text persistence deferred.
+- [x] Add an explicit Research Tracks scenario catalog for baseline, source disagreement,
+  PARTIAL, EMPTY and FAILED replays; keep live Provider access and recommendation side
+  effects deferred.
 
 ## External inputs / decisions
 
@@ -89,6 +92,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 23 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-23`
-worktree. Create a new worktree for Phase 24 and submit its plan before implementation;
+Phase 24 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-24`
+worktree. Create a new worktree for Phase 25 and submit its plan before implementation;
 keep real authentication, live Provider access and production persistence deferred.
