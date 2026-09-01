@@ -207,4 +207,17 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 
 - Final full suite: `79 passed` (Phase 1/2's 69 tests remain green).
 - Compilation, import, `git diff --check`, fixture JSON/sensitive-field scan and post-commit independent adversarial checks all passed.
-- Phase 3 was accepted in the single local implementation commit `e340cf8`; the next concentration/risk plan must use a new worktree.
+- Phase 3 was accepted in the single local implementation commit `f6a1af4`; the next concentration/risk plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 4 concentration and risk-budget plan
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-4` on branch `codex/mvp-phase-4-concentration-risk` from Phase 3 accepted commit `f6a1af4`.
+- Added `docs/plans/2026-09-01-mvp-phase-4-concentration-risk-budget.md` before implementation.
+- The phase narrows the next slice to deterministic asset/sector concentration and profile-conditioned risk-budget assessment; correlation, liquidity, optimization and recommendations remain deferred.
+
+### Current boundary
+
+- No Phase 4 implementation or real data-source access has started.
+- The Phase 4 plan is ready for implementation after its plan commit; Phase 1/2/3 artifacts remain unchanged.

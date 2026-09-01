@@ -82,6 +82,7 @@ python -m pytest
 - [Phase 2 Profile/Portfolio 契约](docs/profile-portfolio-contracts.md)
 - [Phase 3 Look-through Exposure 计划](docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md)
 - [Phase 3 Portfolio Exposure 契约](docs/portfolio-exposure.md)
+- [Phase 4 Concentration/Risk Budget 计划](docs/plans/2026-09-01-mvp-phase-4-concentration-risk-budget.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

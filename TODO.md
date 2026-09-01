@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 3 Look-through Exposure](docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md)
+> Active phase: [MVP Phase 4 Concentration/Risk Budget](docs/plans/2026-09-01-mvp-phase-4-concentration-risk-budget.md)
 
 ## P0 — Foundation
 
@@ -28,7 +28,7 @@
 - [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
 - [x] Define portfolio and fund/ETF position import contracts.
 - [x] Calculate look-through technology exposure and data coverage.
-- [ ] Implement concentration, correlation, liquidity and risk-budget findings.
+- [ ] Implement concentration, correlation, liquidity and risk-budget findings (Phase 4 plan ready; implementation not started).
 - [ ] Generate conservative, balanced and growth-oriented allocation ranges.
 - [ ] Show pre/post impact and recommendation invalidation conditions.
 - [ ] Prove that the same evidence produces materially different valid outputs for different profiles.
