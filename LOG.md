@@ -221,3 +221,17 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 
 - No Phase 4 implementation or real data-source access has started.
 - The Phase 4 plan is ready for implementation after its plan commit; Phase 1/2/3 artifacts remain unchanged.
+
+## 2026-09-01 — MVP Phase 4 concentration and risk-budget implementation
+
+### Implemented locally
+
+- Added immutable concentration groups/reports/results with Decimal asset/sector aggregation, HHI, deterministic tie-breaking and upstream status propagation.
+- Added versioned fixed `RiskBudget` rules selected by `RiskProfile` risk level and explicit `RiskBudgetBreach` / `RiskBudgetAssessment` states (`PASS`, `REVIEW_REQUIRED`, `BLOCKED`).
+- Preserved unlooked-through and unknown data, enforced owner/profile/exposure closure, and added synthetic offline tests without recommendations or real data access.
+
+### Current review evidence
+
+- Final full suite: `92 passed` (Phase 1/2/3's 79 tests remain green).
+- Compilation, import, `git diff --check`, fixture scan and post-commit independent adversarial checks all passed.
+- Phase 4 was accepted in the single local implementation commit recorded by this worktree; the final commit hash is reported by `git log -1` and the handoff message. The next optimization/recommendation plan must use a new worktree.

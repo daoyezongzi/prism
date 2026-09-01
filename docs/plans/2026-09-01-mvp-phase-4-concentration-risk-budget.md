@@ -1,6 +1,6 @@
 # MVP Phase 4 Working Plan：Concentration and Profile-conditioned Risk Budget
 
-- Status：`READY_FOR_IMPLEMENTATION`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target worktree：`D:\Github_Storage\prism-phase-4`

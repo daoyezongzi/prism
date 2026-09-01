@@ -28,7 +28,7 @@
 - [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
 - [x] Define portfolio and fund/ETF position import contracts.
 - [x] Calculate look-through technology exposure and data coverage.
-- [ ] Implement concentration, correlation, liquidity and risk-budget findings (Phase 4 plan ready; implementation not started).
+- [x] Implement concentration and profile-conditioned risk-budget findings; correlation, liquidity and optimization remain deferred.
 - [ ] Generate conservative, balanced and growth-oriented allocation ranges.
 - [ ] Show pre/post impact and recommendation invalidation conditions.
 - [ ] Prove that the same evidence produces materially different valid outputs for different profiles.
