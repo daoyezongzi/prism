@@ -510,8 +510,8 @@ def _metrics(
 
 
 def evaluate(case_ids: tuple[str, ...] | None = None, *, repeat: int = 1) -> EvaluationReport:
-    if repeat < 1 or repeat > 20:
-        raise ValueError("repeat must be between 1 and 20")
+    if repeat < 1 or repeat > 100:
+        raise ValueError("repeat must be between 1 and 100")
     cases_by_id = load_cases()
     selected_ids = tuple(case_ids or tuple(sorted(cases_by_id)))
     unknown = set(selected_ids) - set(cases_by_id)
@@ -544,7 +544,7 @@ def _parser() -> argparse.ArgumentParser:
         description="Run the fixed, local-only fixture-first MVP evaluation set."
     )
     parser.add_argument("--case", dest="case_ids", action="append", help="case ID to run; repeatable")
-    parser.add_argument("--repeat", type=int, default=1, help="semantic replay count (1-20)")
+    parser.add_argument("--repeat", type=int, default=1, help="semantic replay count (1-100)")
     parser.add_argument("--json", action="store_true", help="emit the versioned JSON report")
     return parser
 
