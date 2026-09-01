@@ -22,6 +22,7 @@
         <nav class="nav-list">
           <a class="nav-item active" href="#overview">Overview</a>
           <a class="nav-item" href="#advisor">Advisor</a>
+          <a class="nav-item" href="#research-tracks">Research Tracks</a>
           <a class="nav-item" href="#evidence">Evidence</a>
           <a class="nav-item" href="#profile">Risk Profile</a>
         </nav>
@@ -139,6 +140,26 @@
             </form>
             <div id="event-list" class="event-list" aria-live="polite">
               <div class="empty-state">输入 owner 后读取已保存的决策事件。</div>
+            </div>
+          </section>
+
+          <section class="panel research-panel" id="research-tracks" aria-labelledby="research-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">RESEARCH TRACKS</span>
+                <h2 id="research-title">四轨道研究矩阵</h2>
+              </div>
+              <span id="research-status" class="status-chip">待运行</span>
+            </div>
+            <div class="research-actions">
+              <div id="research-template-meta" class="query-meta">
+                运行时读取四轨道矩阵模板；研究结果不写入决策回执。
+              </div>
+              <button id="run-research-matrix" class="query-submit" type="button">运行研究矩阵</button>
+            </div>
+            <p class="research-boundary">Macro、Industry、Stock、ETF/Fund 只展示结构化研究状态与证据链；READY 不代表可交易建议。</p>
+            <div id="research-matrix-content" class="research-content" aria-live="polite">
+              <div class="empty-state">运行矩阵后查看四类节点、独立来源验证与 Finding → Fact → Evidence。</div>
             </div>
           </section>
 

@@ -19,9 +19,21 @@ from app.api.contracts import (
     DecisionEventListResponse,
     DecisionEventWriteResponse,
     ErrorResponse,
+    ResearchMatrixIssueResponse,
+    ResearchMatrixNodeResponse,
+    ResearchMatrixResponse,
+    ResearchMatrixTemplateResponse,
 )
 from app.recommendation import RecommendationCompositionResult
-from app.service import AdvisorQueryError, AdvisorQueryRequest, FixtureAdvisorQueryService
+from app.research import ResearchSpecialistMatrixRequest
+from app.service import (
+    AdvisorQueryError,
+    AdvisorQueryRequest,
+    FixtureAdvisorQueryService,
+    FixtureResearchSpecialistMatrixService,
+    SpecialistMatrixError,
+    SpecialistMatrixOutput,
+)
 from app.store import (
     DecisionEvent,
     DecisionEventStore,
@@ -50,11 +62,59 @@ def _owner_id_from_header(x_owner_id: str | None) -> str:
     return x_owner_id.strip()
 
 
+def _research_matrix_response(output: SpecialistMatrixOutput) -> ResearchMatrixResponse:
+    matrix_by_id = {node.node_id: node for node in output.matrix.nodes}
+    response_nodes: list[ResearchMatrixNodeResponse] = []
+    for node in output.execution.state.nodes:
+        matrix_node = matrix_by_id[node.node_id]
+        issues = [
+            ResearchMatrixIssueResponse(
+                code=issue.code.value,
+                safe_message=issue.safe_message,
+            )
+            for issue in node.issues
+        ]
+        if node.result is not None:
+            issues.extend(
+                ResearchMatrixIssueResponse(
+                    code=issue.code.value,
+                    safe_message=issue.safe_message,
+                )
+                for issue in node.result.issues
+            )
+        response_nodes.append(
+            ResearchMatrixNodeResponse(
+                node_id=node.node_id,
+                role=matrix_node.role,
+                node_kind=node.node_kind,
+                subject=matrix_node.subject,
+                required=node.required,
+                status=node.status,
+                started_at=node.started_at,
+                finished_at=node.finished_at,
+                issues=tuple(issues),
+            )
+        )
+    return ResearchMatrixResponse(
+        matrix_id=output.matrix.matrix_id,
+        request_id=output.request_id,
+        owner_id=output.owner_id,
+        run_id=output.execution.state.run_id,
+        run_status=output.execution.state.status,
+        pipeline_status=output.pipeline.status,
+        nodes=tuple(sorted(response_nodes, key=lambda item: item.node_id)),
+        validations=output.pipeline.validations,
+        issues=output.pipeline.issues,
+        trace=output.pipeline.trace,
+    )
+
+
 def create_app(
     store: DecisionEventStore | None = None,
     *,
     clock: Callable[[], datetime] | None = None,
     advisor_service: FixtureAdvisorQueryService | None = None,
+    specialist_service: FixtureResearchSpecialistMatrixService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -66,6 +126,7 @@ def create_app(
     active_store = store or SQLiteDecisionEventStore(":memory:")
     active_clock = clock or (lambda: datetime.now(UTC))
     active_advisor = advisor_service or FixtureAdvisorQueryService()
+    active_specialist = specialist_service or FixtureResearchSpecialistMatrixService()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -125,6 +186,12 @@ def create_app(
         _: Request, __: AdvisorQueryError
     ) -> JSONResponse:
         return _error_response(400, "ADVISOR_QUERY_ERROR", "advisor query was refused")
+
+    @api.exception_handler(SpecialistMatrixError)
+    async def specialist_matrix_error_handler(
+        _: Request, __: SpecialistMatrixError
+    ) -> JSONResponse:
+        return _error_response(400, "RESEARCH_MATRIX_ERROR", "research matrix was refused")
 
     @api.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
@@ -213,6 +280,48 @@ def create_app(
             questionnaire=template.questionnaire,
             portfolio=template.portfolio,
         )
+
+    @api.get(
+        "/api/v1/advisor/research-matrix-template",
+        response_model=ResearchMatrixTemplateResponse,
+    )
+    def get_research_matrix_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> ResearchMatrixTemplateResponse:
+        template = active_specialist.matrix_template(owner_id)
+        return ResearchMatrixTemplateResponse(
+            matrix_id=template.matrix_id,
+            owner_id=template.owner_id,
+            generated_at=template.generated_at,
+            scope_description=template.scope_description,
+            roles=tuple(sorted({node.role for node in template.nodes}, key=lambda item: item.value)),
+            node_count=len(template.nodes),
+        )
+
+    @api.post(
+        "/api/v1/advisor/research-runs",
+        response_model=ResearchMatrixResponse,
+    )
+    async def create_research_matrix_run(
+        request: ResearchSpecialistMatrixRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> ResearchMatrixResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("research request owner does not match owner scope")
+        try:
+            output = await active_specialist.run(request)
+        except SpecialistMatrixError:
+            raise
+        except Exception as exc:
+            raise SpecialistMatrixError("specialist matrix execution was refused") from exc
+        try:
+            if output.owner_id != owner_id:
+                raise SpecialistMatrixError("specialist matrix output owner drifted")
+            return _research_matrix_response(output)
+        except SpecialistMatrixError:
+            raise
+        except (AttributeError, KeyError, TypeError, ValidationError, ValueError) as exc:
+            raise SpecialistMatrixError("specialist matrix output was refused") from exc
 
     @api.get(
         "/api/v1/decision-events",

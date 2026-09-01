@@ -1,7 +1,15 @@
 (() => {
   "use strict";
 
-  const state = { ownerId: "", events: [], selected: null, queryTemplate: null };
+  const state = {
+    ownerId: "",
+    events: [],
+    selected: null,
+    queryTemplate: null,
+    researchTemplate: null,
+    researchRun: null,
+    researchSequence: 0,
+  };
   const byId = (id) => document.getElementById(id);
 
   function text(value, fallback = "—") {
@@ -23,6 +31,34 @@
     const node = byId("query-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
+  }
+
+  function researchStatusClass(status) {
+    return status === "READY" || status === "COMPLETED" || status === "COMPLETE" || status === "SUPPORTED"
+      ? "pass"
+      : status === "REVIEW_REQUIRED" || status === "PARTIAL" || status === "CONTRADICTED" || status === "UNRESOLVED" || status === "INSUFFICIENT"
+        ? "review"
+        : "blocked";
+  }
+
+  function researchStatusLabel(status) {
+    return status === "READY" ? "READY"
+      : status === "REVIEW_REQUIRED" ? "待复核"
+        : status === "BLOCKED" ? "已阻断"
+          : status === "COMPLETED" || status === "COMPLETE" ? "完成"
+            : status === "PARTIAL" ? "部分完成"
+              : status === "FAILED" ? "失败"
+                : status === "EMPTY" ? "无结果" : text(status, "待运行");
+  }
+
+  function setResearchStatus(message, className = "") {
+    const node = byId("research-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function researchRoleLabel(role) {
+    return role === "ETF_FUND" ? "ETF / Fund" : text(role);
   }
 
   function statusClass(status) {
@@ -232,6 +268,144 @@
     }
   }
 
+  function renderResearchMatrix(result) {
+    const panel = byId("research-matrix-content");
+    clear(panel);
+    if (!result) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "运行矩阵后查看四类节点、独立来源验证与 Finding → Fact → Evidence。";
+      panel.append(empty);
+      return;
+    }
+
+    const summary = document.createElement("div");
+    summary.className = "research-summary";
+    summary.append(
+      chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
+      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+    );
+    const summaryText = document.createElement("p");
+    summaryText.textContent = `${text(result.matrix_id)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summary.append(summaryText);
+    panel.append(summary);
+
+    const cards = document.createElement("div");
+    cards.className = "research-grid";
+    (result.nodes || []).forEach((node) => {
+      const card = document.createElement("article");
+      card.className = "research-card";
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = researchRoleLabel(node.role);
+      header.append(title, chip(researchStatusLabel(node.status), researchStatusClass(node.status)));
+      card.append(header);
+      const subject = document.createElement("div");
+      subject.className = "muted";
+      subject.textContent = text(node.subject);
+      card.append(subject);
+      const metadata = document.createElement("dl");
+      addMetadata(metadata, "Node", node.node_id);
+      addMetadata(metadata, "Kind", node.node_kind);
+      addMetadata(metadata, "Status", researchStatusLabel(node.status));
+      card.append(metadata);
+      if (node.issues && node.issues.length) {
+        const issues = document.createElement("ul");
+        issues.className = "research-issues";
+        node.issues.forEach((issue) => {
+          const item = document.createElement("li");
+          item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          issues.append(item);
+        });
+        card.append(issues);
+      }
+      cards.append(card);
+    });
+    panel.append(cards);
+
+    if (result.pipeline_status !== "READY") {
+      const notice = document.createElement("div");
+      notice.className = "notice error";
+      notice.textContent = "研究结果仍需复核，Prism 不展示未验证的 Fact/Finding，也不会生成可执行建议。";
+      panel.append(notice);
+      const issues = document.createElement("ul");
+      issues.className = "research-issues";
+      (result.issues || []).forEach((issue) => {
+        const item = document.createElement("li");
+        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issues.append(item);
+      });
+      if (issues.childElementCount) panel.append(issues);
+      return;
+    }
+
+    const validationHeading = document.createElement("h3");
+    validationHeading.textContent = "Independent lineage validation";
+    panel.append(validationHeading);
+    const validations = document.createElement("div");
+    validations.className = "research-validations";
+    (result.validations || []).forEach((validation) => {
+      const row = document.createElement("article");
+      row.className = "research-validation";
+      const title = document.createElement("strong");
+      title.textContent = `${text(validation.subject)} · ${text(validation.metric)}`;
+      row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
+      const meta = document.createElement("div");
+      meta.className = "validation-meta";
+      meta.textContent = `expected ${text(validation.expected_value)} ${text(validation.unit)} · ${text(validation.period)} · ${text(validation.independent_lineage_count)} independent lineages`;
+      row.append(meta);
+      if (validation.issues && validation.issues.length) {
+        const issues = document.createElement("ul");
+        issues.className = "validation-issues";
+        validation.issues.forEach((issue) => {
+          const item = document.createElement("li");
+          item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          issues.append(item);
+        });
+        row.append(issues);
+      }
+      validations.append(row);
+    });
+    panel.append(validations);
+
+    const evidenceHeading = document.createElement("h3");
+    evidenceHeading.textContent = "Finding → Fact → Evidence";
+    panel.append(evidenceHeading);
+    const evidencePanel = document.createElement("div");
+    evidencePanel.className = "research-evidence";
+    const evidenceById = new Map((result.trace && result.trace.evidence || []).map((item) => [item.evidence_id, item]));
+    const factsById = new Map((result.trace && result.trace.facts || []).map((item) => [item.fact_id, item]));
+    (result.trace && result.trace.findings || []).forEach((finding) => {
+      const details = document.createElement("details");
+      details.open = true;
+      const summaryLine = document.createElement("summary");
+      summaryLine.textContent = `${text(finding.kind)} · ${text(finding.statement)}`;
+      details.append(summaryLine);
+      const metadata = document.createElement("div");
+      metadata.className = "research-evidence-meta";
+      const findingLine = document.createElement("div");
+      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      metadata.append(findingLine);
+      (finding.fact_ids || []).forEach((factId) => {
+        const fact = factsById.get(factId);
+        if (!fact) return;
+        const factLine = document.createElement("div");
+        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        metadata.append(factLine);
+        (fact.evidence_ids || []).forEach((evidenceId) => {
+          const evidence = evidenceById.get(evidenceId);
+          if (!evidence) return;
+          const evidenceLine = document.createElement("div");
+          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          metadata.append(evidenceLine);
+        });
+      });
+      details.append(metadata);
+      evidencePanel.append(details);
+    });
+    if (evidencePanel.childElementCount) panel.append(evidencePanel);
+  }
+
   async function loadEvent(eventId) {
     setError("");
     try {
@@ -321,6 +495,62 @@
     }
   }
 
+  async function runResearchMatrix() {
+    state.ownerId = byId("owner-id").value.trim();
+    const requestOwner = state.ownerId;
+    const researchSequence = ++state.researchSequence;
+    const submit = byId("run-research-matrix");
+    if (!state.ownerId) {
+      setError("请输入 owner 标识。");
+      return;
+    }
+    setError("");
+    submit.disabled = true;
+    state.researchRun = null;
+    renderResearchMatrix(null);
+    setResearchStatus("运行中…");
+    try {
+      const templateResponse = await fetch("/api/v1/advisor/research-matrix-template", {
+        headers: { "X-Owner-ID": state.ownerId },
+      });
+      if (!templateResponse.ok) throw await apiError(templateResponse);
+      const template = await templateResponse.json();
+      if (state.ownerId !== requestOwner || state.researchSequence !== researchSequence) return;
+      state.researchTemplate = template;
+      byId("research-template-meta").textContent = `Matrix ${text(template.matrix_id)} · ${text(template.node_count)} nodes · generated_at ${text(template.generated_at)}`;
+      const response = await fetch("/api/v1/advisor/research-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": state.ownerId,
+        },
+        body: JSON.stringify({
+          schema_version: "research-specialist-matrix-request.v1",
+          matrix_id: template.matrix_id,
+          request_id: "ui-research-001",
+          owner_id: state.ownerId,
+          generated_at: template.generated_at,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.researchSequence !== researchSequence) return;
+      state.researchRun = await response.json();
+      setResearchStatus(
+        researchStatusLabel(state.researchRun.pipeline_status),
+        researchStatusClass(state.researchRun.pipeline_status),
+      );
+      renderResearchMatrix(state.researchRun);
+    } catch (error) {
+      if (state.ownerId !== requestOwner || state.researchSequence !== researchSequence) return;
+      state.researchRun = null;
+      renderResearchMatrix(null);
+      setResearchStatus("未运行", "blocked");
+      setError(error.message || "运行研究矩阵失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
   async function loadEvents() {
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
@@ -334,6 +564,12 @@
       state.queryTemplate = null;
       setQueryStatus("待运行");
       byId("query-template-meta").textContent = "运行时读取合成持仓模板；不会提交自然语言或订单。";
+      state.researchTemplate = null;
+      state.researchRun = null;
+      state.researchSequence += 1;
+      byId("research-template-meta").textContent = "运行时读取四轨道矩阵模板；研究结果不写入决策回执。";
+      setResearchStatus("待运行");
+      renderResearchMatrix(null);
     }
     try {
       const response = await fetch("/api/v1/decision-events", {
@@ -375,6 +611,7 @@
 
   byId("load-events").addEventListener("click", loadEvents);
   byId("advisor-query-form").addEventListener("submit", runAdvisorQuery);
+  byId("run-research-matrix").addEventListener("click", runResearchMatrix);
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
   });
