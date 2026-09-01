@@ -334,12 +334,70 @@ class FundResearchNodeResponse(ContractModel):
         for name, value in (("started_at", self.started_at), ("finished_at", self.finished_at)):
             if value is not None:
                 _aware(value, f"fund node {name}")
-        if self.started_at is None and self.finished_at is not None:
+        if (
+            self.started_at is None
+            and self.finished_at is not None
+            and self.status not in {
+                ResearchNodeRunStatus.FAILED,
+                ResearchNodeRunStatus.CANCELLED,
+            }
+        ):
             raise ValueError("fund node finished_at requires started_at")
         if self.started_at is not None and self.finished_at is not None and self.finished_at < self.started_at:
             raise ValueError("fund node finished_at must not precede started_at")
-        if self.status == ResearchNodeRunStatus.EMPTY and not self.scope_description:
-            raise ValueError("EMPTY fund node requires scope_description")
+
+        # Keep the public projection as strict as the underlying research run.
+        # A node state must not imply usable data while carrying a contradictory
+        # reason, nor hide a degraded state without an explicit explanation.
+        if self.status == ResearchNodeRunStatus.PENDING:
+            if (
+                self.started_at is not None
+                or self.finished_at is not None
+                or self.missing_fields
+                or self.scope_description
+                or self.issues
+            ):
+                raise ValueError("PENDING fund node must not carry runtime data")
+        elif self.status == ResearchNodeRunStatus.RUNNING:
+            if (
+                self.started_at is None
+                or self.finished_at is not None
+                or self.missing_fields
+                or self.scope_description
+                or self.issues
+            ):
+                raise ValueError("RUNNING fund node requires only started_at")
+        elif self.status == ResearchNodeRunStatus.COMPLETE:
+            if self.started_at is None or self.finished_at is None:
+                raise ValueError("COMPLETE fund node requires timestamps")
+            if self.missing_fields or self.issues:
+                raise ValueError("COMPLETE fund node must not carry missing/issues")
+        elif self.status == ResearchNodeRunStatus.PARTIAL:
+            if self.started_at is None or self.finished_at is None:
+                raise ValueError("PARTIAL fund node requires timestamps")
+            if not self.missing_fields and not self.issues:
+                raise ValueError("PARTIAL fund node requires missing_fields or issues")
+        elif self.status == ResearchNodeRunStatus.EMPTY:
+            if self.started_at is None or self.finished_at is None:
+                raise ValueError("EMPTY fund node requires timestamps")
+            if self.missing_fields or self.issues:
+                raise ValueError("EMPTY fund node must not carry missing/issues")
+            if not self.scope_description:
+                raise ValueError("EMPTY fund node requires scope_description")
+        elif self.status == ResearchNodeRunStatus.FAILED:
+            if self.finished_at is None:
+                raise ValueError("FAILED fund node requires finished_at")
+            if self.missing_fields:
+                raise ValueError("FAILED fund node must not carry missing_fields")
+            if not self.issues:
+                raise ValueError("FAILED fund node requires an issue")
+        elif self.status == ResearchNodeRunStatus.CANCELLED:
+            if self.finished_at is None:
+                raise ValueError("CANCELLED fund node requires finished_at")
+            if self.missing_fields:
+                raise ValueError("CANCELLED fund node must not carry missing_fields")
+            if not self.issues:
+                raise ValueError("CANCELLED fund node requires an issue")
         return self
 
 

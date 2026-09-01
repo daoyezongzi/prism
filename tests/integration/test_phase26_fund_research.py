@@ -2,10 +2,11 @@ from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from app.api import create_app
 from app.store import SQLiteDecisionEventStore
-from app.fund import FundResearchScenarioId
+from app.fund import FundResearchNodeResponse, FundResearchScenarioId
 
 
 NOW = datetime(2026, 9, 2, 2, tzinfo=UTC)
@@ -276,3 +277,56 @@ def test_fund_workbench_static_boundary_is_text_only_and_same_origin() -> None:
     assert "https://" not in page.text
     assert ".fund-fact-grid" in css.text
     store.close()
+
+
+def _node_projection_payload(**overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "node_id": "fund-research-source-a",
+        "required": True,
+        "status": "COMPLETE",
+        "started_at": NOW,
+        "finished_at": NOW,
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        _node_projection_payload(missing_fields=("expense_ratio_pct",)),
+        _node_projection_payload(
+            issues=(
+                {
+                    "code": "SOURCE_UNAVAILABLE",
+                    "safe_message": "source requires review",
+                },
+            )
+        ),
+        _node_projection_payload(status="PARTIAL"),
+        _node_projection_payload(status="EMPTY"),
+        _node_projection_payload(
+            status="EMPTY", scope_description="empty source", missing_fields=("metric",)
+        ),
+        _node_projection_payload(status="FAILED"),
+        _node_projection_payload(
+            status="FAILED",
+            issues=(
+                {"code": "SOURCE_UNAVAILABLE", "safe_message": "source failed"},
+            ),
+            missing_fields=("metric",),
+        ),
+        _node_projection_payload(status="PENDING", started_at=NOW),
+        _node_projection_payload(status="RUNNING", started_at=None, finished_at=None),
+        _node_projection_payload(
+            status="RUNNING",
+            issues=(
+                {"code": "SOURCE_UNAVAILABLE", "safe_message": "source requires review"},
+            ),
+        ),
+        _node_projection_payload(status="CANCELLED"),
+    ],
+)
+def test_fund_node_projection_rejects_contradictory_state(payload: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        FundResearchNodeResponse.model_validate(payload)
