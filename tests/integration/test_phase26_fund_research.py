@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.api import create_app
+from app.service import FixtureFundResearchService
 from app.store import SQLiteDecisionEventStore
 from app.fund import FundResearchNodeResponse, FundResearchScenarioId
 
@@ -12,9 +13,9 @@ from app.fund import FundResearchNodeResponse, FundResearchScenarioId
 NOW = datetime(2026, 9, 2, 2, tzinfo=UTC)
 
 
-def _client():
+def _client(*, fund_service: object | None = None):
     store = SQLiteDecisionEventStore(":memory:")
-    client = TestClient(create_app(store, clock=lambda: NOW))
+    client = TestClient(create_app(store, clock=lambda: NOW, fund_service=fund_service))
     return client, store
 
 
@@ -259,6 +260,35 @@ def test_fund_request_rejects_owner_scope_extra_sensitive_naive_unknown_and_wron
     )
     assert wrong_scope_response.status_code == 400
     assert wrong_scope_response.json()["error_code"] == "FUND_RESEARCH_ERROR"
+    store.close()
+
+
+def test_fund_api_revalidates_injected_output_and_rejects_scope_drift() -> None:
+    class DriftedFundService:
+        def __init__(self) -> None:
+            self._delegate = FixtureFundResearchService()
+
+        def template(self, owner_id: str):
+            return self._delegate.template(owner_id)
+
+        async def run(self, request):
+            result = await self._delegate.run(request)
+            return result.model_copy(update={"subject": "DRIFTED_FUND"})
+
+    client, store = _client(fund_service=DriftedFundService())
+    payload = _payload(request_id="phase26-injected-drift")
+    response = client.post(
+        "/api/v1/advisor/fund-research-runs",
+        headers={"X-Owner-ID": payload["owner_id"]},
+        json=payload,
+    )
+    assert response.status_code == 400
+    assert response.json() == {
+        "schema_version": "api-error.v1",
+        "error_code": "FUND_RESEARCH_ERROR",
+        "message": "fund research was refused",
+    }
+    assert "DRIFTED_FUND" not in response.text
     store.close()
 
 

@@ -570,12 +570,26 @@ def create_app(
         if request.owner_id != owner_id:
             raise StoreOwnerError("fund research request owner does not match owner scope")
         try:
-            output = await active_fund.run(request)
-            if not isinstance(output, FundResearchResponse) or output.owner_id != owner_id:
+            raw_output = await active_fund.run(request)
+            if not isinstance(raw_output, FundResearchResponse):
+                raise FundResearchError("fund research output type was invalid")
+            # Revalidate at the injection boundary.  A custom service or a
+            # model_copy(..., update=...) must not bypass the response contract.
+            output = FundResearchResponse.model_validate(
+                raw_output.model_dump(mode="python")
+            )
+            if output.owner_id != owner_id:
                 raise FundResearchError("fund research output owner drifted")
+            if (
+                output.request_id != request.request_id
+                or output.subject != request.subject
+                or output.period != request.period
+                or output.scenario.scenario_id != request.scenario_id
+            ):
+                raise FundResearchError("fund research output scope drifted")
         except FundResearchError:
             raise
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, ValidationError) as exc:
             raise FundResearchError("fund research execution was refused") from exc
         return output
 
