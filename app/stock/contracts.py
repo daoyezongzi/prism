@@ -13,6 +13,7 @@ from app.contracts.evidence import (
     ContractModel,
     DecisionTrace,
     Fact,
+    FactStatus,
     Finding,
     FindingSeverity,
     NonEmptyStr,
@@ -360,8 +361,23 @@ class StockResearchResponse(ContractModel):
             raise ValueError("stock response facts must be unique")
         if len({item.finding_id for item in self.findings}) != len(self.findings):
             raise ValueError("stock response findings must be unique")
+        validation_ids = [item.validation_id for item in self.validations]
+        if len(validation_ids) != len(set(validation_ids)):
+            raise ValueError("stock response validations must be unique")
         if any(item.owner_id != self.owner_id for item in self.validations):
             raise ValueError("stock response validation owner does not match")
+        if any(
+            item.subject != self.subject
+            or item.unit is None
+            or item.period != self.period
+            for item in self.validations
+        ):
+            raise ValueError("stock response validation scope does not match")
+        if any(
+            fact.subject != self.subject or fact.period != self.period
+            for fact in self.facts
+        ):
+            raise ValueError("stock response fact scope does not match")
         if self.trace.recommendations:
             raise ValueError("stock research response must not contain recommendations")
         if self.trace.facts != self.facts:
@@ -373,10 +389,23 @@ class StockResearchResponse(ContractModel):
                 raise ValueError("READY stock response requires completed run")
             if not self.facts or not self.findings:
                 raise ValueError("READY stock response requires facts and findings")
+            if any(fact.status != FactStatus.VERIFIED for fact in self.facts):
+                raise ValueError("READY stock response requires VERIFIED facts")
             if self.issues:
                 raise ValueError("READY stock response must not carry issues")
             if self.risk.status == StockRiskStatus.NOT_ASSESSED:
                 raise ValueError("READY stock response requires an assessed risk")
+            finding_by_id = {item.finding_id: item for item in self.findings}
+            risk_findings = [finding_by_id[item] for item in self.risk.finding_ids]
+            if self.risk.status == StockRiskStatus.HIGH_RISK and not any(
+                item.severity == FindingSeverity.CRITICAL for item in risk_findings
+            ):
+                raise ValueError("HIGH_RISK stock response requires a CRITICAL finding")
+            if self.risk.status == StockRiskStatus.WATCH and not any(
+                item.severity in {FindingSeverity.WARNING, FindingSeverity.CRITICAL}
+                for item in risk_findings
+            ):
+                raise ValueError("WATCH stock response requires a warning finding")
         else:
             if self.facts or self.findings:
                 raise ValueError("non-ready stock response must not expose facts/findings")

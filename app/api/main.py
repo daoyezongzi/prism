@@ -527,12 +527,12 @@ def create_app(
             raise StoreOwnerError("stock research request owner does not match owner scope")
         try:
             output = await active_stock.run(request)
+            if not isinstance(output, StockResearchResponse) or output.owner_id != owner_id:
+                raise StockResearchError("stock research output owner drifted")
         except StockResearchError:
             raise
         except Exception as exc:
             raise StockResearchError("stock research execution was refused") from exc
-        if output.owner_id != owner_id:
-            raise StockResearchError("stock research output owner drifted")
         return output
 
     @api.get(
