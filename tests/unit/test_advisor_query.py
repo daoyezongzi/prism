@@ -148,3 +148,21 @@ def test_fixture_query_refuses_completed_evidence_that_drifts_from_manifest() ->
         service = FixtureAdvisorQueryService(provider_dir=provider_dir)
         with pytest.raises(AdvisorQueryError, match="integrity"):
             asyncio.run(service.run(_request(query_id="unit-integrity-drift-001")))
+
+
+def test_query_template_rebinds_every_nested_owner() -> None:
+    template = FixtureAdvisorQueryService().query_template("ui-owner-001")
+    assert template.fixture_id == FIXTURE_ID
+    assert template.questionnaire.owner_id == "ui-owner-001"
+    assert template.portfolio.owner_id == "ui-owner-001"
+    assert template.portfolio.position_snapshot.owner_id == "ui-owner-001"
+    assert all(
+        position.owner_id == "ui-owner-001"
+        for position in template.portfolio.position_snapshot.positions
+    )
+    assert all(snapshot.owner_id == "ui-owner-001" for snapshot in template.portfolio.fund_holdings)
+
+
+def test_query_template_rejects_sensitive_owner() -> None:
+    with pytest.raises(AdvisorQueryError, match="refused"):
+        FixtureAdvisorQueryService().query_template("api_key-owner")

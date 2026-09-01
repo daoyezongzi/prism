@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 from app.api.contracts import (
     AdvisorQueryResponse,
+    AdvisorQueryTemplateResponse,
     DecisionEventListResponse,
     DecisionEventWriteResponse,
     ErrorResponse,
@@ -196,6 +197,21 @@ def create_app(
             status=output.status.value,
             created=created,
             event=stored,
+        )
+
+    @api.get(
+        "/api/v1/advisor/query-template",
+        response_model=AdvisorQueryTemplateResponse,
+    )
+    def get_advisor_query_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorQueryTemplateResponse:
+        template = active_advisor.query_template(owner_id)
+        return AdvisorQueryTemplateResponse(
+            fixture_id=template.fixture_id,
+            generated_at=template.generated_at,
+            questionnaire=template.questionnaire,
+            portfolio=template.portfolio,
         )
 
     @api.get(

@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal, Self
 
-from app.contracts.evidence import ContractModel
+from app.contracts.evidence import ContractModel, NonEmptyStr
 from app.gates import GateStatus
 from app.store import DecisionEvent, DecisionEventSummary
+from app.portfolio import PortfolioImportBundle
+from app.profile import RiskQuestionnaire
 from app.service import AdvisorQueryRequest
-from app.contracts.evidence import NonEmptyStr
 from pydantic import model_validator
 
 
@@ -59,10 +61,29 @@ class AdvisorQueryResponse(ContractModel):
         return self
 
 
+class AdvisorQueryTemplateResponse(ContractModel):
+    schema_version: Literal["advisor-query-template.v1"] = (
+        "advisor-query-template.v1"
+    )
+    fixture_id: NonEmptyStr
+    generated_at: datetime
+    questionnaire: RiskQuestionnaire
+    portfolio: PortfolioImportBundle
+
+    @model_validator(mode="after")
+    def validate_template_response(self) -> Self:
+        if self.generated_at.tzinfo is None or self.generated_at.utcoffset() is None:
+            raise ValueError("generated_at must be timezone-aware")
+        if self.questionnaire.owner_id != self.portfolio.owner_id:
+            raise ValueError("template response owners must match")
+        return self
+
+
 __all__ = [
     "DecisionEventListResponse",
     "DecisionEventWriteResponse",
     "AdvisorQueryResponse",
+    "AdvisorQueryTemplateResponse",
     "ErrorResponse",
     "AdvisorQueryRequest",
 ]

@@ -25,7 +25,7 @@ from app.orchestration import (
     create_research_run,
     execute_research_run,
 )
-from app.portfolio import calculate_exposure
+from app.portfolio import PortfolioImportBundle, calculate_exposure
 from app.profile import (
     RiskProfile,
     build_profile_draft,
@@ -40,13 +40,18 @@ from app.providers import (
 from app.recommendation import compose_recommendations
 from app.research import ResearchNodeKind, ValidationClaim
 from app.risk import assess_risk_budget, calculate_concentration
-from app.service.contracts import AdvisorQueryOutput, AdvisorQueryRequest
+from app.service.contracts import (
+    AdvisorQueryOutput,
+    AdvisorQueryRequest,
+    AdvisorQueryTemplate,
+)
 from app.store.contracts import build_decision_event
 
 
 _DEFAULT_FIXTURE_ROOT = Path(__file__).resolve().parent.parent / "fixtures" / "advisor"
 _DEFAULT_MANIFEST = _DEFAULT_FIXTURE_ROOT / "two_lineage_research.json"
 _DEFAULT_PROVIDER_DIR = _DEFAULT_FIXTURE_ROOT / "providers"
+_DEFAULT_TEMPLATE = _DEFAULT_FIXTURE_ROOT / "query_template.json"
 
 
 class AdvisorQueryError(RuntimeError):
@@ -146,12 +151,22 @@ class FixtureAdvisorQueryService:
         *,
         manifest_path: str | Path = _DEFAULT_MANIFEST,
         provider_dir: str | Path = _DEFAULT_PROVIDER_DIR,
+        template_path: str | Path = _DEFAULT_TEMPLATE,
     ) -> None:
         self._manifest_path = Path(manifest_path)
         self._provider_dir = Path(provider_dir)
+        self._template_path = Path(template_path)
         try:
-            payload = json.loads(self._manifest_path.read_text(encoding="utf-8"))
-            self._manifest = _FixtureManifest.model_validate(payload)
+            manifest_payload = json.loads(
+                self._manifest_path.read_text(encoding="utf-8")
+            )
+            template_payload = json.loads(
+                self._template_path.read_text(encoding="utf-8")
+            )
+            self._manifest = _FixtureManifest.model_validate(manifest_payload)
+            self._template = AdvisorQueryTemplate.model_validate(template_payload)
+            if self._template.fixture_id != self._manifest.fixture_id:
+                raise ValueError("advisor template fixture does not match manifest")
         except Exception as exc:
             raise AdvisorQueryError("advisor fixture could not be loaded") from exc
         if not self._provider_dir.exists() or not self._provider_dir.is_dir():
@@ -160,6 +175,57 @@ class FixtureAdvisorQueryService:
     @property
     def fixture_id(self) -> str:
         return self._manifest.fixture_id
+
+    @staticmethod
+    def _rebind_portfolio_owner(
+        portfolio: PortfolioImportBundle,
+        owner_id: str,
+    ) -> PortfolioImportBundle:
+        position_snapshot = portfolio.position_snapshot
+        rebound_positions = tuple(
+            position.model_copy(update={"owner_id": owner_id})
+            for position in position_snapshot.positions
+        )
+        rebound_snapshot = position_snapshot.model_copy(
+            update={"owner_id": owner_id, "positions": rebound_positions}
+        )
+        rebound_funds = tuple(
+            snapshot.model_copy(
+                update={
+                    "owner_id": owner_id,
+                    "holdings": tuple(snapshot.holdings),
+                }
+            )
+            for snapshot in portfolio.fund_holdings
+        )
+        return portfolio.model_copy(
+            update={
+                "owner_id": owner_id,
+                "position_snapshot": rebound_snapshot,
+                "fund_holdings": rebound_funds,
+            }
+        )
+
+    def query_template(self, owner_id: str) -> AdvisorQueryTemplate:
+        """Return synthetic defaults rebound and revalidated for one owner."""
+
+        try:
+            questionnaire = self._template.questionnaire.model_copy(
+                update={"owner_id": owner_id}
+            )
+            portfolio = self._rebind_portfolio_owner(
+                self._template.portfolio,
+                owner_id,
+            )
+            return AdvisorQueryTemplate.model_validate(
+                {
+                    **self._template.model_dump(mode="python"),
+                    "questionnaire": questionnaire,
+                    "portfolio": portfolio,
+                }
+            )
+        except Exception as exc:
+            raise AdvisorQueryError("advisor query template was refused") from exc
 
     def _profile(self, request: AdvisorQueryRequest) -> RiskProfile:
         try:

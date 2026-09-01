@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const state = { ownerId: "", events: [], selected: null };
+  const state = { ownerId: "", events: [], selected: null, queryTemplate: null };
   const byId = (id) => document.getElementById(id);
 
   function text(value, fallback = "—") {
@@ -17,6 +17,12 @@
     const node = byId("global-error");
     node.textContent = message;
     node.hidden = !message;
+  }
+
+  function setQueryStatus(message, className = "") {
+    const node = byId("query-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
   }
 
   function statusClass(status) {
@@ -248,12 +254,86 @@
     }
   }
 
-  async function loadEvents() {
+  async function runAdvisorQuery(event) {
+    event.preventDefault();
     state.ownerId = byId("owner-id").value.trim();
+    const queryId = byId("query-id").value.trim();
+    const submit = byId("run-advisor-query");
+    if (!state.ownerId) {
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (!queryId) {
+      setError("请输入 query ID。");
+      return;
+    }
+    setError("");
+    submit.disabled = true;
+    setQueryStatus("运行中…");
+    try {
+      const templateResponse = await fetch("/api/v1/advisor/query-template", {
+        headers: { "X-Owner-ID": state.ownerId },
+      });
+      if (!templateResponse.ok) throw await apiError(templateResponse);
+      const template = await templateResponse.json();
+      state.queryTemplate = template;
+      byId("query-template-meta").textContent = `Fixture ${text(template.fixture_id)} · generated_at ${text(template.generated_at)} · 合成持仓模板`;
+
+      const questionnaire = {
+        ...template.questionnaire,
+        questionnaire_id: `${queryId}-questionnaire`,
+        owner_id: state.ownerId,
+        answered_at: template.generated_at,
+        loss_tolerance_score: Number(byId("loss-tolerance").value),
+        investment_horizon: byId("investment-horizon").value,
+        liquidity_need: byId("liquidity-need").value,
+        experience_level: byId("experience-level").value,
+        return_expectation: byId("return-expectation").value,
+        max_drawdown_tolerance_pct: byId("max-drawdown").value,
+      };
+      const payload = {
+        schema_version: "advisor-query.v1",
+        query_id: queryId,
+        fixture_id: template.fixture_id,
+        generated_at: template.generated_at,
+        questionnaire,
+        portfolio: template.portfolio,
+      };
+      const response = await fetch("/api/v1/advisor/queries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": state.ownerId,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw await apiError(response);
+      const result = await response.json();
+      const createdLabel = result.created ? "已保存" : "已复用";
+      setQueryStatus(`${statusLabel(result.status)} · ${createdLabel}`, statusClass(result.status));
+      await loadEvents();
+      if (result.event && result.event.event_id) await loadEvent(result.event.event_id);
+    } catch (error) {
+      setQueryStatus("未运行", "blocked");
+      setError(error.message || "运行 Advisor 查询失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  async function loadEvents() {
+    const nextOwnerId = byId("owner-id").value.trim();
+    const ownerChanged = nextOwnerId !== state.ownerId;
+    state.ownerId = nextOwnerId;
     setError("");
     if (!state.ownerId) {
       setError("请输入 owner 标识。");
       return;
+    }
+    if (ownerChanged) {
+      state.queryTemplate = null;
+      setQueryStatus("待运行");
+      byId("query-template-meta").textContent = "运行时读取合成持仓模板；不会提交自然语言或订单。";
     }
     try {
       const response = await fetch("/api/v1/decision-events", {
@@ -294,6 +374,7 @@
   }
 
   byId("load-events").addEventListener("click", loadEvents);
+  byId("advisor-query-form").addEventListener("submit", runAdvisorQuery);
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
   });

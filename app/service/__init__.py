@@ -7,11 +7,13 @@ from app.service.advisor_query import (
 from app.service.contracts import (
     AdvisorQueryOutput,
     AdvisorQueryRequest,
+    AdvisorQueryTemplate,
 )
 
 __all__ = [
     "AdvisorQueryError",
     "AdvisorQueryOutput",
     "AdvisorQueryRequest",
+    "AdvisorQueryTemplate",
     "FixtureAdvisorQueryService",
 ]

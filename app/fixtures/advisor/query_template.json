@@ -1,0 +1,104 @@
+{
+  "schema_version": "advisor-query-template.v1",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "questionnaire": {
+    "schema_version": "risk-questionnaire.v1",
+    "questionnaire_id": "ui-template-questionnaire-001",
+    "owner_id": "demo-owner",
+    "answered_at": "2026-09-02T00:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20",
+    "expected_return_range": null
+  },
+  "portfolio": {
+    "schema_version": "portfolio-import-bundle.v1",
+    "bundle_id": "ui-template-bundle-001",
+    "owner_id": "demo-owner",
+    "created_at": "2026-09-02T00:00:00Z",
+    "position_snapshot": {
+      "schema_version": "position-snapshot.v1",
+      "snapshot_id": "ui-template-position-snapshot-001",
+      "owner_id": "demo-owner",
+      "as_of": "2026-08-31T16:00:00Z",
+      "base_currency": "CNY",
+      "source": "synthetic-advisor-template",
+      "positions": [
+        {
+          "position_id": "ui-template-position-etf-001",
+          "owner_id": "demo-owner",
+          "asset_id": "ui-template-etf-001",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Balanced ETF",
+          "quantity": "1",
+          "market_value": "1000",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-advisor-template"
+        }
+      ]
+    },
+    "fund_holdings": [
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "ui-template-fund-snapshot-001",
+        "owner_id": "demo-owner",
+        "parent_asset_id": "ui-template-etf-001",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-advisor-template",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "ui-template-holding-tech",
+            "parent_asset_id": "ui-template-etf-001",
+            "underlying_asset_id": "ui-template-stock-tech",
+            "underlying_name": "Synthetic Technology Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Technology",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-advisor-template"
+          },
+          {
+            "holding_id": "ui-template-holding-health",
+            "parent_asset_id": "ui-template-etf-001",
+            "underlying_asset_id": "ui-template-stock-health",
+            "underlying_name": "Synthetic Healthcare Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Healthcare",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-advisor-template"
+          },
+          {
+            "holding_id": "ui-template-holding-finance",
+            "parent_asset_id": "ui-template-etf-001",
+            "underlying_asset_id": "ui-template-stock-finance",
+            "underlying_name": "Synthetic Finance Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Finance",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-advisor-template"
+          },
+          {
+            "holding_id": "ui-template-holding-industrials",
+            "parent_asset_id": "ui-template-etf-001",
+            "underlying_asset_id": "ui-template-stock-industrials",
+            "underlying_name": "Synthetic Industrials Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Industrials",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-advisor-template"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -65,6 +65,29 @@ class AdvisorQueryRequest(ContractModel):
         return self
 
 
+class AdvisorQueryTemplate(ContractModel):
+    """Synthetic, owner-rebindable defaults for the local Advisor workbench."""
+
+    schema_version: Literal["advisor-query-template.v1"] = (
+        "advisor-query-template.v1"
+    )
+    fixture_id: QueryIdentifier
+    generated_at: datetime
+    questionnaire: RiskQuestionnaire
+    portfolio: PortfolioImportBundle
+
+    @model_validator(mode="after")
+    def validate_template(self) -> Self:
+        if self.generated_at.tzinfo is None or self.generated_at.utcoffset() is None:
+            raise ValueError("generated_at must be timezone-aware")
+        if self.questionnaire.owner_id != self.portfolio.owner_id:
+            raise ValueError("template questionnaire and portfolio must share one owner")
+        serialized = self.model_dump_json().casefold()
+        if any(item in serialized for item in _SENSITIVE_SUBSTRINGS):
+            raise ValueError("advisor template must not contain sensitive fields")
+        return self
+
+
 class AdvisorQueryOutput(ContractModel):
     """Safe service output bound to the submitted query and composed result."""
 
@@ -97,4 +120,9 @@ class AdvisorQueryOutput(ContractModel):
         return self
 
 
-__all__ = ["AdvisorQueryOutput", "AdvisorQueryRequest", "QueryIdentifier"]
+__all__ = [
+    "AdvisorQueryOutput",
+    "AdvisorQueryRequest",
+    "AdvisorQueryTemplate",
+    "QueryIdentifier",
+]
