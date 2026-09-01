@@ -484,7 +484,10 @@ class ConvertibleBondResearchResponse(ContractModel):
     run_id: NonEmptyStr
     run_status: ResearchRunStatus
     pipeline_status: ResearchPipelineStatus
-    nodes: tuple[ConvertibleBondResearchNodeResponse, ...] = Field(min_length=2)
+    nodes: tuple[ConvertibleBondResearchNodeResponse, ...] = Field(
+        min_length=2,
+        max_length=2,
+    )
     validations: tuple[CrossValidationResult, ...] = Field(default_factory=tuple)
     facts: tuple[Fact, ...] = Field(default_factory=tuple)
     findings: tuple[Finding, ...] = Field(default_factory=tuple)
@@ -508,6 +511,8 @@ class ConvertibleBondResearchResponse(ContractModel):
         node_ids = [item.node_id for item in self.nodes]
         if node_ids != sorted(node_ids) or len(node_ids) != len(set(node_ids)):
             raise ValueError("convertible response nodes must be unique and sorted")
+        if any(not item.required for item in self.nodes):
+            raise ValueError("convertible response nodes must be required")
         validation_ids = [item.validation_id for item in self.validations]
         if len(validation_ids) != len(set(validation_ids)):
             raise ValueError("convertible response validations must be unique")
@@ -516,6 +521,10 @@ class ConvertibleBondResearchResponse(ContractModel):
             raise ValueError("convertible response validations must contain one row per raw metric")
         raw_metrics = set(CONVERTIBLE_BOND_RAW_METRICS)
         all_metrics = set(CONVERTIBLE_BOND_METRIC_UNITS)
+        if validation_metrics != sorted(validation_metrics):
+            raise ValueError("convertible response validations must be sorted")
+        if set(validation_metrics) != raw_metrics:
+            raise ValueError("convertible response validations must contain every raw metric")
         if any(item.owner_id != self.owner_id for item in self.validations):
             raise ValueError("convertible response validation owner does not match")
         if any(item.subject != self.subject or item.period != self.period or item.metric not in raw_metrics or item.unit != CONVERTIBLE_BOND_METRIC_UNITS[item.metric] for item in self.validations):

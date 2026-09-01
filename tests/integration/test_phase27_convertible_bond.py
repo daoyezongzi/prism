@@ -384,6 +384,30 @@ def test_convertible_response_rejects_forged_formula_values_and_duplicate_metric
         ConvertibleBondResearchResponse.model_validate(
             original.model_copy(update={"facts": duplicate_facts, "trace": duplicate_trace}).model_dump(mode="python")
         )
+
+    with pytest.raises(ValidationError):
+        ConvertibleBondResearchResponse.model_validate(
+            original.model_copy(
+                update={"validations": original.validations[:1]}
+            ).model_dump(mode="python")
+        )
+
+    optional_node = original.nodes[0].model_copy(update={"required": False})
+    with pytest.raises(ValidationError):
+        ConvertibleBondResearchResponse.model_validate(
+            original.model_copy(
+                update={
+                    "nodes": tuple(sorted((optional_node, original.nodes[1]), key=lambda item: item.node_id))
+                }
+            ).model_dump(mode="python")
+        )
+
+    with pytest.raises(ValidationError):
+        ConvertibleBondResearchResponse.model_validate(
+            original.model_copy(
+                update={"nodes": original.nodes + (original.nodes[0],)}
+            ).model_dump(mode="python")
+        )
     store.close()
 
 
