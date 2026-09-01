@@ -4,7 +4,9 @@
 >
 > Source of truth for product scope: [Prism.md](Prism.md)
 >
-> Active execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
+> Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
+>
+> Active delegated phase: [MVP Phase 1 Provider Protocol](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md)
 
 ## P0 — Foundation
 
@@ -14,7 +16,7 @@
 - [x] Implement the first Evidence/Fact/Finding/Recommendation contract.
 - [x] Test missing data, stale evidence, reference closure and blocked decisions.
 - [ ] Define a fixture-first Provider Protocol with distinct `SUCCESS`, `PARTIAL`, `EMPTY`, and `FAILED` results.
-- [ ] Add deterministic provider request IDs, time budgets and redacted diagnostics.
+- [ ] Add per-call correlation IDs, deterministic request fingerprints, time budgets and redacted diagnostics.
 - [ ] Add recorded, synthetic Wencai/Tushare fixtures without credentials or private data.
 - [ ] Define schema versioning and Decision Receipt content hashes.
 - [ ] Add PostgreSQL-oriented storage models and migrations for owner-isolated profiles, evidence and decision events.
@@ -60,4 +62,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Implement and test the fixture-first Provider Protocol. It should make provider failure semantics executable before any live SkillHub credential is introduced.
+Dispatch the [MVP Phase 1 execution contract](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md) to Gemini. After Gemini returns, independently review its allowed-file scope, contract invariants, tests, commit and clean repository state before accepting Phase 1.

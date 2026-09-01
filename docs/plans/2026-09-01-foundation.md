@@ -34,10 +34,10 @@
 
 ### Phase 1：可信数据底座
 
-- 完成 Evidence/Fact/Finding/Recommendation 契约；
-- 建立 Provider 基类、Wencai/Tushare 适配器和失败分类；
-- 建立数据库迁移、用户隔离和决策事件模型；
-- 同时建立 100 用户负载测试骨架，而不是最后补测。
+- Phase 1A：完成 Evidence/Fact/Finding/Recommendation 契约，并按 [Gemini 执行合同](2026-09-01-mvp-phase-1-provider-protocol.md) 建立 fixture-first Provider Protocol、失败分类与并发隔离 smoke test；
+- Phase 1B：在取得接口材料后建立 Wencai/Tushare live adapters；
+- Phase 1B：建立数据库迁移、用户隔离和决策事件模型；
+- Phase 1B：扩展 100 用户负载测试骨架，而不是最后补测。
 
 退出门槛：缺失、无效、不适用和 Provider 失败在契约及 API 中可区分；所有可行动建议能闭包到有效证据。
 
@@ -98,4 +98,5 @@
 - Git 仓库已初始化；
 - Reuse Matrix 与 ADR 已落盘；
 - Evidence Contract 首版已实现并通过 8 项单元测试；
-- 下一项是 Provider Protocol 与录制 fixture 方案，但真实 SkillHub 接入受专用材料约束。
+- MVP Phase 1A Provider Protocol 执行合同已就绪，等待 Gemini 在独立分支实施；
+- 真实 SkillHub 接入仍受专用材料约束，不属于 Phase 1A。

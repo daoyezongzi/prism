@@ -72,6 +72,7 @@ python -m pytest
 - [复用矩阵](docs/reuse-matrix.md)
 - [架构决策 ADR-0001](docs/adr/0001-modular-monolith.md)
 - [当前实施计划](docs/plans/2026-09-01-foundation.md)
+- [Gemini Phase 1 执行合同](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

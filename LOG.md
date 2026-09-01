@@ -42,3 +42,29 @@ This verifies only the initial domain contract. No real SkillHub request, financ
 - Competition-specific SkillHub interface and usage authorization are not present in the repository.
 - The scoring appendix referenced in the brief is not present in the repository.
 - Storage, Provider, profile, research, portfolio, risk, compliance, API and Web workbench remain unimplemented.
+
+## 2026-09-01 — Gemini MVP Phase 1 delegation contract
+
+### Decision
+
+- Gemini may execute the overall MVP route one accepted phase at a time; it does not own or rewrite the route in `Prism.md`.
+- The first delegated phase is narrowed to the fixture-first Provider boundary. Live SkillHub, storage, profile, research, portfolio and UI are explicitly excluded.
+- Each Gemini phase must run on an isolated branch/worktree, satisfy an executable acceptance contract, create a local commit without pushing, and return evidence for independent review.
+- Provider call identity is split into a per-call `request_id` and a deterministic semantic `request_fingerprint`; credentials are excluded from both fixtures and fingerprints.
+
+### Artifact
+
+- Added `docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md` as the copy-ready Gemini execution contract.
+- The contract defines allowed files, four-state invariants, fixture data, timeout/redaction behavior, Evidence conversion, a 100-request isolation smoke test, stop conditions and the required handoff format.
+
+### Current evidence boundary
+
+- This change is planning only. No Provider implementation or real external request has been added.
+- Phase 1 remains incomplete until Gemini's implementation is independently reviewed and accepted.
+
+### Verification
+
+- Existing baseline: `python -m pytest` -> 8 passed.
+- Python compilation: passed.
+- Local Markdown link validation: passed.
+- Staged diff check: passed.
