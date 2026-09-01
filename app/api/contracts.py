@@ -22,6 +22,7 @@ from app.research import (
 )
 from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
+from app.providers import FrozenDict
 from app.profile import (
     ConflictResolution,
     ProfileDraft,
@@ -257,8 +258,12 @@ class AdvisorProfileConfirmationRequest(ContractModel):
     def validate_request(self) -> Self:
         if self.questionnaire.owner_id != self.extraction.owner_id:
             raise ValueError("profile confirmation owners must match")
-        if any(not isinstance(key, str) or not key.strip() for key in self.resolutions):
-            raise ValueError("profile confirmation conflict IDs must be non-empty")
+        normalized_resolutions: dict[str, ConflictResolution] = {}
+        for key, value in self.resolutions.items():
+            if not isinstance(key, str) or not key.strip() or key != key.strip():
+                raise ValueError("profile confirmation conflict IDs must be non-empty")
+            normalized_resolutions[key] = ConflictResolution(value)
+        object.__setattr__(self, "resolutions", FrozenDict(normalized_resolutions))
         _validate_context_payload_safety(
             self.model_dump_json(), "profile confirmation request"
         )

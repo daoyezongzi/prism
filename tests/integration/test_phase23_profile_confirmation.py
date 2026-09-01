@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.api import create_app
+from app.api.contracts import AdvisorProfileConfirmationRequest
 from app.profile import ProfileExtractionProposal
 from app.store import SQLiteDecisionEventStore
 
@@ -177,6 +178,16 @@ def test_no_conflict_proposal_still_requires_explicit_confirmation() -> None:
     )
     assert confirmed.status_code == 200
     assert confirmed.json()["profile"]["risk_level"] == "BALANCED"
+    confirmation_model = AdvisorProfileConfirmationRequest.model_validate(
+        {
+            "schema_version": "advisor-profile-confirmation-request.v1",
+            "questionnaire": template["questionnaire"],
+            "extraction": extraction,
+            "resolutions": {},
+        }
+    )
+    with pytest.raises(TypeError):
+        confirmation_model.resolutions["new-conflict"] = "USE_EXTRACTION"
     assert store.list(OWNER) == ()
     store.close()
 
