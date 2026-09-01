@@ -45,6 +45,9 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 14 已实现 API 触发的 fixture-first Advisor 纵切：结构化风险问卷与持仓进入 Profile→Exposure→Risk Budget→Allocation→Research→Evidence/Finding→双闸门→HOLD/REDUCE→Decision Receipt，并以幂等 DecisionEvent 返回；固定 `generated_at` 支持确定性重放。
 - Phase 14 的脱敏 fixture 覆盖 BALANCED/HOLD、CONSERVATIVE/REDUCE 与研究退化 REVIEW_REQUIRED；工作台可读取并展开新事件，不展示原始 Provider 或私有持仓。
 - Phase 14 已通过 `238` 项全量回归、打包/边界检查、100 次确定性并发复核和真实浏览器验收；当前 worktree `HEAD` 在本地接受，未推送。
+- Phase 15 已把 Advisor Query 接成结构化表单工作台：模板按 owner 重绑定，表单触发既有
+  fixture-first 纵切，支持 BALANCED/HOLD、CONSERVATIVE/REDUCE、回执复用和 Evidence
+  展开；`243` 项回归与真实浏览器路径已通过，仍明确是离线合成演示。
 
 尚未实现：
 
@@ -119,6 +122,8 @@ python -m pytest
 - [Phase 13 Decision Events API 与工作台](docs/decision-events-api.md)
 - [Phase 14 Advisor Query API 与 Fixture 边界](docs/advisor-query-api.md)
 - [Phase 14 Advisor Query/Profile/Portfolio 计划](docs/plans/2026-09-02-mvp-phase-14-advisor-query-profile-portfolio.md)
+- [Phase 15 Advisor Query 结构化工作台](docs/advisor-query-workbench.md)
+- [Phase 15 结构化工作台计划与验收](docs/plans/2026-09-02-mvp-phase-15-advisor-query-workbench.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

@@ -28,7 +28,9 @@ app/
 新增 `app/store` 的 owner-scoped SQLite 决策事件 adapter 和 `app/api` 的
 FastAPI/静态工作台边界；Phase 14 新增 `app/service` 的结构化 fixture-first
 Advisor query 编排，并把结果保存回同一 DecisionEvent 边界。真实认证、
-PostgreSQL、SkillHub 网络和生产级 Provider 仍未实现。
+PostgreSQL、SkillHub 网络和生产级 Provider 仍未实现。Phase 15 在同一边界上增加
+owner-scoped query template 与结构化表单；它不改变服务端决策链，也不引入自然语言
+或交易入口。
 
 ## 数据流
 

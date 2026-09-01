@@ -525,3 +525,34 @@ Independent post-commit adversarial review and final acceptance are still pendin
 - Phase 14 is accepted locally at the current worktree `HEAD`. No push was
   performed; the next phase
   must start in a new worktree with a plan committed before implementation.
+
+## 2026-09-02 — MVP Phase 15 structured Advisor Query workbench
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-15` on branch
+  `codex/mvp-phase-15-query-workbench` from the accepted Phase 14 tree.
+- Committed the plan before implementation as `765d64c`. Scope is a structured,
+  owner-scoped query form and packaged synthetic template; live Provider access,
+  authentication, LLM/chat, CRUD, new financial rules and orders remain out of scope.
+
+### Implemented locally
+
+- Added a validated `AdvisorQueryTemplate` contract and packaged two-lineage synthetic
+  query template. The service rebinds every owner-bearing nested model and rejects
+  sensitive or mismatched templates.
+- Added `GET /api/v1/advisor/query-template` and a form with explicit risk, horizon,
+  liquidity, experience, return-expectation and drawdown fields. Submission reuses the
+  Phase 14 `AdvisorQueryRequest`/service/store chain and keeps CSP/text-only DOM safety.
+- Added focused contract/API/static tests and the [structured workbench contract](docs/advisor-query-workbench.md).
+
+### Independent acceptance
+
+- Full regression: `243 passed`; compile/import, fixture JSON, wheel package-data,
+  `git diff --check`, no-network/LLM/transaction and static DOM boundary scans passed.
+- Adversarial review passed template owner isolation, sensitive and forged-input refusal,
+  generic error handling, 100 concurrent deterministic runs, unique events, and replay.
+- Real local browser passed BALANCED `HOLD`, CONSERVATIVE `REDUCE`, `PASS · 已复用`,
+  `Finding → Fact → Evidence` expansion and a second owner seeing `0 events`.
+- Phase 15 is accepted locally at the current worktree `HEAD`; no push was performed.
+  The next phase must start in a new worktree after a plan-only commit.

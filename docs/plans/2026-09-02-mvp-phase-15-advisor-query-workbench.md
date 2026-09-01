@@ -113,4 +113,24 @@ BALANCED 可以得到 HOLD，CONSERVATIVE 可以得到 breach-bound REDUCE；用
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record
+
+- Implementation landed in this dedicated worktree at the current `HEAD` after the
+  plan-only commit `765d64c`; no push was performed.
+- Full regression: `python -m pytest -q` → `243 passed` (only the installed
+  Starlette/httpx deprecation warning); `python -m compileall -q app`, public imports,
+  fixture JSON parsing, `node --check app/api/static/app.js`, wheel package-data and
+  `git diff --check` passed.
+- Boundary scans confirmed no network/LLM/transaction path, no inline script or
+  `innerHTML`, no sensitive fixture values, and no package-data omission.
+- Adversarial review passed template owner rebinding and sensitive-owner rejection,
+  Pydantic-bypass revalidation, generic extra-field errors, 100 concurrent deterministic
+  runs, unique persisted events, and owner isolation.
+- Real local browser passed structured-form BALANCED `HOLD`, CONSERVATIVE `REDUCE`,
+  receipt reuse (`created=false`), `Finding → Fact → Evidence` expansion, and another
+  owner seeing `0 events` with a reset form state.
+- This phase is accepted locally. The next phase must start from this accepted tree in a
+  new worktree and must keep live Provider access, authentication, LLM/chat and orders
+  deferred.
