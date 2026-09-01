@@ -26,7 +26,14 @@ web = [
 include = ["app*"]
 
 [tool.setuptools.package-data]
-app = ["store/migrations/*.sql", "api/static/*.html", "api/static/*.css", "api/static/*.js"]
+app = [
+  "store/migrations/*.sql",
+  "api/static/*.html",
+  "api/static/*.css",
+  "api/static/*.js",
+  "fixtures/advisor/*.json",
+  "fixtures/advisor/providers/*.json",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"

@@ -26,7 +26,9 @@ app/
 
 当前只创建已经具有可测试行为的包；不使用空目录伪装完成度。Phase 13
 新增 `app/store` 的 owner-scoped SQLite 决策事件 adapter 和 `app/api` 的
-FastAPI/静态工作台边界；真实认证、PostgreSQL 与 API 触发的研究编排仍未实现。
+FastAPI/静态工作台边界；Phase 14 新增 `app/service` 的结构化 fixture-first
+Advisor query 编排，并把结果保存回同一 DecisionEvent 边界。真实认证、
+PostgreSQL、SkillHub 网络和生产级 Provider 仍未实现。
 
 ## 数据流
 
@@ -109,7 +111,7 @@ Provider 统一返回四类结果：
 ## 当前实现边界
 
 已经实现 Evidence、Provider、画像/持仓、暴露/风险、研究、合规闸门、
-Recommendation/Decision Receipt，以及 Phase 13 的本地决策事件存储、FastAPI
-读写和首个解释工作台。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
-API 内部编排和完整浏览器旗舰流仍未完成；README 与 TODO 必须持续保持这一
-事实边界。
+Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/首个
+解释工作台，以及 Phase 14 的 API 触发 fixture-first Advisor 纵切。真实
+SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整工作台
+交互和外部浏览器旗舰流仍未完成；README 与 TODO 必须持续保持这一事实边界。

@@ -1,0 +1,62 @@
+{
+  "schema_version": "advisor-research-fixture.v1",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "source": "offline-test-only",
+  "scope_description": "synthetic two-source revenue cross-check",
+  "budget_ms": 1500,
+  "claim": {
+    "claim_id": "advisor-claim-revenue-001",
+    "subject": "ADVISOR_STOCK_001",
+    "metric": "revenue",
+    "unit": "CNY",
+    "period": "2026-Q2",
+    "expected_value": "10.00"
+  },
+  "finding": {
+    "kind": "REVENUE_STABLE",
+    "severity": "INFO",
+    "statement": "两个独立来源对该报告期的收入数值一致。"
+  },
+  "candidate": {
+    "statement": "基于当前证据与画像约束进入后续建议组装。",
+    "rationale": "研究事实、风险预算与配置约束均已闭合。",
+    "invalidation_conditions": [
+      "用户风险画像版本变化",
+      "持仓或研究证据发生变化"
+    ]
+  },
+  "sources": [
+    {
+      "node_id": "stock-source-a",
+      "node_kind": "STOCK",
+      "operation": "COMPANY_DATA",
+      "request_id": "advisor-provider-request-a",
+      "subject": "ADVISOR_STOCK_001",
+      "required_fields": ["revenue"],
+      "parameters": {
+        "period": "2026-Q2",
+        "source_slot": "a"
+      },
+      "source": "advisor-source-a",
+      "record_id": "advisor-record-a",
+      "lineage_id": "advisor-lineage-a",
+      "value": "10.00"
+    },
+    {
+      "node_id": "stock-source-b",
+      "node_kind": "STOCK",
+      "operation": "COMPANY_DATA",
+      "request_id": "advisor-provider-request-b",
+      "subject": "ADVISOR_STOCK_001",
+      "required_fields": ["revenue"],
+      "parameters": {
+        "period": "2026-Q2",
+        "source_slot": "b"
+      },
+      "source": "advisor-source-b",
+      "record_id": "advisor-record-b",
+      "lineage_id": "advisor-lineage-b",
+      "value": "10.00"
+    }
+  ]
+}

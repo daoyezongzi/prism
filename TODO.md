@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 13 Owner-scoped API, Persistence and Explainable UI](docs/plans/2026-09-02-mvp-phase-13-owner-scoped-api-persistence-ui.md)
+> Active phase: Phase 14 accepted locally; next phase plan is pending in a new worktree.
 
 ## P0 — Foundation
 
@@ -46,6 +46,7 @@
 - [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
 - [x] Compose deterministic HOLD/REDUCE Recommendations from a dual-PASS gate and create a self-validating Decision Receipt.
 - [x] Expose stored decision receipts through a FastAPI boundary and the first explainable workbench slice.
+- [x] Trigger the fixture-first Advisor vertical slice from a structured API request and persist an idempotent DecisionEvent.
 - [ ] Verify the complete flagship flow in a real browser.
 
 ## External inputs / decisions
@@ -68,6 +69,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 13 is accepted locally. Create a new Phase 14 worktree and plan the
-API-triggered fixture query plus Profile/Portfolio integration; keep real
-authentication, live Provider access and production persistence deferred.
+Phase 14 is accepted locally at the current `HEAD` in the dedicated
+`D:\Github_Storage\prism-phase-14` worktree. Create a new worktree for the next
+plan before implementation; keep real authentication, live Provider access and
+production persistence deferred.

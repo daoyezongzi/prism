@@ -14,11 +14,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from app.api.contracts import (
+    AdvisorQueryResponse,
     DecisionEventListResponse,
     DecisionEventWriteResponse,
     ErrorResponse,
 )
 from app.recommendation import RecommendationCompositionResult
+from app.service import AdvisorQueryError, AdvisorQueryRequest, FixtureAdvisorQueryService
 from app.store import (
     DecisionEvent,
     DecisionEventStore,
@@ -51,6 +53,7 @@ def create_app(
     store: DecisionEventStore | None = None,
     *,
     clock: Callable[[], datetime] | None = None,
+    advisor_service: FixtureAdvisorQueryService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -61,6 +64,7 @@ def create_app(
     owned_store = store is None
     active_store = store or SQLiteDecisionEventStore(":memory:")
     active_clock = clock or (lambda: datetime.now(UTC))
+    active_advisor = advisor_service or FixtureAdvisorQueryService()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -115,6 +119,12 @@ def create_app(
     async def store_error_handler(_: Request, __: StoreError) -> JSONResponse:
         return _error_response(400, "STORE_ERROR", "decision event request was refused")
 
+    @api.exception_handler(AdvisorQueryError)
+    async def advisor_query_error_handler(
+        _: Request, __: AdvisorQueryError
+    ) -> JSONResponse:
+        return _error_response(400, "ADVISOR_QUERY_ERROR", "advisor query was refused")
+
     @api.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
         if exc.status_code == 404:
@@ -150,6 +160,43 @@ def create_app(
         except (ValidationError, ValueError) as exc:
             raise StoreError("decision event failed contract validation") from exc
         return DecisionEventWriteResponse(event=stored, created=created)
+
+    @api.post(
+        "/api/v1/advisor/queries",
+        response_model=AdvisorQueryResponse,
+    )
+    async def create_advisor_query(
+        query: AdvisorQueryRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorQueryResponse:
+        if (
+            query.questionnaire.owner_id != owner_id
+            or query.portfolio.owner_id != owner_id
+        ):
+            raise StoreOwnerError("query owner does not match owner scope")
+        try:
+            output = await active_advisor.run(query)
+        except AdvisorQueryError:
+            raise
+        except Exception as exc:
+            raise AdvisorQueryError("advisor query was refused") from exc
+        try:
+            event = build_decision_event(
+                output.result,
+                recorded_at=active_clock(),
+            )
+            stored, created = active_store.save(event)
+        except (ValidationError, ValueError) as exc:
+            raise StoreError("advisor result failed event validation") from exc
+        return AdvisorQueryResponse(
+            query_id=output.query_id,
+            owner_id=output.owner_id,
+            profile_id=output.profile_id,
+            research_run_id=output.research_run_id,
+            status=output.status.value,
+            created=created,
+            event=stored,
+        )
 
     @api.get(
         "/api/v1/decision-events",

@@ -1,0 +1,30 @@
+{
+  "request": {
+    "operation": "COMPANY_DATA",
+    "subject": "ADVISOR_STOCK_001",
+    "required_fields": ["revenue"],
+    "parameters": {
+      "period": "2026-Q2",
+      "source_slot": "a"
+    }
+  },
+  "result": {
+    "provider": "fixture-provider",
+    "status": "SUCCESS",
+    "records": [
+      {
+        "source": "advisor-source-a",
+        "record_id": "advisor-record-a",
+        "fields": {"revenue": "10.00"},
+        "units": {"revenue": "CNY"},
+        "period": "2026-Q2",
+        "observed_at": "2026-09-01T12:00:00Z",
+        "lineage_id": "advisor-lineage-a"
+      }
+    ],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

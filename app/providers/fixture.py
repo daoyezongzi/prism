@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 import json
 from pathlib import Path
+from collections.abc import Callable
 from typing import Any
 
 from app.providers.contracts import (
@@ -25,8 +26,14 @@ DEFAULT_FIXTURE_DIR = Path(__file__).resolve().parent.parent.parent / "tests" / 
 class FixtureFinancialProvider:
     """Deterministic offline provider backed by validated synthetic JSON fixtures."""
 
-    def __init__(self, fixture_dir: Path | str | None = None) -> None:
+    def __init__(
+        self,
+        fixture_dir: Path | str | None = None,
+        *,
+        clock: Callable[[], datetime] | None = None,
+    ) -> None:
         self._provider_name = "fixture-provider"
+        self._clock = clock or (lambda: datetime.now(UTC))
         if fixture_dir is None:
             self._fixture_dir = DEFAULT_FIXTURE_DIR
         else:
@@ -81,7 +88,7 @@ class FixtureFinancialProvider:
                 "request_fingerprint": fp,
                 "provider": self.name,
                 "status": ProviderStatus(res_data["status"]),
-                "retrieved_at": datetime.now(UTC),
+                "retrieved_at": self._clock(),
                 "records": records,
                 "missing_fields": missing_fields,
                 "issues": issues,
@@ -106,7 +113,7 @@ class FixtureFinancialProvider:
                 request_fingerprint=fp,
                 provider=self.name,
                 status=ProviderStatus.FAILED,
-                retrieved_at=datetime.now(UTC),
+                retrieved_at=self._clock(),
                 records=(),
                 missing_fields=(),
                 issues=(
@@ -129,7 +136,7 @@ class FixtureFinancialProvider:
             request_fingerprint=fp,
             provider=self.name,
             status=template_res.status,
-            retrieved_at=datetime.now(UTC),
+            retrieved_at=self._clock(),
             records=template_res.records,
             missing_fields=template_res.missing_fields,
             issues=template_res.issues,

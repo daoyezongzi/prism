@@ -144,4 +144,21 @@ REDUCE；如果研究来源不足，API 会保留待复核/阻断原因而不编
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record
+
+- Implementation commit is the current `HEAD` of the dedicated `prism-phase-14`
+  worktree (no push).
+- `python -m pytest -q`: `238 passed`; only the installed Starlette/httpx
+  deprecation warning remains.
+- `python -m compileall -q app`, public imports, JSON fixture parsing, package-data
+  wheel inspection, `git diff --check`, no-network/LLM/transaction boundary scan,
+  deterministic 100-run replay/concurrency and adversarial trust-boundary checks all
+  passed.
+- Post-commit local browser: API-triggered BALANCED query rendered PASS/HOLD,
+  Receipt, invalidation conditions and expanded Finding→Fact→two Evidence sources;
+  another owner saw `0 events`.
+- Independent review confirmed that invalid or Pydantic-bypassed requests are
+  revalidated, completed evidence is matched one-for-one to the manifest, and
+  degraded Provider results remain non-executable REVIEW_REQUIRED/BLOCKED.

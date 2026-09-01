@@ -477,3 +477,51 @@ Independent post-commit adversarial review and final acceptance are still pendin
 - Phase 13 is accepted locally. No push was performed. The next phase must start in
   a new worktree from `e7eddd2` and keep the API owner-scoped while adding only the
   planned fixture-query/Profile/Portfolio integration.
+
+## 2026-09-02 — MVP Phase 14 Advisor query, Profile and Portfolio integration
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-14` on branch
+  `codex/mvp-phase-14-api-fixture-query-profile-portfolio` from accepted Phase 13
+  commit `0156f1b`.
+- Added `docs/plans/2026-09-02-mvp-phase-14-advisor-query-profile-portfolio.md` and
+  committed the plan before implementation (`52bb2e3`).
+- This phase is limited to a structured, offline fixture-first Advisor query. It
+  does not add live SkillHub/Tushare, credentials, LLM/chat, production storage,
+  orders, target prices or a new UI business structure.
+
+### Implemented locally
+
+- Added immutable `AdvisorQueryRequest`/`AdvisorQueryOutput` contracts with owner
+  closure, timezone replay anchor, bounded identifiers, extra-field rejection and
+  sensitive-input refusal.
+- Added a fixture manifest and two independent source/record/lineage Provider
+  fixtures. The service reuses Profile, Portfolio Exposure/Concentration, Risk
+  Budget, Allocation, Research Executor/Pipeline, Risk/Compliance Gates,
+  Recommendation Composer and DecisionEvent Store rather than duplicating rules.
+- Added `POST /api/v1/advisor/queries`; successful calls persist an owner-scoped,
+  content-addressed DecisionEvent and repeated fixed inputs return `created=false`.
+  Provider degradation remains REVIEW_REQUIRED/BLOCKED with no executable receipt,
+  recommendation or trace.
+- Added `docs/advisor-query-api.md`, package data declarations, unit/API tests and
+  updated README, architecture, TODO and this execution log.
+
+### Current verification
+
+- Phase-specific tests: `11 passed`.
+- Full regression suite: `238 passed` with only the installed Starlette/httpx
+  deprecation warning.
+- Deterministic replay now uses the injected `generated_at` clock through fixture
+  load and execution; evidence integrity checks match each expected source,
+  record, lineage, field, unit, period and Decimal value.
+- Post-commit compile/import, fixture JSON, package-data, source boundary, static UI
+  and real-browser acceptance all passed. Browser evidence shows an API-triggered
+  BALANCED `HOLD` Receipt with expanded Finding→Fact→two Evidence sources; another
+  owner sees no events.
+- Independent adversarial review passed for Pydantic-bypass revalidation, 100-run
+  deterministic/concurrent execution, one-for-one manifest evidence integrity,
+  owner/error isolation and non-executable degraded results.
+- Phase 14 is accepted locally at the current worktree `HEAD`. No push was
+  performed; the next phase
+  must start in a new worktree with a plan committed before implementation.
