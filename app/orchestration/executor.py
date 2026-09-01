@@ -27,7 +27,6 @@ from app.contracts.evidence import (
 )
 from app.providers import (
     FinancialProvider,
-    ProviderOperation,
     ProviderRequest,
     ProviderResult,
     ProviderStatus,
@@ -37,10 +36,10 @@ from app.providers import (
 from app.research import (
     ResearchNodeIssue,
     ResearchNodeIssueCode,
-    ResearchNodeKind,
     ResearchNodeResult,
     ResearchNodeStatus,
     ResearchObservation,
+    allowed_operations_for_node,
 )
 
 from app.orchestration.contracts import (
@@ -73,16 +72,6 @@ _SENSITIVE_SUBSTRINGS = (
     "credential",
     "cookie",
 )
-
-_ALLOWED_OPERATIONS: dict[ResearchNodeKind, frozenset[ProviderOperation]] = {
-    ResearchNodeKind.MACRO: frozenset({ProviderOperation.MACRO_DATA}),
-    ResearchNodeKind.INDUSTRY: frozenset({ProviderOperation.INDUSTRY_DATA}),
-    ResearchNodeKind.STOCK: frozenset(
-        {ProviderOperation.COMPANY_DATA, ProviderOperation.MARKET_DATA}
-    ),
-    ResearchNodeKind.FUND: frozenset({ProviderOperation.FUND_DATA}),
-}
-
 
 def _contains_sensitive(value: str) -> bool:
     normalized = value.casefold().replace("-", "_")
@@ -232,7 +221,7 @@ def _index_requests(
         request = by_id[node.node_id].request
         if not _safe_identifier(request.subject):
             raise ValueError("node request subject contains a disallowed field")
-        if request.operation not in _ALLOWED_OPERATIONS[node.node_kind]:
+        if request.operation not in allowed_operations_for_node(node.node_kind):
             raise ValueError("node request operation does not match node kind")
     if _contains_sensitive(state.owner_id):
         raise ValueError("research owner metadata contains a disallowed field")

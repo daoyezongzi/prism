@@ -1,0 +1,24 @@
+{
+  "request": {
+    "operation": "MACRO_DATA",
+    "subject": "MARKET_MACRO_001",
+    "required_fields": ["policy_rate_pct"],
+    "parameters": {"period": "2026-Q2", "source_slot": "b"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [{
+      "source": "matrix-macro-source-b",
+      "record_id": "matrix-macro-record-b",
+      "fields": {"policy_rate_pct": "2.50"},
+      "units": {"policy_rate_pct": "pct"},
+      "period": "2026-Q2",
+      "observed_at": "2026-08-01T00:00:00Z",
+      "lineage_id": "matrix-macro-lineage-b"
+    }],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

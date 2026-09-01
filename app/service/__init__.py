@@ -9,6 +9,11 @@ from app.service.contracts import (
     AdvisorQueryRequest,
     AdvisorQueryTemplate,
 )
+from app.service.specialist_matrix import (
+    FixtureResearchSpecialistMatrixService,
+    SpecialistMatrixError,
+    SpecialistMatrixOutput,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -16,4 +21,7 @@ __all__ = [
     "AdvisorQueryRequest",
     "AdvisorQueryTemplate",
     "FixtureAdvisorQueryService",
+    "FixtureResearchSpecialistMatrixService",
+    "SpecialistMatrixError",
+    "SpecialistMatrixOutput",
 ]

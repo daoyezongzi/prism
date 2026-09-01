@@ -91,6 +91,7 @@ class ResearchClaimSpec(ContractModel):
     finding_kind: NonEmptyStr
     finding_severity: FindingSeverity
     statement: NonEmptyStr
+    observation_ids: tuple[NonEmptyStr, ...] = Field(default_factory=tuple)
 
     @model_validator(mode="after")
     def validate_safe_text(self) -> Self:
@@ -106,6 +107,12 @@ class ResearchClaimSpec(ContractModel):
         )
         if any(_contains_sensitive(value) for value in values):
             raise ValueError("research claim metadata must not contain sensitive fields")
+        if len(set(self.observation_ids)) != len(self.observation_ids):
+            raise ValueError("claim observation_ids must not contain duplicates")
+        if self.observation_ids != tuple(sorted(self.observation_ids)):
+            raise ValueError("claim observation_ids must be in deterministic order")
+        if any(_contains_sensitive(value) for value in self.observation_ids):
+            raise ValueError("claim observation IDs must not contain sensitive fields")
         return self
 
 
@@ -367,16 +374,57 @@ def build_research_evidence_pipeline(
             )
         )
 
+    known_observation_ids = {item.observation_id for item in execution.observations}
+
+    def append_claim_issue(
+        code: ResearchPipelineIssueCode,
+        message: str,
+        claim_id: str,
+    ) -> None:
+        # Pipeline-level issue codes are intentionally unique.  Multiple claims
+        # can have the same review/blocked outcome; their individual bridge and
+        # validation objects retain the claim-specific detail.
+        if any(issue.code == code for issue in issues):
+            return
+        issues.append(_pipeline_issue(code, message, claim_id))
+
     for spec in ordered_specs:
-        try:
-            validation = validate_claim(spec.claim, execution.observations)
-        except ValueError:
-            issues.append(
-                _pipeline_issue(
+        selected_observations = execution.observations
+        if spec.observation_ids:
+            unknown_observations = set(spec.observation_ids) - known_observation_ids
+            if unknown_observations:
+                append_claim_issue(
                     ResearchPipelineIssueCode.CLAIM_INVALID,
-                    "claim could not be validated against the execution observations",
+                    "claim references an observation outside the executed research result",
                     spec.claim.claim_id,
                 )
+                continue
+            scoped_observations = tuple(
+                item
+                for item in execution.observations
+                if (
+                    item.subject == spec.claim.subject
+                    and item.metric == spec.claim.metric
+                    and item.unit == spec.claim.unit
+                    and item.period == spec.claim.period
+                )
+            )
+            scoped_ids = {item.observation_id for item in scoped_observations}
+            if set(spec.observation_ids) != scoped_ids:
+                append_claim_issue(
+                    ResearchPipelineIssueCode.CLAIM_INVALID,
+                    "claim observation scope must include every matching executed observation",
+                    spec.claim.claim_id,
+                )
+                continue
+            selected_observations = scoped_observations
+        try:
+            validation = validate_claim(spec.claim, selected_observations)
+        except ValueError:
+            append_claim_issue(
+                ResearchPipelineIssueCode.CLAIM_INVALID,
+                "claim could not be validated against the execution observations",
+                spec.claim.claim_id,
             )
             continue
         if getattr(run_status, "value", run_status) != "COMPLETED":
@@ -385,27 +433,23 @@ def build_research_evidence_pipeline(
         bridge = bridge_cross_validation(
             validation,
             execution.evidence,
-            execution.observations,
+            selected_observations,
             finding_kind=spec.finding_kind,
             finding_severity=spec.finding_severity,
             statement=spec.statement,
         )
         bridges.append(bridge)
         if bridge.status == EvidenceBridgeStatus.BLOCKED:
-            issues.append(
-                _pipeline_issue(
-                    ResearchPipelineIssueCode.CLAIM_BLOCKED,
-                    "claim could not close to registered Evidence and requires correction",
-                    spec.claim.claim_id,
-                )
+            append_claim_issue(
+                ResearchPipelineIssueCode.CLAIM_BLOCKED,
+                "claim could not close to registered Evidence and requires correction",
+                spec.claim.claim_id,
             )
         elif bridge.status == EvidenceBridgeStatus.REVIEW_REQUIRED:
-            issues.append(
-                _pipeline_issue(
-                    ResearchPipelineIssueCode.CLAIM_REVIEW_REQUIRED,
-                    "claim requires review before it can be consumed downstream",
-                    spec.claim.claim_id,
-                )
+            append_claim_issue(
+                ResearchPipelineIssueCode.CLAIM_REVIEW_REQUIRED,
+                "claim requires review before it can be consumed downstream",
+                spec.claim.claim_id,
             )
 
     if issues and any(

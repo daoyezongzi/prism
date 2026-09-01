@@ -1,0 +1,24 @@
+{
+  "request": {
+    "operation": "COMPANY_DATA",
+    "subject": "PRISM_STOCK_001",
+    "required_fields": ["revenue_cny"],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [{
+      "source": "matrix-stock-source-a",
+      "record_id": "matrix-stock-record-a",
+      "fields": {"revenue_cny": "10.00"},
+      "units": {"revenue_cny": "CNY"},
+      "period": "2026-Q2",
+      "observed_at": "2026-08-01T00:00:00Z",
+      "lineage_id": "matrix-stock-lineage-a"
+    }],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

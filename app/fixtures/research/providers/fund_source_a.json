@@ -1,0 +1,24 @@
+{
+  "request": {
+    "operation": "FUND_DATA",
+    "subject": "PRISM_ETF_001",
+    "required_fields": ["technology_weight_pct"],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [{
+      "source": "matrix-fund-source-a",
+      "record_id": "matrix-fund-record-a",
+      "fields": {"technology_weight_pct": "63.50"},
+      "units": {"technology_weight_pct": "pct"},
+      "period": "2026-Q2",
+      "observed_at": "2026-08-01T00:00:00Z",
+      "lineage_id": "matrix-fund-lineage-a"
+    }],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

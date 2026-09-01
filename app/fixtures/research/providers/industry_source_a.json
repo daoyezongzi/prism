@@ -1,0 +1,24 @@
+{
+  "request": {
+    "operation": "INDUSTRY_DATA",
+    "subject": "TECH_INDUSTRY_001",
+    "required_fields": ["growth_pct"],
+    "parameters": {"period": "2026-Q2", "source_slot": "a"}
+  },
+  "result": {
+    "status": "SUCCESS",
+    "records": [{
+      "source": "matrix-industry-source-a",
+      "record_id": "matrix-industry-record-a",
+      "fields": {"growth_pct": "8.00"},
+      "units": {"growth_pct": "pct"},
+      "period": "2026-Q2",
+      "observed_at": "2026-08-01T00:00:00Z",
+      "lineage_id": "matrix-industry-lineage-a"
+    }],
+    "missing_fields": [],
+    "issues": [],
+    "scope_description": null,
+    "latency_ms": 5
+  }
+}

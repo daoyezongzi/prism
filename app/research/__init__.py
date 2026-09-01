@@ -22,6 +22,14 @@ from app.research.evidence_bridge import (
     bridge_cross_validation,
     build_evidence_grounded_finding,
 )
+from app.research.specialists import (
+    ResearchIdentifier,
+    ResearchSpecialistMatrix,
+    ResearchSpecialistMatrixRequest,
+    ResearchSpecialistNode,
+    ResearchSpecialistRole,
+    allowed_operations_for_node,
+)
 
 _PIPELINE_EXPORTS = {
     "ResearchClaimSpec",
@@ -63,5 +71,11 @@ __all__ = [
     "EvidenceFindingBridgeResult",
     "bridge_cross_validation",
     "build_evidence_grounded_finding",
+    "ResearchIdentifier",
+    "ResearchSpecialistMatrix",
+    "ResearchSpecialistMatrixRequest",
+    "ResearchSpecialistNode",
+    "ResearchSpecialistRole",
+    "allowed_operations_for_node",
     *sorted(_PIPELINE_EXPORTS),
 ]
