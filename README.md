@@ -36,11 +36,13 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 5 已实现画像条件 allocation envelope、逐约束前后影响和失效条件；最终 Recommendation、研究 DAG 编排、相关性和优化仍未实现。
 - Phase 6 已实现四态结构化研究节点、lineage-aware Cross-Validation 与冲突/缺失语义；真实 Provider、DAG 执行器和 Evidence/Finding 连接仍未实现。
 - Phase 7 已实现 owner 隔离、依赖闭包、预算/deadline、required/optional 降级和可回放的研究 run 状态机；真实异步执行、Provider 与 Evidence/Finding 桥接仍未实现。
+- Phase 8 已实现 CrossValidationResult、ResearchObservation 与 Evidence 的确定性闭包校验，并只在完整支持条件下生成稳定 `VERIFIED Fact -> Finding`；Recommendation、独立合规闸门和真实执行仍未实现。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
 - 实时自然语言画像提取、研究编排、组合暴露/风险/合规计算模块；
+- 真实异步研究节点、Recommendation/Decision Receipt 和独立合规闸门；
 - Web 工作台与真实端到端场景；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -94,6 +96,8 @@ python -m pytest
 - [Phase 6 Structured Research/Cross-Validation 契约](docs/research-cross-validation.md)
 - [Phase 7 Bounded Orchestration 计划](docs/plans/2026-09-01-mvp-phase-7-bounded-orchestration.md)
 - [Phase 7 Bounded Orchestration 契约](docs/bounded-orchestration.md)
+- [Phase 8 Evidence/Finding 桥接计划](docs/plans/2026-09-01-mvp-phase-8-evidence-finding.md)
+- [Phase 8 Evidence/Finding 桥接契约](docs/evidence-finding-bridge.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

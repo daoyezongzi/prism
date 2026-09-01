@@ -298,3 +298,25 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - `python -m compileall -q app`, orchestration import, `git diff --check`, fixture JSON and secret-like assignment scans passed.
 - Independent adversarial checks passed for deterministic topology, request normalization, deadline rejection, active-node closure, required-node failure, dependency cancellation, forged state rejection, safe cancellation reasons and immutable source states.
 - Phase 7 is accepted in this worktree after the above review; the next Evidence-grounded Finding/compliance plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 8 Evidence-grounded Fact/Finding bridge
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-8` on branch `codex/mvp-phase-8-evidence-finding` from the accepted Phase 7 commit `3e5a021`.
+- Added `docs/plans/2026-09-01-mvp-phase-8-evidence-finding.md` and committed the plan before implementation (`b9e7dc5`).
+- The phase is limited to deterministic closure from `CrossValidationResult` plus owner/lineage-bound `ResearchObservation` and normalized `Evidence`; Recommendation, compliance, network, persistence and UI remain out of scope.
+
+### Implemented locally
+
+- Added `EvidenceFindingBridgeResult` with explicit `READY`, `REVIEW_REQUIRED` and `BLOCKED` states and safe issue codes.
+- Added `bridge_cross_validation` / `build_evidence_grounded_finding`: only a clean `SUPPORTED` result with two independent lineages, VERIFIED evidence, exact scope/value/unit/period/provenance and owner closure can produce stable `VERIFIED Fact -> Finding` objects.
+- Added bounded sensitive-input filtering, no raw validation issue/payload propagation, deterministic fact/finding IDs, synthetic fixture, unit/integration counterexamples and `docs/evidence-finding-bridge.md`.
+- No Provider execution, LLM, Recommendation, order, database, API, UI or upstream repository change was introduced.
+
+### Independent review evidence
+
+- Phase-specific bridge tests and independent adversarial review pass; full suite reports `156 passed` (Phase 1–7's 138 tests remain green).
+- `python -m compileall -q app`, research bridge import, `git diff --check`, fixture JSON and sensitive-value scans all pass.
+- Adversarial checks cover stable ordering, DecisionTrace closure, forged `SUPPORTED`, duplicate lineage, missing/unknown evidence, owner/provenance tampering, sensitive text/IDs and immutable inputs.
+- Phase 8 is accepted in this worktree; the next bounded fixture-backed async research execution plan must use a new worktree.

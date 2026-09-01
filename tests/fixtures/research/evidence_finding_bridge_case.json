@@ -1,0 +1,80 @@
+{
+  "schema_version": "evidence-finding-bridge-fixture.v1",
+  "fixture_id": "evidence-finding-bridge-case-001",
+  "claim": {
+    "claim_id": "fixture-claim-revenue-001",
+    "owner_id": "fixture-research-owner-001",
+    "subject": "FIXTURE_STOCK_001",
+    "metric": "revenue",
+    "unit": "CNY",
+    "period": "2026-Q2",
+    "expected_value": "10.00"
+  },
+  "observations": [
+    {
+      "observation_id": "fixture-observation-a",
+      "owner_id": "fixture-research-owner-001",
+      "evidence_id": "fixture-evidence-a",
+      "subject": "FIXTURE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "synthetic-provider-a",
+      "source": "synthetic-report-a",
+      "lineage_id": "fixture-lineage-a",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-08-31T10:00:00Z",
+      "retrieved_at": "2026-09-01T10:00:00Z"
+    },
+    {
+      "observation_id": "fixture-observation-b",
+      "owner_id": "fixture-research-owner-001",
+      "evidence_id": "fixture-evidence-b",
+      "subject": "FIXTURE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "synthetic-provider-b",
+      "source": "synthetic-report-b",
+      "lineage_id": "fixture-lineage-b",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-08-31T11:00:00Z",
+      "retrieved_at": "2026-09-01T10:05:00Z"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "fixture-evidence-a",
+      "provider": "synthetic-provider-a",
+      "source": "synthetic-report-a",
+      "field": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "observed_at": "2026-08-31T10:00:00Z",
+      "retrieved_at": "2026-09-01T10:00:00Z",
+      "quality_status": "VERIFIED",
+      "lineage_id": "fixture-lineage-a"
+    },
+    {
+      "evidence_id": "fixture-evidence-b",
+      "provider": "synthetic-provider-b",
+      "source": "synthetic-report-b",
+      "field": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "observed_at": "2026-08-31T11:00:00Z",
+      "retrieved_at": "2026-09-01T10:05:00Z",
+      "quality_status": "VERIFIED",
+      "lineage_id": "fixture-lineage-b"
+    }
+  ],
+  "finding": {
+    "kind": "REVENUE_STABLE",
+    "severity": "INFO",
+    "statement": "两条独立来源对该报告期的收入数值一致。"
+  }
+}

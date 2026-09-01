@@ -14,6 +14,14 @@ from app.research.contracts import (
     ValidationStatus,
 )
 from app.research.cross_validation import validate_claim, validate_node_claim
+from app.research.evidence_bridge import (
+    EvidenceBridgeIssue,
+    EvidenceBridgeIssueCode,
+    EvidenceBridgeStatus,
+    EvidenceFindingBridgeResult,
+    bridge_cross_validation,
+    build_evidence_grounded_finding,
+)
 
 __all__ = [
     "CrossValidationResult",
@@ -29,4 +37,10 @@ __all__ = [
     "ValidationStatus",
     "validate_claim",
     "validate_node_claim",
+    "EvidenceBridgeIssue",
+    "EvidenceBridgeIssueCode",
+    "EvidenceBridgeStatus",
+    "EvidenceFindingBridgeResult",
+    "bridge_cross_validation",
+    "build_evidence_grounded_finding",
 ]

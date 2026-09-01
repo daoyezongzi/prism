@@ -136,4 +136,4 @@ Fact ID 必须由稳定输入确定性生成（至少包含 owner、claim、metr
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
