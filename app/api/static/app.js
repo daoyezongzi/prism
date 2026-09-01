@@ -6,6 +6,8 @@
     events: [],
     selected: null,
     queryTemplate: null,
+    templateContext: null,
+    templateSequence: 0,
     researchTemplate: null,
     researchRun: null,
     researchSequence: 0,
@@ -119,6 +121,120 @@
     dd.textContent = text(value);
     item.append(dt, dd);
     container.append(item);
+  }
+
+  function renderPortfolio(portfolio) {
+    const panel = byId("portfolio-content");
+    clear(panel);
+    if (!portfolio) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "读取 owner 模板后查看持仓快照与基金穿透范围。";
+      panel.append(empty);
+      return;
+    }
+    const snapshot = portfolio.position_snapshot;
+    const summary = document.createElement("dl");
+    summary.className = "portfolio-summary";
+    addMetadata(summary, "Owner", portfolio.owner_id);
+    addMetadata(summary, "Bundle", portfolio.bundle_id);
+    addMetadata(summary, "Position snapshot", snapshot.snapshot_id);
+    addMetadata(summary, "As of", snapshot.as_of);
+    addMetadata(summary, "Base currency", snapshot.base_currency);
+    panel.append(summary);
+
+    const positionsHeading = document.createElement("h3");
+    positionsHeading.className = "context-heading";
+    positionsHeading.textContent = "Positions";
+    panel.append(positionsHeading);
+    const positions = document.createElement("div");
+    positions.className = "position-grid";
+    (snapshot.positions || []).forEach((position) => {
+      const card = document.createElement("article");
+      card.className = "position-card";
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = text(position.asset_name);
+      header.append(title, chip(text(position.asset_type), ""));
+      card.append(header);
+      const metadata = document.createElement("dl");
+      addMetadata(metadata, "Asset", position.asset_id);
+      addMetadata(metadata, "Position", position.position_id);
+      addMetadata(metadata, "Quantity", position.quantity);
+      addMetadata(metadata, "Market value", `${text(position.market_value)} ${text(position.currency)}`);
+      card.append(metadata);
+      positions.append(card);
+    });
+    panel.append(positions);
+
+    const holdingHeading = document.createElement("h3");
+    holdingHeading.className = "context-heading";
+    holdingHeading.textContent = "Look-through holdings";
+    panel.append(holdingHeading);
+    if (!(portfolio.fund_holdings || []).length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "当前模板没有基金/ETF 穿透快照。";
+      panel.append(empty);
+      return;
+    }
+    (portfolio.fund_holdings || []).forEach((fund) => {
+      const section = document.createElement("section");
+      section.className = "holding-section";
+      const meta = document.createElement("div");
+      meta.className = "holding-meta";
+      meta.textContent = `${text(fund.parent_asset_id)} · snapshot ${text(fund.snapshot_id)} · coverage ${text(fund.coverage_pct)}% · as of ${text(fund.as_of)}`;
+      section.append(meta);
+      const holdings = document.createElement("div");
+      holdings.className = "holding-grid";
+      (fund.holdings || []).forEach((holding) => {
+        const card = document.createElement("article");
+        card.className = "holding-card";
+        const header = document.createElement("header");
+        const title = document.createElement("strong");
+        title.textContent = text(holding.underlying_name);
+        header.append(title, chip(text(holding.sector, "未分类"), ""));
+        card.append(header);
+        const metadata = document.createElement("dl");
+        addMetadata(metadata, "Underlying", holding.underlying_asset_id);
+        addMetadata(metadata, "Holding", holding.holding_id);
+        addMetadata(metadata, "Weight", `${text(holding.weight_pct)}%`);
+        addMetadata(metadata, "As of", holding.as_of);
+        card.append(metadata);
+        holdings.append(card);
+      });
+      section.append(holdings);
+      panel.append(section);
+    });
+  }
+
+  function renderProfileContext(questionnaire) {
+    const panel = byId("profile-template-content");
+    clear(panel);
+    if (!questionnaire) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "读取 owner 模板后查看风险问卷约束。";
+      panel.append(empty);
+      return;
+    }
+    const metadata = document.createElement("dl");
+    addMetadata(metadata, "Questionnaire", questionnaire.questionnaire_id);
+    addMetadata(metadata, "Owner", questionnaire.owner_id);
+    addMetadata(metadata, "Answered at", questionnaire.answered_at);
+    addMetadata(metadata, "Loss tolerance", questionnaire.loss_tolerance_score);
+    addMetadata(metadata, "Horizon", questionnaire.investment_horizon);
+    addMetadata(metadata, "Liquidity", questionnaire.liquidity_need);
+    addMetadata(metadata, "Experience", questionnaire.experience_level);
+    addMetadata(metadata, "Return expectation", questionnaire.return_expectation);
+    addMetadata(metadata, "Max drawdown", `${text(questionnaire.max_drawdown_tolerance_pct)}%`);
+    const expected = questionnaire.expected_return_range;
+    addMetadata(
+      metadata,
+      "Expected range",
+      expected ? `${text(expected.minimum_pct)}% — ${text(expected.maximum_pct)}%` : "未设置",
+    );
+    panel.append(metadata);
   }
 
   function renderProfile(receipt) {
@@ -407,12 +523,15 @@
   }
 
   async function loadEvent(eventId) {
+    const requestOwner = state.ownerId;
+    const templateSequence = state.templateSequence;
     setError("");
     try {
       const response = await fetch(`/api/v1/decision-events/${encodeURIComponent(eventId)}`, {
-        headers: { "X-Owner-ID": state.ownerId },
+        headers: { "X-Owner-ID": requestOwner },
       });
       if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== templateSequence) return;
       renderDetail(await response.json());
     } catch (error) {
       setError(error.message || "读取决策事件失败");
@@ -428,9 +547,65 @@
     }
   }
 
+  function clearTemplateContext() {
+    state.queryTemplate = null;
+    state.templateContext = null;
+    byId("query-template-meta").textContent = "运行时读取合成持仓模板；不会提交自然语言或订单。";
+    renderPortfolio(null);
+    renderProfileContext(null);
+  }
+
+  async function loadTemplateContext(ownerId, sequence) {
+    try {
+      const response = await fetch("/api/v1/advisor/query-template", {
+        headers: { "X-Owner-ID": ownerId },
+      });
+      if (!response.ok) throw await apiError(response);
+      const template = await response.json();
+      if (state.ownerId !== ownerId || state.templateSequence !== sequence) return null;
+      state.templateContext = template;
+      state.queryTemplate = template;
+      byId("query-template-meta").textContent = `Fixture ${text(template.fixture_id)} · generated_at ${text(template.generated_at)} · 合成持仓模板`;
+      renderPortfolio(template.portfolio);
+      renderProfileContext(template.questionnaire);
+      return template;
+    } catch (error) {
+      if (state.ownerId === ownerId && state.templateSequence === sequence) clearTemplateContext();
+      throw error;
+    }
+  }
+
+  function resetOwnerScopedViews() {
+    clearTemplateContext();
+    setQueryStatus("待运行");
+    state.events = [];
+    state.selected = null;
+    renderEvents();
+    renderProfile(null);
+    renderEvidence(null);
+    byId("detail-status").className = "status-chip";
+    byId("detail-status").textContent = "待选择";
+    byId("detail-content").replaceChildren();
+    const detailEmpty = document.createElement("div");
+    detailEmpty.className = "empty-state";
+    detailEmpty.textContent = "读取 owner 后查看已保存的决策事件。";
+    byId("detail-content").append(detailEmpty);
+    state.researchTemplate = null;
+    state.researchRun = null;
+    state.researchSequence += 1;
+    byId("research-template-meta").textContent = "运行时读取四轨道矩阵模板；研究结果不写入决策回执。";
+    setResearchStatus("待运行");
+    renderResearchMatrix(null);
+  }
+
   async function runAdvisorQuery(event) {
     event.preventDefault();
-    state.ownerId = byId("owner-id").value.trim();
+    const nextOwnerId = byId("owner-id").value.trim();
+    const ownerChanged = nextOwnerId !== state.ownerId;
+    state.ownerId = nextOwnerId;
+    if (ownerChanged || !state.ownerId) resetOwnerScopedViews();
+    const requestOwner = state.ownerId;
+    const templateSequence = ++state.templateSequence;
     const queryId = byId("query-id").value.trim();
     const submit = byId("run-advisor-query");
     if (!state.ownerId) {
@@ -445,13 +620,8 @@
     submit.disabled = true;
     setQueryStatus("运行中…");
     try {
-      const templateResponse = await fetch("/api/v1/advisor/query-template", {
-        headers: { "X-Owner-ID": state.ownerId },
-      });
-      if (!templateResponse.ok) throw await apiError(templateResponse);
-      const template = await templateResponse.json();
-      state.queryTemplate = template;
-      byId("query-template-meta").textContent = `Fixture ${text(template.fixture_id)} · generated_at ${text(template.generated_at)} · 合成持仓模板`;
+      const template = await loadTemplateContext(requestOwner, templateSequence);
+      if (!template) return;
 
       const questionnaire = {
         ...template.questionnaire,
@@ -482,6 +652,7 @@
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== templateSequence) return;
       const result = await response.json();
       const createdLabel = result.created ? "已保存" : "已复用";
       setQueryStatus(`${statusLabel(result.status)} · ${createdLabel}`, statusClass(result.status));
@@ -496,7 +667,10 @@
   }
 
   async function runResearchMatrix() {
-    state.ownerId = byId("owner-id").value.trim();
+    const nextOwnerId = byId("owner-id").value.trim();
+    const ownerChanged = nextOwnerId !== state.ownerId;
+    state.ownerId = nextOwnerId;
+    if (ownerChanged || !state.ownerId) resetOwnerScopedViews();
     const requestOwner = state.ownerId;
     const researchSequence = ++state.researchSequence;
     const submit = byId("run-research-matrix");
@@ -555,27 +729,22 @@
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
     state.ownerId = nextOwnerId;
+    const requestOwner = state.ownerId;
+    const templateSequence = ++state.templateSequence;
     setError("");
+    if (ownerChanged || !state.ownerId) {
+      resetOwnerScopedViews();
+    }
     if (!state.ownerId) {
       setError("请输入 owner 标识。");
       return;
     }
-    if (ownerChanged) {
-      state.queryTemplate = null;
-      setQueryStatus("待运行");
-      byId("query-template-meta").textContent = "运行时读取合成持仓模板；不会提交自然语言或订单。";
-      state.researchTemplate = null;
-      state.researchRun = null;
-      state.researchSequence += 1;
-      byId("research-template-meta").textContent = "运行时读取四轨道矩阵模板；研究结果不写入决策回执。";
-      setResearchStatus("待运行");
-      renderResearchMatrix(null);
-    }
     try {
       const response = await fetch("/api/v1/decision-events", {
-        headers: { "X-Owner-ID": state.ownerId },
+        headers: { "X-Owner-ID": requestOwner },
       });
       if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== templateSequence) return;
       state.events = (await response.json()).items || [];
       state.selected = null;
       renderEvents();
@@ -588,6 +757,13 @@
       empty.className = "empty-state";
       empty.textContent = state.events.length ? "选择一条回执查看详情。" : "这个 owner 还没有保存的决策事件。";
       byId("detail-content").append(empty);
+      try {
+        await loadTemplateContext(requestOwner, templateSequence);
+      } catch (error) {
+        if (state.ownerId === requestOwner && state.templateSequence === templateSequence) {
+          setError(error.message || "读取 Portfolio/Risk Profile 模板失败");
+        }
+      }
       if (state.events.length) await loadEvent(state.events[0].event_id);
     } catch (error) {
       state.events = [];

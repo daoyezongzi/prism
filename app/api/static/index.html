@@ -22,6 +22,7 @@
         <nav class="nav-list">
           <a class="nav-item active" href="#overview">Overview</a>
           <a class="nav-item" href="#advisor">Advisor</a>
+          <a class="nav-item" href="#portfolio">Portfolio</a>
           <a class="nav-item" href="#research-tracks">Research Tracks</a>
           <a class="nav-item" href="#evidence">Evidence</a>
           <a class="nav-item" href="#profile">Risk Profile</a>
@@ -163,6 +164,19 @@
             </div>
           </section>
 
+          <section class="panel portfolio-panel" id="portfolio" aria-labelledby="portfolio-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">PORTFOLIO SNAPSHOT</span>
+                <h2 id="portfolio-title">当前持仓</h2>
+              </div>
+              <span class="muted">只读 · 合成模板</span>
+            </div>
+            <div id="portfolio-content" class="portfolio-content" aria-live="polite">
+              <div class="empty-state">读取 owner 模板后查看持仓快照与基金穿透范围。</div>
+            </div>
+          </section>
+
           <section class="panel detail-panel" aria-labelledby="detail-title">
             <div class="panel-head">
               <div>
@@ -195,6 +209,9 @@
                 <span class="eyebrow">RISK PROFILE</span>
                 <h2 id="profile-title">约束上下文</h2>
               </div>
+            </div>
+            <div id="profile-template-content" class="profile-context" aria-live="polite">
+              <div class="empty-state">读取 owner 模板后查看风险问卷约束。</div>
             </div>
             <div id="profile-content" class="profile-content">
               <div class="empty-state">回执会绑定画像版本、持仓快照和风险预算。</div>
