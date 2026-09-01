@@ -1850,6 +1850,13 @@
     panel.append(invalidation);
   }
 
+  function clearPortfolioOptimizationRun(status = "待运行", className = "") {
+    state.portfolioOptimizationRun = null;
+    state.portfolioOptimizationSequence += 1;
+    renderPortfolioOptimization(null);
+    setPortfolioOptimizationStatus(status, className);
+  }
+
   async function loadEvent(eventId) {
     const requestOwner = state.ownerId;
     const templateSequence = state.templateSequence;
@@ -1896,6 +1903,7 @@
     const raw = byId("portfolio-json").value.trim();
     const submit = byId("confirm-portfolio");
     clearAdvisorPlan();
+    clearPortfolioOptimizationRun("需重新运行", "review");
     if (!requestOwner) {
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
@@ -1970,6 +1978,7 @@
     const submit = byId("confirm-profile");
     clearAdvisorPlan();
     clearProfileProposal();
+    clearPortfolioOptimizationRun("需重新运行", "review");
     if (!requestOwner) {
       state.profileContext = null;
       renderConfirmedProfile(null);

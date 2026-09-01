@@ -570,6 +570,8 @@ class FixturePortfolioOptimizationService:
             aggregate_ids = [asset_constraint_id, sector_constraint_id]
             if sector in _TECHNOLOGY_SECTORS:
                 aggregate_ids.append(_stable_id("optimization-constraint", "TECHNOLOGY"))
+            if sector == "UNCLASSIFIED":
+                aggregate_ids.append(_stable_id("optimization-constraint", "UNCLASSIFIED"))
             constraints.append(
                 OptimizationConstraint(
                     constraint_id=asset_constraint_id,
@@ -728,6 +730,19 @@ class FixturePortfolioOptimizationService:
             )
             profile = confirm_questionnaire(request.questionnaire)
             portfolio = self._scenario_portfolio(request.portfolio, request.scenario_id)
+            scenario = _scenario_definition(request.scenario_id)
+            if request.scenario_id == OptimizationScenarioId.SOURCE_PARTIAL and not portfolio.fund_holdings:
+                return self._failure_response(
+                    request,
+                    portfolio,
+                    profile.profile_id,
+                    profile.profile_version,
+                    profile.risk_level,
+                    scenario,
+                    OptimizationStatus.REVIEW_REQUIRED,
+                    "SOURCE_PARTIAL 回放需要基金/ETF 穿透快照；当前输入无法构造部分覆盖场景。",
+                    (OptimizationIssue(code=OptimizationIssueCode.INPUT_PARTIAL, safe_message="partial replay requires a fund look-through snapshot"),),
+                )
             exposure = calculate_exposure(
                 portfolio,
                 request_id=_stable_id("optimization-exposure-request", request.request_id),
@@ -735,7 +750,6 @@ class FixturePortfolioOptimizationService:
             )
             concentration = calculate_concentration(exposure)
             assessment = assess_risk_budget(profile, concentration)
-            scenario = _scenario_definition(request.scenario_id)
             if exposure.status == ExposureStatus.FAILED or concentration.status == ConcentrationStatus.FAILED:
                 return self._failure_response(
                     request,

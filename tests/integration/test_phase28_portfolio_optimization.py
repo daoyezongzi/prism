@@ -171,6 +171,26 @@ def test_ready_constraints_close_asset_sector_and_technology_caps() -> None:
     assert tech.allowed_max_weight_pct == Decimal("40")
 
 
+def test_multiple_technology_labels_still_respect_global_technology_cap() -> None:
+    service, template = _template()
+    funds = []
+    for fund in template.portfolio.fund_holdings:
+        if fund.parent_asset_id == "OPT_HEALTH_ASSET":
+            holding = fund.holdings[0].model_copy(update={"sector": "Tech"})
+            fund = fund.model_copy(update={"holdings": (holding,)})
+        funds.append(fund)
+    portfolio = template.portfolio.model_copy(update={"fund_holdings": tuple(funds)})
+    request = _request(template, request_id="multi-tech")
+    request = request.model_copy(update={"portfolio": portfolio})
+    result = __import__("asyncio").run(service.run(request))
+    assert result.status == OptimizationStatus.READY
+    technology = next(
+        item for item in result.constraints if item.dimension == OptimizationDimension.TECHNOLOGY
+    )
+    assert technology.target_weight_pct <= technology.allowed_max_weight_pct
+    assert technology.target_weight_pct == Decimal("40.00")
+
+
 @pytest.mark.parametrize(
     ("scenario", "status", "issue"),
     [

@@ -332,6 +332,115 @@ class PortfolioOptimizationResponse(ContractModel):
                 raise ValueError("READY optimization requires closed report identities")
             if self.assessment_status is None:
                 raise ValueError("READY optimization requires assessment status")
+            constraints_by_id = {item.constraint_id: item for item in self.constraints}
+            targets_by_id = {item.target_id: item for item in self.targets}
+            asset_constraints = {
+                item.target_id: item
+                for item in self.constraints
+                if item.dimension == OptimizationDimension.ASSET and item.target_id is not None
+            }
+            sector_constraints = {
+                item.target_id: item
+                for item in self.constraints
+                if item.dimension == OptimizationDimension.SECTOR and item.target_id is not None
+            }
+            aggregate_constraints = {
+                item.dimension: item
+                for item in self.constraints
+                if item.dimension in {
+                    OptimizationDimension.TECHNOLOGY,
+                    OptimizationDimension.UNCLASSIFIED,
+                }
+            }
+            if set(asset_constraints) != set(targets_by_id):
+                raise ValueError("optimization asset constraints must cover every target")
+            if set(aggregate_constraints) != {
+                OptimizationDimension.TECHNOLOGY,
+                OptimizationDimension.UNCLASSIFIED,
+            }:
+                raise ValueError("optimization aggregate constraints are incomplete")
+            if not sector_constraints:
+                raise ValueError("optimization sector constraints are required")
+
+            def _sector_key(value: str | None) -> str:
+                return value.strip().casefold() if value else "UNCLASSIFIED"
+
+            target_sector_totals: dict[str, Decimal] = {}
+            for target in self.targets:
+                key = _sector_key(target.sector)
+                target_sector_totals[key] = target_sector_totals.get(key, Decimal("0")) + target.target_weight_pct
+            target_current_sector_totals: dict[str, Decimal] = {}
+            for target in self.targets:
+                key = _sector_key(target.sector)
+                target_current_sector_totals[key] = target_current_sector_totals.get(key, Decimal("0")) + target.current_weight_pct
+
+            technology = aggregate_constraints[OptimizationDimension.TECHNOLOGY]
+            unclassified = aggregate_constraints[OptimizationDimension.UNCLASSIFIED]
+
+            for target_id, target in targets_by_id.items():
+                constraint = asset_constraints[target_id]
+                if (
+                    constraint.current_weight_pct != target.current_weight_pct
+                    or constraint.target_weight_pct != target.target_weight_pct
+                    or constraint.allowed_max_weight_pct != target.allowed_max_weight_pct
+                    or constraint.delta_pct != target.delta_pct
+                ):
+                    raise ValueError("asset constraint does not close its target row")
+                if any(item_id not in constraints_by_id for item_id in target.constraint_ids):
+                    raise ValueError("optimization target references an unknown constraint")
+                if constraint.constraint_id not in target.constraint_ids:
+                    raise ValueError("optimization target must reference its asset constraint")
+                sector_key = _sector_key(target.sector)
+                sector_constraint = sector_constraints.get(sector_key)
+                if sector_constraint is None or sector_constraint.constraint_id not in target.constraint_ids:
+                    raise ValueError("optimization target must reference its sector constraint")
+                if sector_key in {"technology", "information technology", "tech"}:
+                    if technology.constraint_id not in target.constraint_ids:
+                        raise ValueError("technology target must reference its aggregate constraint")
+                if sector_key == "UNCLASSIFIED":
+                    if unclassified.constraint_id not in target.constraint_ids:
+                        raise ValueError("unclassified target must reference its aggregate constraint")
+
+            for sector_key, constraint in sector_constraints.items():
+                if constraint.target_weight_pct != target_sector_totals.get(sector_key, Decimal("0")):
+                    raise ValueError("sector constraint target does not close target rows")
+                if constraint.current_weight_pct != target_current_sector_totals.get(sector_key, Decimal("0")):
+                    raise ValueError("sector constraint current weight does not close target rows")
+
+            expected_technology_target = sum(
+                (target.target_weight_pct for target in self.targets if _sector_key(target.sector) in {"technology", "information technology", "tech"}),
+                Decimal("0"),
+            )
+            expected_technology_current = sum(
+                (target.current_weight_pct for target in self.targets if _sector_key(target.sector) in {"technology", "information technology", "tech"}),
+                Decimal("0"),
+            )
+            expected_unclassified_target = sum(
+                (target.target_weight_pct for target in self.targets if _sector_key(target.sector) == "UNCLASSIFIED"),
+                Decimal("0"),
+            )
+            expected_unclassified_current = sum(
+                (target.current_weight_pct for target in self.targets if _sector_key(target.sector) == "UNCLASSIFIED"),
+                Decimal("0"),
+            )
+            if (
+                technology.target_weight_pct != expected_technology_target
+                or technology.current_weight_pct != expected_technology_current
+                or unclassified.target_weight_pct != expected_unclassified_target
+                or unclassified.current_weight_pct != expected_unclassified_current
+            ):
+                raise ValueError("aggregate constraint weights do not close target rows")
+            has_current_breach = any(
+                item.current_weight_pct > item.allowed_max_weight_pct
+                for item in self.constraints
+            )
+            expected_assessment_status = (
+                BudgetAssessmentStatus.REVIEW_REQUIRED
+                if has_current_breach
+                else BudgetAssessmentStatus.PASS
+            )
+            if self.assessment_status != expected_assessment_status:
+                raise ValueError("optimization assessment status does not match current constraints")
         else:
             if self.targets:
                 raise ValueError("non-ready optimization must not expose targets")
