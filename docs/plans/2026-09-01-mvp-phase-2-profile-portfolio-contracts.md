@@ -1,6 +1,6 @@
 # MVP Phase 2 Working Plan：Profile and Portfolio Import Contracts
 
-- Status：`READY_FOR_IMPLEMENTATION`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target branch：`codex/mvp-phase-2-profile-portfolio-contracts`

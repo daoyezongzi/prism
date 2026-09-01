@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 1 Hardening](docs/plans/2026-09-01-mvp-phase-1-hardening.md)
+> Active phase: [MVP Phase 2 Profile/Portfolio Contracts](docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md)
 
 ## P0 — Foundation
 
@@ -24,9 +24,9 @@
 
 ## P0 — Flagship vertical slice
 
-- [ ] Implement deterministic risk questionnaire scoring.
-- [ ] Implement structured natural-language profile extraction and conflict confirmation.
-- [ ] Define portfolio and fund/ETF position import contracts.
+- [x] Implement deterministic risk questionnaire scoring.
+- [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
+- [x] Define portfolio and fund/ETF position import contracts.
 - [ ] Calculate look-through technology exposure and data coverage.
 - [ ] Implement concentration, correlation, liquidity and risk-budget findings.
 - [ ] Generate conservative, balanced and growth-oriented allocation ranges.
@@ -62,4 +62,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Dispatch Phase 1B (persistence & storage contracts) or Phase 2 (user profile & portfolio import contracts) according to the execution route.
+Complete the independent Phase 2 review gate. Only after it passes, write and execute the next phase plan for deterministic look-through exposure and risk inputs.

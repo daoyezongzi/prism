@@ -155,5 +155,28 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 
 ### Current evidence boundary
 
-- Phase 1 hardening is implemented locally and is ready for final review/commit acceptance; Phase 2 remains intentionally unstarted.
+- Phase 1 hardening was accepted in local commit `84bbe3b`; Phase 2 began only after that gate.
 - Real external providers, credentials, production concurrency/SLA and all later product layers remain unimplemented.
+
+## 2026-09-01 — MVP Phase 2 profile and portfolio contracts
+
+### Plan and boundary
+
+- Added `docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md` and committed it before implementation in `ae9c68c`.
+- The phase fixes two input boundaries for the flagship vertical slice: deterministic user risk profiles with explicit extraction conflict confirmation, and raw owner-scoped position/fund/ETF imports.
+- Portfolio analytics, exposure, risk budgets, recommendations, LLM/network access, persistence, API, UI and upstream changes remain explicitly out of scope.
+
+### Implemented locally
+
+- Added immutable, versioned `RiskQuestionnaire`, `ProfileExtractionProposal`, `ProfileConflict`, `ProfileDraft` and `RiskProfile` contracts.
+- Added fixed Decimal scoring and fixed risk-level thresholds; maximum drawdown remains an independent user constraint.
+- Added explicit `USE_QUESTIONNAIRE` / `USE_EXTRACTION` resolution with no silent overwrite and no raw natural-language field.
+- Added immutable `Position`, `PositionSnapshot`, four-state `PositionImportResult`, safe import issues, raw `LookThroughHolding`, `FundHoldingSnapshot` and owner/parent-closed `PortfolioImportBundle` contracts.
+- Added credential-free synthetic fixtures, unit反例 and integration tests.
+
+### Current review evidence
+
+- Final full suite: `69 passed` (the original 50 Phase 1/Evidence tests remain green).
+- Compilation, import, `git diff --check`, fixture JSON parsing and import checks passed after commit.
+- Independent adversarial checks passed for stale conflicts, unknown resolutions, risk-level tampering, owner mismatch, deep tuple mutation, four-state misuse, illegal weights and unknown fund parents.
+- Phase 2 was accepted in the single local commit `f3cee7a`; no Phase 3 implementation has started yet.

@@ -30,11 +30,12 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 决策链闭包、缺失数据语义和可行动建议约束测试；
 - 架构 ADR、复用矩阵和分阶段实施计划；
 - Provider Protocol、四态结果不变量、确定性语义指纹、脱敏与合成 Fixture Provider。
+- Phase 2 用户画像契约、确定性问卷评分、结构化提取冲突确认，以及 owner 隔离的持仓/基金穿透原始导入契约。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
-- 用户画像、研究编排、组合、风险和合规模块；
+- 实时自然语言画像提取、研究编排、组合暴露/风险/合规计算模块；
 - Web 工作台与真实端到端场景；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -76,6 +77,8 @@ python -m pytest
 - [当前实施计划](docs/plans/2026-09-01-foundation.md)
 - [Gemini Phase 1 执行合同](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md)
 - [Phase 1 Hardening 计划](docs/plans/2026-09-01-mvp-phase-1-hardening.md)
+- [Phase 2 Profile/Portfolio 计划](docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md)
+- [Phase 2 Profile/Portfolio 契约](docs/profile-portfolio-contracts.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

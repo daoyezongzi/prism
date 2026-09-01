@@ -1,0 +1,65 @@
+{
+  "schema_version": "portfolio-import-bundle.v1",
+  "bundle_id": "fixture-bundle-001",
+  "owner_id": "fixture-owner-001",
+  "created_at": "2026-09-01T12:00:00Z",
+  "position_snapshot": {
+    "schema_version": "position-snapshot.v1",
+    "snapshot_id": "fixture-position-snapshot-001",
+    "owner_id": "fixture-owner-001",
+    "as_of": "2026-08-31T16:00:00Z",
+    "base_currency": "CNY",
+    "source": "synthetic-broker-import",
+    "positions": [
+      {
+        "position_id": "fixture-position-fund-001",
+        "owner_id": "fixture-owner-001",
+        "asset_id": "FUND_SYNTH_001",
+        "asset_type": "MUTUAL_FUND",
+        "asset_name": "Synthetic Technology Fund",
+        "quantity": "100",
+        "market_value": "10000",
+        "currency": "CNY",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-broker-import"
+      },
+      {
+        "position_id": "fixture-position-stock-001",
+        "owner_id": "fixture-owner-001",
+        "asset_id": "STOCK_SYNTH_001",
+        "asset_type": "STOCK",
+        "asset_name": "Synthetic Technology Holding",
+        "quantity": "10",
+        "market_value": "5000",
+        "currency": "CNY",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-broker-import"
+      }
+    ]
+  },
+  "fund_holdings": [
+    {
+      "schema_version": "fund-holdings-snapshot.v1",
+      "snapshot_id": "fixture-fund-holdings-001",
+      "owner_id": "fixture-owner-001",
+      "parent_asset_id": "FUND_SYNTH_001",
+      "parent_asset_type": "MUTUAL_FUND",
+      "as_of": "2026-08-31T16:00:00Z",
+      "source": "synthetic-fund-report",
+      "coverage_pct": "80",
+      "holdings": [
+        {
+          "holding_id": "fixture-holding-001",
+          "parent_asset_id": "FUND_SYNTH_001",
+          "underlying_asset_id": "STOCK_SYNTH_001",
+          "underlying_name": "Synthetic Technology Holding",
+          "asset_type": "STOCK",
+          "weight_pct": "35.5",
+          "sector": "Technology",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-fund-report"
+        }
+      ]
+    }
+  ]
+}

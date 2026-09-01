@@ -1,0 +1,32 @@
+{
+  "questionnaire": {
+    "schema_version": "risk-questionnaire.v1",
+    "questionnaire_id": "fixture-questionnaire-001",
+    "owner_id": "fixture-owner-001",
+    "answered_at": "2026-09-01T12:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20",
+    "expected_return_range": {
+      "minimum_pct": "4",
+      "maximum_pct": "8"
+    }
+  },
+  "extraction": {
+    "schema_version": "profile-extraction.v1",
+    "extraction_id": "fixture-extraction-001",
+    "owner_id": "fixture-owner-001",
+    "input_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "extracted_at": "2026-09-01T12:01:00Z",
+    "confidence": "0.80",
+    "investment_horizon": "LONG",
+    "return_expectation": "HIGH",
+    "max_drawdown_tolerance_pct": "25",
+    "asset_preferences": ["ETF_SYNTH_001"],
+    "sector_preferences": ["Technology"],
+    "exclusions": ["Leveraged"]
+  }
+}
