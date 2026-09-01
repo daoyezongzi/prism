@@ -65,6 +65,24 @@ def test_matrix_replay_is_deterministic_and_owner_rebound() -> None:
     assert all("matrix-integration-owner" not in item.model_dump_json() for item in other.execution.observations)
 
 
+def test_one_hundred_concurrent_matrix_runs_are_isolated_and_deterministic() -> None:
+    service = FixtureResearchSpecialistMatrixService()
+    requests = tuple(
+        _request(request_id=f"matrix-concurrent-{index:03d}")
+        for index in range(100)
+    )
+
+    async def run_all():
+        return await asyncio.gather(*(service.run(request) for request in requests))
+
+    outputs = asyncio.run(run_all())
+    assert len(outputs) == 100
+    assert len({output.execution.state.run_id for output in outputs}) == 100
+    assert all(output.pipeline.status.value == "READY" for output in outputs)
+    assert all(output.owner_id == requests[0].owner_id for output in outputs)
+    assert all(len(output.pipeline.trace.facts) == 4 for output in outputs)
+
+
 def test_matrix_ready_nodes_execute_in_parallel(monkeypatch: pytest.MonkeyPatch) -> None:
     import app.service.specialist_matrix as module
     from app.providers import FixtureFinancialProvider
