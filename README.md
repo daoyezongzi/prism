@@ -51,6 +51,10 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 16 已把四类研究职责落成可复用矩阵：Macro、Industry、Stock、ETF/Fund
   各有双 lineage 来源，8 个节点有界并行执行后形成 8 条 Evidence、4 个 Fact 和
   4 个 Finding；`257` 项回归、100 次并发与边界审查通过，真实 Provider 仍未接入。
+- Phase 17 已把四轨道矩阵接入 owner-scoped API 与 Research Tracks 工作台：模板锚点、
+  READY/REVIEW/BLOCKED 节点状态、独立 lineage 验证和 Finding → Fact → Evidence
+  展开均复用既有 pipeline；研究结果不写入 DecisionEvent，也不产生 Recommendation。
+  `264` 项回归、100 次 API 重放、真实浏览器 owner 隔离与 Advisor HOLD/REDUCE 回归通过。
 
 尚未实现：
 
@@ -129,6 +133,8 @@ python -m pytest
 - [Phase 15 结构化工作台计划与验收](docs/plans/2026-09-02-mvp-phase-15-advisor-query-workbench.md)
 - [Phase 16 四类研究专员节点矩阵](docs/research-specialist-matrix.md)
 - [Phase 16 研究节点矩阵计划与验收](docs/plans/2026-09-02-mvp-phase-16-research-node-matrix.md)
+- [Phase 17 Research Tracks 工作台](docs/research-workbench.md)
+- [Phase 17 研究工作台计划与验收](docs/plans/2026-09-02-mvp-phase-17-research-workbench.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

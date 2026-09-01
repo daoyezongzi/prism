@@ -595,3 +595,45 @@ Independent post-commit adversarial review and final acceptance are still pendin
   `Finding → Fact → Evidence` expansion and a second owner seeing `0 events`.
 - Phase 15 is accepted locally at the current worktree `HEAD`; no push was performed.
   The next phase must start in a new worktree after a plan-only commit.
+
+## 2026-09-02 — MVP Phase 17 Research Tracks 工作台
+
+## 计划与 worktree
+
+- 在已接受的 Phase 16 `b04740c` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-17`，分支为
+  `codex/mvp-phase-17-research-workbench`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `aeefebc`；本阶段仍不接入真实 SkillHub/Tushare、鉴权、LLM、生产持久化或交易。
+
+## 本地实现
+
+- 在 `app/api` 增加 owner-scoped `research-matrix-template` 与 `research-runs` 路由，
+  使用严格 `ResearchSpecialistMatrixRequest`，统一映射 owner scope、invalid input
+  和 matrix refusal 错误；输出只保留节点状态、交叉验证和闭合 DecisionTrace。
+- 增加 Research Tracks 静态工作台区域：四类轨道的节点状态、独立 lineage 数、
+  READY/REVIEW/BLOCKED 语义和 Finding → Fact → Evidence 展开均来自既有 pipeline；
+  动态文字继续用 text-only DOM/CSP 渲染，owner 切换和异步竞态会清空旧研究状态。
+- 新增 [Research Tracks 工作台契约](docs/research-workbench.md) 与 Phase 17 API、
+  owner 隔离、降级、重放、伪造 Pydantic 输出和静态安全测试。
+
+## 独立审查与验收
+
+- 实现提交：`8db4246`；补强伪造输出/敏感输入/无时区/100 次重放测试并修正空白：
+  `9d210bc`。
+- 全量回归：`264 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开导入、`node --check`、`git diff --check` 通过。
+- 100 次相同 API request replay 返回完全相同的 run/pipeline/trace，且不写入
+  `DecisionEventStore`；PARTIAL fixture 通过 API 保持 `REVIEW_REQUIRED`/`FAILED`，
+  不暴露 Fact/Finding/Recommendation。
+- adversarial review 覆盖额外字段、敏感 owner、无时区、未知矩阵、跨 owner、
+  `model_copy(update=...)` 伪造输出与异常安全映射；没有发现可将研究状态升级为
+  Recommendation/Receipt 的路径。
+- wheel package-data 检查确认静态资源、四轨道 manifest/provider fixtures 和
+  service 均在包内；边界扫描确认没有新增外网、LLM/Gemini、订单或事务路径。
+- 真实本地浏览器完成最新代码的 owner→研究矩阵→8 节点/4 role READY→展开
+  Finding/Fact/Evidence→换 owner 清空；同一浏览器还回归了 Advisor `HOLD` 与
+  `REDUCE` 两条 Receipt 路径，浏览器错误日志为空。
+
+Phase 17 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
+worktree，并先提交计划书。

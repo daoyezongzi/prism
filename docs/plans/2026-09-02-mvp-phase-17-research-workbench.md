@@ -135,4 +135,26 @@ Advisor Recommendation 回执，研究矩阵结果保持显式的非持久化、
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record (2026-09-02)
+
+- Worktree: `D:\Github_Storage\prism-phase-17`, branch
+  `codex/mvp-phase-17-research-workbench`; plan commit `aeefebc` preceded
+  implementation. Implementation commits are `8db4246` and `9d210bc`.
+- Full regression: `python -m pytest -o addopts=` → `264 passed`, with only the
+  known Starlette/httpx deprecation warning. `compileall`, public imports,
+  `node --check`, `git diff --check`, fixture JSON and wheel package-data checks pass.
+- API and adversarial checks pass for template owner scope, strict/extra-forbid and
+  sensitive/naive input refusal, unknown matrix/error mapping, owner mismatch,
+  Pydantic-bypassed output, deterministic 100-replay closure, no DecisionEvent
+  side effect, and degraded `REVIEW_REQUIRED` without Fact/Finding/Recommendation.
+- Browser acceptance on the latest worktree code passes: Research Tracks template→run
+  displays all 8 nodes, four roles, READY, lineage validation and expandable
+  Finding→Fact→Evidence; switching owner clears the prior matrix. Existing Advisor
+  BALANCED `HOLD` and CONSERVATIVE `REDUCE` paths also pass, with no browser errors.
+- Static/boundary review confirms same-origin CSP/text-only DOM, no external network,
+  LLM/Gemini, credentials, orders or transaction path. Research results remain
+  explicitly non-persistent and separate from DecisionEvent/Recommendation/Receipt.
+- No push performed. Phase 18 may begin only in a new worktree from the accepted
+  Phase 17 `HEAD` and after a plan-only commit.

@@ -32,7 +32,10 @@ PostgreSQL、SkillHub 网络和生产级 Provider 仍未实现。Phase 15 在同
 owner-scoped query template 与结构化表单；它不改变服务端决策链，也不引入自然语言
 或交易入口。Phase 16 增加 `ResearchSpecialistMatrix` 和 fixture-first 四轨道
 （Macro/Industry/Stock/FUND）配方；它复用同一 bounded executor、Cross Validation
-和 Evidence/Finding bridge，不复制状态机，也不宣称实时专员或 LLM 已接入。
+和 Evidence/Finding bridge，不复制状态机，也不宣称实时专员或 LLM 已接入。Phase 17
+增加 Research Tracks 的 owner-scoped template/run API 与静态可解释视图；矩阵结果
+仍不进入 DecisionEvent，不产生 Recommendation/Receipt，且切换 owner 会清空研究
+状态。
 
 ## 数据流
 
@@ -107,6 +110,7 @@ Provider 统一返回四类结果：
 
 - Portfolio：当前持仓、穿透暴露和调整前后对比；
 - Advisor：任务、研究节点状态和三类调整方案；
+- Research Tracks：四类研究节点、独立 lineage 验证和 Finding → Fact → Evidence；
 - Evidence：证据回执、来源、期间、新鲜度和冲突；
 - Risk Profile：画像参数、置信度、冲突及其对建议的实际影响。
 
@@ -117,5 +121,7 @@ Provider 统一返回四类结果：
 已经实现 Evidence、Provider、画像/持仓、暴露/风险、研究、合规闸门、
 Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/首个
 解释工作台、Phase 14 的 API 触发 fixture-first Advisor 纵切、Phase 15 的结构化
-Query 工作台和 Phase 16 的四轨道研究节点矩阵。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整工作台
-交互和外部浏览器旗舰流仍未完成；README 与 TODO 必须持续保持这一事实边界。
+Query 工作台、Phase 16 的四轨道研究节点矩阵和 Phase 17 的 Research Tracks API/UI
+切片。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整
+Portfolio/Advisor/Evidence/Risk Profile 工作台交互和外部浏览器旗舰流仍未完成；
+README 与 TODO 必须持续保持这一事实边界。
