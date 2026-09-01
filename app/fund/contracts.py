@@ -516,6 +516,26 @@ class FundResearchResponse(ContractModel):
         known_finding_ids = {item.finding_id for item in self.findings}
         if not set(self.risk.finding_ids).issubset(known_finding_ids):
             raise ValueError("fund risk references an unknown finding")
+        non_info_findings = {
+            item.finding_id: item
+            for item in self.findings
+            if item.severity in {FindingSeverity.WARNING, FindingSeverity.CRITICAL}
+        }
+        non_info_ids = set(non_info_findings)
+        risk_ids = set(self.risk.finding_ids)
+        if self.pipeline_status == ResearchPipelineStatus.READY:
+            if self.risk.status == FundRiskStatus.CLEAR and non_info_findings:
+                raise ValueError("CLEAR fund risk must not hide warning or critical findings")
+            if self.risk.status == FundRiskStatus.WATCH:
+                if any(item.severity == FindingSeverity.CRITICAL for item in non_info_findings.values()):
+                    raise ValueError("WATCH fund risk must not hide a critical finding")
+                if risk_ids != non_info_ids:
+                    raise ValueError("WATCH fund risk must reference every non-info finding")
+            if self.risk.status == FundRiskStatus.HIGH_RISK:
+                if not any(item.severity == FindingSeverity.CRITICAL for item in non_info_findings.values()):
+                    raise ValueError("HIGH_RISK fund risk requires a critical finding")
+                if risk_ids != non_info_ids:
+                    raise ValueError("HIGH_RISK fund risk must reference every non-info finding")
         serialized = self.model_dump_json().casefold()
         if any(token in serialized for token in _SENSITIVE_SUBSTRINGS):
             raise ValueError("fund response must not contain sensitive fields")

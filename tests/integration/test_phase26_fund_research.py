@@ -7,7 +7,12 @@ from pydantic import ValidationError
 from app.api import create_app
 from app.service import FixtureFundResearchService
 from app.store import SQLiteDecisionEventStore
-from app.fund import FundResearchNodeResponse, FundResearchScenarioId
+from app.fund import (
+    FundResearchNodeResponse,
+    FundResearchResponse,
+    FundResearchScenarioId,
+    FundRiskSummary,
+)
 
 
 NOW = datetime(2026, 9, 2, 2, tzinfo=UTC)
@@ -289,6 +294,30 @@ def test_fund_api_revalidates_injected_output_and_rejects_scope_drift() -> None:
         "message": "fund research was refused",
     }
     assert "DRIFTED_FUND" not in response.text
+    store.close()
+
+
+def test_fund_response_risk_cannot_hide_triggered_findings() -> None:
+    client, store = _client()
+    payload = _payload(request_id="phase26-risk-closure")
+    response = client.post(
+        "/api/v1/advisor/fund-research-runs",
+        headers={"X-Owner-ID": payload["owner_id"]},
+        json=payload,
+    )
+    assert response.status_code == 200
+    original = FundResearchResponse.model_validate(response.json())
+    forged = original.model_copy(
+        update={
+            "risk": FundRiskSummary(
+                status="CLEAR",
+                summary="规则未触发；这不是交易建议。",
+                finding_ids=(),
+            )
+        }
+    )
+    with pytest.raises(ValidationError):
+        FundResearchResponse.model_validate(forged.model_dump(mode="python"))
     store.close()
 
 
