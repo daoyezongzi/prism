@@ -355,6 +355,38 @@ def test_convertible_response_risk_cannot_hide_triggered_findings() -> None:
     store.close()
 
 
+def test_convertible_response_rejects_forged_formula_values_and_duplicate_metrics() -> None:
+    client, store = _client()
+    payload = _payload(request_id="phase27-formula-closure")
+    response = client.post(
+        "/api/v1/advisor/convertible-bond-research-runs",
+        headers={"X-Owner-ID": payload["owner_id"]},
+        json=payload,
+    )
+    original = ConvertibleBondResearchResponse.model_validate(response.json())
+    forged_facts = list(original.facts)
+    conversion_index = next(
+        index for index, fact in enumerate(forged_facts) if fact.metric == "conversion_value"
+    )
+    forged_conversion = forged_facts[conversion_index].model_copy(update={"value": "999.00"})
+    forged_facts[conversion_index] = forged_conversion
+    forged_trace = original.trace.model_copy(update={"facts": tuple(sorted(forged_facts, key=lambda item: item.fact_id))})
+    with pytest.raises(ValidationError):
+        ConvertibleBondResearchResponse.model_validate(
+            original.model_copy(update={"facts": tuple(sorted(forged_facts, key=lambda item: item.fact_id)), "trace": forged_trace}).model_dump(mode="python")
+        )
+
+    duplicate_facts = list(original.facts)
+    duplicate_facts[-1] = duplicate_facts[-1].model_copy(update={"metric": duplicate_facts[0].metric})
+    duplicate_facts = tuple(sorted(duplicate_facts, key=lambda item: item.fact_id))
+    duplicate_trace = original.trace.model_copy(update={"facts": duplicate_facts})
+    with pytest.raises(ValidationError):
+        ConvertibleBondResearchResponse.model_validate(
+            original.model_copy(update={"facts": duplicate_facts, "trace": duplicate_trace}).model_dump(mode="python")
+        )
+    store.close()
+
+
 def test_convertible_explicit_operation_and_node_kind_are_compatible() -> None:
     assert ProviderOperation.CONVERTIBLE_BOND_DATA.value == "CONVERTIBLE_BOND_DATA"
     assert ProviderOperation.CONVERTIBLE_BOND_DATA in allowed_operations_for_node(

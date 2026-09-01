@@ -2,6 +2,7 @@
 
 from app.convertible_bond.contracts import (
     CONVERTIBLE_BOND_METRIC_UNITS,
+    CONVERTIBLE_BOND_DERIVED_METRICS,
     CONVERTIBLE_BOND_RAW_METRICS,
     ConvertibleBondMetricResponse,
     ConvertibleBondResearchIssue,
@@ -22,6 +23,7 @@ from app.convertible_bond.contracts import (
 
 __all__ = [
     "CONVERTIBLE_BOND_METRIC_UNITS",
+    "CONVERTIBLE_BOND_DERIVED_METRICS",
     "CONVERTIBLE_BOND_RAW_METRICS",
     "ConvertibleBondMetricResponse",
     "ConvertibleBondResearchIssue",

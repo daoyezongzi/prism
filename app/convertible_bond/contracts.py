@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from enum import StrEnum
 from typing import Literal, Self
 
@@ -78,6 +78,17 @@ def _aware(value: datetime, field_name: str) -> None:
 def _finite(value: Decimal, field_name: str) -> None:
     if not value.is_finite():
         raise ValueError(f"{field_name} must be finite")
+
+
+def _decimal_value(value: object, field_name: str) -> Decimal:
+    if isinstance(value, bool) or value is None or isinstance(value, (dict, list, tuple)):
+        raise ValueError(f"{field_name} must be a finite scalar")
+    try:
+        parsed = Decimal(str(value))
+    except (InvalidOperation, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a finite scalar") from exc
+    _finite(parsed, field_name)
+    return parsed
 
 
 class ConvertibleBondResearchScenarioId(StrEnum):
@@ -469,6 +480,7 @@ class ConvertibleBondResearchResponse(ContractModel):
     subject: ResearchIdentifier
     period: ResearchIdentifier
     scenario: ConvertibleBondResearchScenarioResponse
+    bond_par_value: Decimal = Field(gt=0)
     run_id: NonEmptyStr
     run_status: ResearchRunStatus
     pipeline_status: ResearchPipelineStatus
@@ -510,6 +522,8 @@ class ConvertibleBondResearchResponse(ContractModel):
             raise ValueError("convertible response validation scope does not match")
         if any(item.subject != self.subject or item.period != self.period or item.metric not in all_metrics or item.unit != CONVERTIBLE_BOND_METRIC_UNITS[item.metric] for item in self.facts):
             raise ValueError("convertible response fact scope does not match")
+        if self.bond_par_value != Decimal("100"):
+            raise ValueError("convertible response must use the fixed 100 CNY par value")
         if self.trace.recommendations:
             raise ValueError("convertible response must not contain recommendations")
         if self.trace.facts != self.facts:
@@ -529,6 +543,26 @@ class ConvertibleBondResearchResponse(ContractModel):
                 raise ValueError("READY convertible response must not carry issues")
             if self.risk.status == ConvertibleBondRiskStatus.NOT_ASSESSED:
                 raise ValueError("READY convertible response requires an assessed risk")
+            values = {
+                fact.metric: _decimal_value(fact.value, f"fact {fact.metric}")
+                for fact in self.facts
+            }
+            if values["underlying_stock_price"] <= 0 or values["conversion_price"] <= 0 or values["bond_price"] <= 0:
+                raise ValueError("convertible response price inputs must be positive")
+            for metric, maximum in (("credit_rating_rank", Decimal("5")), ("liquidity_score", Decimal("3"))):
+                level = values[metric]
+                if level != level.to_integral_value() or level < Decimal("1") or level > maximum:
+                    raise ValueError(f"convertible response {metric} is outside the fixed rank range")
+            expected_conversion_value = (
+                values["underlying_stock_price"] / values["conversion_price"] * self.bond_par_value
+            ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            expected_premium = (
+                (values["bond_price"] / expected_conversion_value - Decimal("1")) * Decimal("100")
+            ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            if values["conversion_value"] != expected_conversion_value:
+                raise ValueError("convertible response conversion value does not match formula")
+            if values["conversion_premium_pct"] != expected_premium:
+                raise ValueError("convertible response conversion premium does not match formula")
         else:
             if self.facts or self.findings:
                 raise ValueError("non-ready convertible response must not expose facts/findings")
