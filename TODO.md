@@ -6,8 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 24 is accepted locally in the dedicated
-> `D:\Github_Storage\prism-phase-24` worktree; Phase 25 must start in a new worktree.
+> Active phase: Phase 25 is accepted locally in the dedicated
+> `D:\Github_Storage\prism-phase-25` worktree; Phase 26 must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -71,6 +71,9 @@
 - [x] Add an explicit Research Tracks scenario catalog for baseline, source disagreement,
   PARTIAL, EMPTY and FAILED replays; keep live Provider access and recommendation side
   effects deferred.
+- [x] Add the independent Demo F stock research Evidence Card with six financial claims,
+  deterministic quality/leverage Findings, five safe replay scenarios and visible node
+  degradation reasons; keep live market data, valuation and Recommendation effects deferred.
 
 ## External inputs / decisions
 
@@ -92,6 +95,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 24 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-24`
-worktree. Create a new worktree for Phase 25 and submit its plan before implementation;
+Phase 25 is accepted locally in the dedicated `D:\Github_Storage\prism-phase-25`
+worktree. Create a new worktree for Phase 26 and submit its plan before implementation;
 keep real authentication, live Provider access and production persistence deferred.

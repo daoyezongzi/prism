@@ -926,3 +926,57 @@ worktree，并先提交 Phase 25 计划书。
 - 独立审查确认没有自然语言/LLM/Gemini 假象、前端评分、原文持久化、跨 owner 泄露、
   外部网络、订单/交易或新的 Recommendation 路径。Phase 23 已接受，下一阶段必须
   从本提交创建新 worktree 并先提交计划书。
+## 2026-09-02 — MVP Phase 25 个股研究 Evidence Card（Demo F）
+
+### 计划与 worktree
+
+- 在已接受的 Phase 24 `8c38a3a` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-25`，分支为
+  `codex/mvp-phase-25-stock-research`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `f1ebbd5`；本阶段继续保持 fixture-first，不接入真实 SkillHub/同花顺网络、
+  在线鉴权、LLM/Gemini、估值/价格预测、交易或 Recommendation。
+
+### 本地实现
+
+- 新增 `StockResearchRequest`、manifest、template/response、节点状态、五场景和
+  `StockRiskSummary` 严格契约；请求/结果绑定 owner、subject、period、timezone-aware
+  时间，拒绝 extra、敏感字段、未知场景和跨 scope。响应逐节点公开状态、缺失字段、
+  范围说明和安全 issue。
+- 新增两条独立 lineage 的六指标公司财务 fixture 与
+  `FixtureStockResearchService`。它复用既有 Provider 四态校验、bounded run、
+  Cross-Validation、Evidence/Finding bridge 和 DecisionTrace；场景 overlay 只重建
+  并重新验证 `ProviderResult`。
+- READY 基线形成六个 VERIFIED Fact；服务端 `Decimal` 确定性计算现金流质量、应收
+  占比和杠杆 Findings，并生成 HIGH_RISK 摘要。分歧、PARTIAL、EMPTY、FAILED 均保留
+  Evidence 和降级原因，不泄露 Fact/Finding，不写 DecisionEvent，不生成
+  Recommendation。
+- 新增 owner-scoped `/api/v1/advisor/stock-research-template` 与
+  `/api/v1/advisor/stock-research-runs`，并接入 Demo F 静态工作台；动态值只用节点
+  API/`textContent`，同源 fetch，owner/场景/序列切换清理旧结果。
+- 新增 [个股研究 Evidence Card 契约](docs/stock-research-card.md)，同步架构、README
+  和 TODO 的实现边界。
+
+### 独立审查与验收
+
+- 首版实现提交为 `daad1b0`；审查发现非 READY 响应虽保留 Evidence，但 UI/API 没有
+  展示具体来源节点降级原因；`6d8a349` 强化响应边界，`3a46b92` 增加
+  `StockResearchNodeResponse`、节点 reason 投影及场景断言。
+- Phase-specific tests：`11 passed`；全量回归：`325 passed`，仅已知
+  Starlette/httpx deprecation warning。`compileall`、公开导入、`node --check`、
+  `git diff --check` 通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9 case 通过，case/profile/
+  risk/compliance/evidence/replay 指标均为 `1.0`。本地 ASGI 100 并发基线为：
+  `template` 100/100，P50/P95/P99 `99.815/114.745/118.167 ms`；`research` 100/100，
+  `671.476/917.163/925.097 ms`；`advisor` 100/100 logical operations（200 requests），
+  P50/P95/P99 `1025.719/1612.853/1643.036 ms`；三场景 error、owner mismatch 均为 0，
+  仅作为 fixture/ASGI 基线，不外推生产 SLA。
+- wheel 复核为 94 entries，包含 stock manifest、双 provider fixture、service/contracts
+  和静态资源；运行时范围扫描确认没有上游运行时导入、外网、LLM/Gemini、凭据、HTML
+  sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成模板/五场景：基线显示六个 Fact、异常和 HIGH_RISK；分歧显示
+  双方债务率 Evidence 与 lineage；PARTIAL/EMPTY/FAILED 显示节点状态和具体 reason，
+  且没有 Fact/Finding；切换 owner 清空旧卡并重新绑定。浏览器 console error 为 `[]`。
+
+Phase 25 已在本地 worktree 接受，未 push；下一阶段必须从本提交创建新 worktree，
+并先提交 Phase 26 计划书。

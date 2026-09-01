@@ -35,7 +35,12 @@ owner-scoped query template 与结构化表单；它不改变服务端决策链�
 和 Evidence/Finding bridge，不复制状态机，也不宣称实时专员或 LLM 已接入。Phase 17
 增加 Research Tracks 的 owner-scoped template/run API 与静态可解释视图；矩阵结果
 仍不进入 DecisionEvent，不产生 Recommendation/Receipt，且切换 owner 会清空研究
-状态。
+状态。Phase 25 在不改变 Phase 16/24 四轨道矩阵的前提下，增加独立的 Demo F 个股
+研究 Evidence Card：两个 `COMPANY_DATA` fixture 节点复用同一 bounded run、四态
+Provider、lineage-aware Cross-Validation 和 Evidence/Finding bridge，基线闭合六个
+财务 Fact 并由 deterministic `Decimal` 规则计算风险；来源分歧、PARTIAL、EMPTY 和
+FAILED 只保留 Evidence 与节点降级原因，不产生 Fact/Finding/Recommendation。该卡
+通过 owner-scoped API 和静态工作台展示，仍不接入网络、LLM/Gemini、认证或生产存储。
 
 ## 数据流
 
@@ -122,7 +127,8 @@ Provider 统一返回四类结果：
 Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/首个
 解释工作台、Phase 14 的 API 触发 fixture-first Advisor 纵切、Phase 15 的结构化
 Query 工作台、Phase 16 的四轨道研究节点矩阵、Phase 17 的 Research Tracks API/UI
-切片、Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图，以及 Phase 19
-的本地 fixture 负载测试骨架。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
+切片、Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图、Phase 19
+的本地 fixture 负载测试骨架，以及 Phase 25 的个股研究 Evidence Card API/UI。
+真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
 专用多研究 Agent、Portfolio/Risk Profile CRUD、真实持仓导入、云压测和外部真实
 旗舰流/SLA 仍未完成；README 与 TODO 必须持续保持这一事实边界。

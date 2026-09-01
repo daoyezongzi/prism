@@ -91,6 +91,14 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   保留节点/run/pipeline 状态但不升级为 Fact/Finding/Recommendation。`314` 项回归、
   100 次固定评测回放、三场景 100 并发本地基线、wheel 和真实浏览器五场景路径均通过；
   这些仍是离线 fixture/ASGI 证据。详见 [研究场景契约](docs/research-scenarios.md)。
+- Phase 25 已把 Demo F 个股研究落成独立的 Evidence Card：两条 `COMPANY_DATA`
+  lineage 经过同一 bounded run、四态 Provider、Cross-Validation 和 Evidence/Finding
+  bridge，基线闭合六个财务 Fact，并以服务端 `Decimal` 规则生成现金流质量、应收占比和
+  杠杆 Finding；分歧、PARTIAL、EMPTY、FAILED 保留 Evidence 与具体节点降级原因，拒绝
+  Fact/Finding/风险升级。owner-scoped API 与静态工作台支持五场景回放，结果不写
+  DecisionEvent、不生成 Recommendation。`325` 项回归、100 次评测回放、三场景 100
+  并发本地基线、wheel、静态边界和真实浏览器路径均通过；这些仍是离线 fixture/ASGI
+  证据。详见 [个股研究 Evidence Card](docs/stock-research-card.md)。
 
 尚未实现：
 

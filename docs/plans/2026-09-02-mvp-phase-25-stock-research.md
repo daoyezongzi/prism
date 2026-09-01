@@ -168,8 +168,24 @@ lineage，再让 deterministic layer 计算现金流质量、应收占比和杠�
 
 ## Independent review and acceptance
 
-待 Phase 25 实现、独立审查、修复和验证后填写。
+- 计划提交：`f1ebbd5`；首版实现：`daad1b0`。
+- 独立审查发现非 READY 节点的具体降级原因没有投影到 response/UI；以
+  `6d8a349` 强化 response 边界、`3a46b92` 增加 `StockResearchNodeResponse`、安全
+  issue/missing/scope 投影及场景断言后关闭该问题。
+- Phase-specific tests `11 passed`；全量回归 `325 passed`（仅已知
+  Starlette/httpx deprecation warning）；compileall、公开导入、node 静态检查、
+  `git diff --check` 通过。
+- `tools.evaluate_mvp --repeat 100` 为 9/9、所有评测指标 `1.0`；template/research/
+  advisor 三场景 100 并发本地 ASGI 均无错误或 owner mismatch；wheel 94 entries
+  包含 stock fixture、service/contracts 和静态资源。
+- 真实本地浏览器完成五场景、Evidence 展开和 owner 清理：基线六 Fact/异常/HIGH_RISK，
+  分歧显示双方 Evidence，PARTIAL/EMPTY/FAILED 显示节点降级且没有 Fact/Finding，
+  console error `[]`。运行时范围审查确认没有外网、LLM/Gemini、凭据、HTML sink、
+  订单或 Recommendation 旁路。
+
+结论：Phase 25 验收通过，提交链为 `f1ebbd5` → `daad1b0` → `6d8a349` → `3a46b92`；
+本地未 push。下一阶段必须从 `3a46b92` 创建新 worktree 并先提交计划书。
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
