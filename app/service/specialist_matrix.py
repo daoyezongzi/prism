@@ -69,6 +69,23 @@ class SpecialistMatrixOutput(ContractModel):
             raise ValueError("pipeline request does not match output request")
         if self.pipeline.trace.recommendations:
             raise ValueError("specialist matrix must not produce recommendations")
+        matrix_nodes = {node.node_id: node for node in self.matrix.nodes}
+        plan_nodes = {node.node_id: node for node in self.execution.state.plan.nodes}
+        if set(matrix_nodes) != set(plan_nodes):
+            raise ValueError("execution plan nodes do not match specialist matrix")
+        for node_id, matrix_node in matrix_nodes.items():
+            plan_node = plan_nodes[node_id]
+            if (
+                plan_node.owner_id != self.owner_id
+                or plan_node.node_kind != matrix_node.node_kind
+                or plan_node.required != matrix_node.required
+                or plan_node.dependencies != matrix_node.dependencies
+            ):
+                raise ValueError("execution plan node does not match specialist matrix")
+        expected_claim_ids = {node.claim_id for node in self.matrix.claims()}
+        actual_claim_ids = {item.claim_id for item in self.pipeline.validations}
+        if actual_claim_ids != expected_claim_ids:
+            raise ValueError("pipeline claims do not match specialist matrix")
         return self
 
 
