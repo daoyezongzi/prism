@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 5 Allocation Envelope](docs/plans/2026-09-01-mvp-phase-5-allocation-envelope.md)
+> Active phase: [MVP Phase 6 Structured Research/Cross-Validation](docs/plans/2026-09-01-mvp-phase-6-research-cross-validation.md)
 
 ## P0 — Foundation
 
@@ -35,6 +35,7 @@
 
 ## P0 — Structured research and UI
 
+- [x] Define four-state structured research-node results and lineage-aware Cross-Validation contract; real Provider/DAG integration remains deferred.
 - [ ] Implement bounded async orchestration with structured `ResearchState`.
 - [ ] Add macro, industry, stock and fund/ETF research nodes.
 - [ ] Implement source-lineage-aware cross validation and disagreement handling.
@@ -62,4 +63,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 5 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for structured research and cross-validation contracts.
+Phase 6 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for bounded orchestration and Evidence-grounded finding integration.

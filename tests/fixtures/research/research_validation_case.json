@@ -1,0 +1,70 @@
+{
+  "schema_version": "research-validation-fixture.v1",
+  "fixture_id": "research-validation-case-001",
+  "source": "offline-test-only",
+  "claim": {
+    "claim_id": "fixture-claim-revenue-001",
+    "owner_id": "fixture-research-owner-001",
+    "subject": "FIXTURE_STOCK_001",
+    "metric": "revenue",
+    "unit": "CNY",
+    "period": "2026-Q2",
+    "expected_value": "10.00"
+  },
+  "observations": [
+    {
+      "observation_id": "fixture-observation-a",
+      "owner_id": "fixture-research-owner-001",
+      "evidence_id": "fixture-evidence-a",
+      "subject": "FIXTURE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "synthetic-provider-a",
+      "source": "synthetic-report-a",
+      "lineage_id": "fixture-lineage-a",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-08-31T10:00:00Z",
+      "retrieved_at": "2026-09-01T10:00:00Z"
+    },
+    {
+      "observation_id": "fixture-observation-b",
+      "owner_id": "fixture-research-owner-001",
+      "evidence_id": "fixture-evidence-b",
+      "subject": "FIXTURE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "synthetic-provider-b",
+      "source": "synthetic-report-b",
+      "lineage_id": "fixture-lineage-b",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-08-31T11:00:00Z",
+      "retrieved_at": "2026-09-01T10:05:00Z"
+    },
+    {
+      "observation_id": "fixture-observation-a-copy",
+      "owner_id": "fixture-research-owner-001",
+      "evidence_id": "fixture-evidence-a-copy",
+      "subject": "FIXTURE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "synthetic-provider-a",
+      "source": "synthetic-report-a-copy",
+      "lineage_id": "fixture-lineage-a",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-08-31T10:00:00Z",
+      "retrieved_at": "2026-09-01T10:06:00Z"
+    }
+  ],
+  "forbidden_fields": [
+    "recommendation",
+    "order",
+    "target_price",
+    "expected_return"
+  ]
+}

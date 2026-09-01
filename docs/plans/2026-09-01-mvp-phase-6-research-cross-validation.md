@@ -1,6 +1,6 @@
 # MVP Phase 6 Working Plan：Structured Research and Cross-Validation Contract
 
-- Status：`READY`
+- Status：`ACCEPTED`
 - Owner：Codex
 - Reviewer：Codex + user
 - Target worktree：`D:\Github_Storage\prism-phase-6`

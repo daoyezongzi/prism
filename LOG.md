@@ -256,3 +256,24 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - `python -m compileall -q app`, allocation import, `git diff --check`, fixture JSON and source/fixture sensitive-field scans passed.
 - Independent adversarial checks passed for deterministic repeatability, partial/failed propagation, stale/tampered budget breaches, blocked outputs and absence of recommendation/order/secret-shaped output fields.
 - Phase 5 is accepted in this worktree after the above review; the next structured-research/cross-validation plan must use a new worktree.
+
+## 2026-09-01 — MVP Phase 6 structured research and cross-validation plan
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-6` on branch `codex/mvp-phase-6-research-cross-validation` from the accepted Phase 5 worktree.
+- Added `docs/plans/2026-09-01-mvp-phase-6-research-cross-validation.md` before implementation.
+- The phase narrows structured research to scalar observation contracts, four-state node results and lineage-aware validation; live providers, orchestration and Evidence/Finding conversion remain deferred.
+
+### Implemented locally
+
+- Added immutable `ResearchObservation`, `ResearchNodeResult`, `ValidationClaim`, `CrossValidationResult` and safe issue contracts.
+- Added deterministic equality/lineage validation: duplicate lineage rows count once, no-lineage rows cannot prove independence, non-VERIFIED and scope-mismatched observations stay visible but cannot support a claim, and conflicts become `UNRESOLVED`.
+- Added synthetic offline fixture, unit/integration counterexamples and `docs/research-cross-validation.md`; no network, credentials, LLM, provider adapter, DAG, persistence, API, UI or recommendation path was introduced.
+
+### Independent review evidence
+
+- Full suite: `122 passed` (Phase 1–5's 103 tests remain green).
+- `python -m compileall -q app`, research import, `git diff --check`, fixture JSON and source/fixture sensitive-field scans passed.
+- Independent adversarial checks passed for repeated-lineage de-duplication, no-lineage insufficiency, support/contradiction conflicts, non-VERIFIED exclusion, scope mismatch, partial/failed nodes, forged result rejection, stable IDs and absence of recommendation/order/secret-shaped output fields.
+- Phase 6 is accepted in this worktree after the above review; the next bounded-orchestration/Evidence-integration plan must use a new worktree.
