@@ -27,6 +27,18 @@ def _canonicalize(value: Any) -> Any:
     return value
 
 
+def canonical_payload_signature(payload: object) -> str:
+    """Hash structured JSON-like content with collection-order invariance."""
+
+    canonical = json.dumps(
+        _canonicalize(payload),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def canonical_model_signature(model: object) -> str:
     """Hash model content while treating contract collections as unordered sets."""
 
@@ -40,13 +52,7 @@ def canonical_model_signature(model: object) -> str:
             }
         except Exception:
             payload = {"invalid_type": "unrepresentable"}
-    canonical = json.dumps(
-        _canonicalize(payload),
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    )
-    return sha256(canonical.encode("utf-8")).hexdigest()
+    return canonical_payload_signature(payload)
 
 
-__all__ = ["canonical_model_signature"]
+__all__ = ["canonical_model_signature", "canonical_payload_signature"]

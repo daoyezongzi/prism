@@ -387,3 +387,36 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - `python -m compileall -q app`, public gate imports, all 15 fixture JSON files, `git diff --check`, no-network/storage/LLM import scan, and fixture sensitive-key scan passed.
 - Independent post-commit checks passed for wrong-type inputs, 100-run determinism, immutable inputs, sensitive owner redaction, combined review/block precedence, candidate prose non-echo, content-bound IDs, deterministic breach remediation, bridge/trace divergence, and absence of Recommendation/action fields.
 - Phase 11 is accepted in this worktree. Phase 12 must start from this accepted commit in a new worktree and may consume only a dual-PASS gate result; no push was performed.
+
+## 2026-09-02 — MVP Phase 12 Recommendation and Decision Receipt
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-12` on branch `codex/mvp-phase-12-recommendation-receipt` from accepted Phase 11 commit `38c53c2`.
+- Added `docs/plans/2026-09-02-mvp-phase-12-recommendation-decision-receipt.md` and committed the plan before implementation (`5796192`).
+- The phase is limited to deterministic Recommendation composition after a dual-PASS gate and an in-memory self-validating Decision Receipt; API, persistence, UI, live providers and LLM remain out of scope.
+
+### Implemented locally
+
+- Added frozen `RecommendationBinding`, `DecisionReceipt`, `RecommendationCompositionResult`, rule-version and issue contracts under `app/recommendation`.
+- Added `compose_recommendations`: revalidates all profile/portfolio/research/risk/allocation/candidate/gate inputs, reruns the Phase 11 gate, emits only ASSET `HOLD` for no-breach envelopes or breach-bound `REDUCE` within exact allocation bands, and rebuilds a closed `DecisionTrace`.
+- Added an explicit aggregate-breach guard: sector/technology/unclassified breaches without an asset mapping are blocked rather than presented as a fake security recommendation.
+- Added canonical content signatures and a receipt builder recording owner/profile/snapshot/report/gate/evidence/fact/finding/recommendation identities, rule versions, deterministic generation mode, band/breach bindings, trace hash and content hash.
+- Added balanced/conservative fixtures, unit/integration counterexamples, and `docs/recommendation-decision-receipt.md`. No ADD/EXIT, price, quantity, target return, order, cash redistribution, LLM, network, persistence or UI behavior was introduced.
+
+### Current review evidence
+
+- Phase-specific Recommendation/Receipt tests: `17 passed`.
+- Full regression suite: `215 passed`.
+- `python -m compileall -q app`, public Recommendation imports, all fixture JSON
+  parsing, `git diff --check`, no-network/storage/LLM boundary scan, and fixture
+  sensitive-value scan passed.
+- Additional adversarial checks cover non-VERIFIED trace reuse, forged extra
+  remediation breaches, gate/candidate/run/assessment/allocation receipt identity,
+  non-ASSET REDUCE rejection, receipt hash tampering, 100-run determinism and
+  input immutability.
+- Independent post-commit review passed on commit `d0fe0b6`: clean worktree,
+  full `215 passed`, compile/import checks, fixture/sensitive scans, and
+  no-network/storage/LLM boundary checks all passed.
+- Phase 12 is accepted locally. No push was performed; Phase 13 must start from
+  this accepted commit in a new worktree.

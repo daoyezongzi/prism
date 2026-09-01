@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 11 Independent Risk and Compliance Gates](docs/plans/2026-09-01-mvp-phase-11-risk-compliance-gates.md)
+> Active phase: [MVP Phase 12 Recommendation and Decision Receipt](docs/plans/2026-09-02-mvp-phase-12-recommendation-decision-receipt.md)
 
 ## P0 — Foundation
 
@@ -44,6 +44,7 @@
 - [x] Consume complete-run validation through the Evidence/Finding bridge and emit a closed DecisionTrace; degraded runs remain review/blocked.
 - [x] Implement and independently accept the risk and compliance gates.
 - [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
+- [x] Compose deterministic HOLD/REDUCE Recommendations from a dual-PASS gate and create a self-validating Decision Receipt.
 - [ ] Verify the complete flagship flow in a real browser.
 
 ## External inputs / decisions
@@ -66,4 +67,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Create a dedicated Phase 12 worktree from the accepted Phase 11 commit, write its plan first, and compose Recommendation/Decision Receipt only from a dual-PASS gate result.
+Phase 12 is accepted locally. Create a new Phase 13 worktree and write its plan before implementing owner-scoped persistence/API and the first explainable UI slice.

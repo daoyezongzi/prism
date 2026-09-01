@@ -56,6 +56,8 @@ breach 只允许降险；无 breach 只允许维持当前配置。任何数据�
   `remediation_breach_ids` 的 `OVER_LIMIT` bands 生成 `REDUCE`，每条区间严格
   使用 band 的 `[target_min_weight_pct, target_max_weight_pct]`，并要求全部
   remediation breach 被覆盖且无额外 breach；
+- 如果 breach 只落在 SECTOR/TECHNOLOGY/UNCLASSIFIED 聚合 band，当前阶段不
+  伪造具体证券，返回安全阻断原因，等待后续显式资产映射阶段；
 - 当 `remediation_required=false`：只对 ASSET bands 生成 `HOLD`，区间严格等于
   当前权重；不得生成 ADD/EXIT、聚合风险动作或任意仓位变化；
 - Recommendation ID 绑定 profile、gate、candidate、band、动作、区间、Finding
@@ -152,11 +154,11 @@ Recommendation 内容被修改时，验证失败。Receipt 只保存身份/哈�
 - 计划提交后才可实现；实现、审查和修复均在本 worktree，最终本地提交不 push。
 - 无法证明 gate/candidate/portfolio/research/allocation 精确闭包时宁可 BLOCKED；
   不接受“ID 看起来相同”替代内容重验证。
-- 如果 aggregate breach 无法映射到可执行证券，本阶段保留 aggregate REDUCE
-  约束展示，不伪造具体卖出标的或资金去向。
+- 如果 aggregate breach 无法映射到可执行证券，本阶段返回安全阻断结果，不生成
+  Recommendation/Receipt，也不伪造具体卖出标的或资金去向。
 - 只有所有验收证据齐全，下一阶段才能从接受提交创建新 worktree，接 API/
   持久化或三情景方案；真实外部 Provider 仍受官方文档/凭据阻塞。
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`

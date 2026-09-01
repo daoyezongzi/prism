@@ -1,0 +1,32 @@
+{
+  "schema_version": "recommendation-receipt-fixture.v1",
+  "fixture_id": "recommendation-receipt-case-001",
+  "source": "offline-test-only",
+  "gate_fixture": "../gates/risk_compliance_gate_case.json",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "expected": {
+    "balanced": {
+      "risk_level": "BALANCED",
+      "action_type": "HOLD",
+      "remediation_required": false,
+      "recommendation_count": 4
+    },
+    "conservative": {
+      "risk_level": "CONSERVATIVE",
+      "action_type": "REDUCE",
+      "remediation_required": true,
+      "recommendation_count": 4,
+      "target_maximum_pct": "20"
+    },
+    "forbidden_output_fields": [
+      "expected_return",
+      "target_price",
+      "quantity",
+      "order"
+    ],
+    "forbidden_action_types": [
+      "ADD",
+      "EXIT"
+    ]
+  }
+}
