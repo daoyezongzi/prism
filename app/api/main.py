@@ -646,6 +646,17 @@ def create_app(
                 raise ConvertibleBondResearchError(
                     "convertible-bond research output owner drifted"
                 )
+            expected_manifest_id = getattr(active_convertible_bond, "manifest_id", None)
+            expected_node_ids = getattr(active_convertible_bond, "node_ids", None)
+            if (
+                not isinstance(expected_manifest_id, str)
+                or output.manifest_id != expected_manifest_id
+                or not isinstance(expected_node_ids, tuple)
+                or tuple(node.node_id for node in output.nodes) != expected_node_ids
+            ):
+                raise ConvertibleBondResearchError(
+                    "convertible-bond research output manifest drifted"
+                )
             if (
                 output.request_id != request.request_id
                 or output.subject != request.subject

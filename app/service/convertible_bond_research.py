@@ -253,6 +253,12 @@ class FixtureConvertibleBondResearchService:
         return self._manifest.manifest_id
 
     @property
+    def node_ids(self) -> tuple[str, ...]:
+        """Expose the manifest's fixed node identity for API output closure."""
+
+        return tuple(node.node_id for node in self._manifest.nodes)
+
+    @property
     def scenarios(self) -> tuple[ConvertibleBondResearchScenarioDefinition, ...]:
         return tuple(sorted(_SCENARIOS, key=lambda item: item.scenario_id.value))
 

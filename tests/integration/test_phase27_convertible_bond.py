@@ -307,6 +307,14 @@ def test_convertible_api_revalidates_injected_output_and_rejects_scope_drift() -
         def __init__(self) -> None:
             self._delegate = FixtureConvertibleBondResearchService()
 
+        @property
+        def manifest_id(self):
+            return self._delegate.manifest_id
+
+        @property
+        def node_ids(self):
+            return self._delegate.node_ids
+
         def template(self, owner_id: str):
             return self._delegate.template(owner_id)
 
@@ -328,6 +336,45 @@ def test_convertible_api_revalidates_injected_output_and_rejects_scope_drift() -
         "message": "convertible-bond research was refused",
     }
     assert "DRIFTED_CONVERTIBLE" not in response.text
+    store.close()
+
+
+@pytest.mark.parametrize("drift", ["manifest", "node"])
+def test_convertible_api_rejects_manifest_or_node_identity_drift(drift: str) -> None:
+    class IdentityDriftService:
+        def __init__(self) -> None:
+            self._delegate = FixtureConvertibleBondResearchService()
+
+        @property
+        def manifest_id(self):
+            return self._delegate.manifest_id
+
+        @property
+        def node_ids(self):
+            return self._delegate.node_ids
+
+        def template(self, owner_id: str):
+            return self._delegate.template(owner_id)
+
+        async def run(self, request):
+            result = await self._delegate.run(request)
+            if drift == "manifest":
+                return result.model_copy(update={"manifest_id": "convertible-bond-forged-manifest"})
+            forged_node = result.nodes[0].model_copy(update={"node_id": "convertible-bond-research-source-z"})
+            return result.model_copy(
+                update={"nodes": tuple(sorted((forged_node, result.nodes[1]), key=lambda item: item.node_id))}
+            )
+
+    client, store = _client(convertible_bond_service=IdentityDriftService())
+    payload = _payload(request_id=f"phase27-identity-drift-{drift}")
+    response = client.post(
+        "/api/v1/advisor/convertible-bond-research-runs",
+        headers={"X-Owner-ID": payload["owner_id"]},
+        json=payload,
+    )
+    assert response.status_code == 400
+    assert response.json()["error_code"] == "CONVERTIBLE_BOND_RESEARCH_ERROR"
+    assert "forged" not in response.text.casefold()
     store.close()
 
 
