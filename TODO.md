@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 2 Profile/Portfolio Contracts](docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md)
+> Active phase: [MVP Phase 3 Look-through Exposure](docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md)
 
 ## P0 — Foundation
 
@@ -27,7 +27,7 @@
 - [x] Implement deterministic risk questionnaire scoring.
 - [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
 - [x] Define portfolio and fund/ETF position import contracts.
-- [ ] Calculate look-through technology exposure and data coverage.
+- [ ] Calculate look-through technology exposure and data coverage (Phase 3 plan ready; implementation not started).
 - [ ] Implement concentration, correlation, liquidity and risk-budget findings.
 - [ ] Generate conservative, balanced and growth-oriented allocation ranges.
 - [ ] Show pre/post impact and recommendation invalidation conditions.

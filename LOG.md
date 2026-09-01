@@ -179,4 +179,17 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - Final full suite: `69 passed` (the original 50 Phase 1/Evidence tests remain green).
 - Compilation, import, `git diff --check`, fixture JSON parsing and import checks passed after commit.
 - Independent adversarial checks passed for stale conflicts, unknown resolutions, risk-level tampering, owner mismatch, deep tuple mutation, four-state misuse, illegal weights and unknown fund parents.
-- Phase 2 was accepted in the single local commit `f3cee7a`; no Phase 3 implementation has started yet.
+- Phase 2 was accepted in the single local commit `0de0c43`; no Phase 3 implementation has started yet.
+
+## 2026-09-01 — MVP Phase 3 look-through exposure plan
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-3` on branch `codex/mvp-phase-3-exposure-risk` from Phase 2 accepted commit `0de0c43`.
+- Added `docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md` before implementation.
+- The plan narrows this phase to deterministic base-currency direct/look-through attribution, residuals and data coverage; concentration, risk budgets and recommendations remain deferred.
+
+### Current boundary
+
+- No Phase 3 implementation or real data-source access has started.
+- The Phase 3 plan is ready for implementation after its plan commit; Phase 2 artifacts remain unchanged.

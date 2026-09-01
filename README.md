@@ -79,6 +79,7 @@ python -m pytest
 - [Phase 1 Hardening 计划](docs/plans/2026-09-01-mvp-phase-1-hardening.md)
 - [Phase 2 Profile/Portfolio 计划](docs/plans/2026-09-01-mvp-phase-2-profile-portfolio-contracts.md)
 - [Phase 2 Profile/Portfolio 契约](docs/profile-portfolio-contracts.md)
+- [Phase 3 Look-through Exposure 计划](docs/plans/2026-09-01-mvp-phase-3-lookthrough-exposure.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 
