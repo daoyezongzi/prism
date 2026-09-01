@@ -184,7 +184,7 @@ def test_research_run_api_rejects_scope_extra_and_unknown_inputs_safely() -> Non
     )
     assert naive_response.status_code == 422
     assert naive_response.json()["error_code"] == "INVALID_INPUT"
-    
+
     missing = client.get("/api/v1/advisor/research-matrix-template")
     assert missing.status_code == 403
     store.close()
