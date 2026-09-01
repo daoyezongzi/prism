@@ -32,8 +32,8 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Provider Protocol、四态结果不变量、确定性语义指纹、脱敏与合成 Fixture Provider。
 - Phase 2 用户画像契约、确定性问卷评分、结构化提取冲突确认，以及 owner 隔离的持仓/基金穿透原始导入契约。
 - Phase 3 已实现基于 Decimal 的直接/基金穿透暴露与数据覆盖结果。
-- Phase 4 已实现基于暴露结果的集中度指标与画像条件风险预算；相关性、优化和推荐仍未实现。
-- Phase 5 已实现画像条件 allocation envelope、逐约束前后影响和失效条件；最终 Recommendation、研究 DAG 编排、相关性和优化仍未实现。
+- Phase 4 已实现基于暴露结果的集中度指标与画像条件风险预算；在该阶段相关性、优化和推荐仍未实现。
+- Phase 5 已实现画像条件 allocation envelope、逐约束前后影响和失效条件；在该阶段最终 Recommendation、研究 DAG 编排、相关性和优化仍未实现。
 - Phase 6 已实现四态结构化研究节点、lineage-aware Cross-Validation 与冲突/缺失语义；真实 Provider、DAG 执行器和 Evidence/Finding 连接仍未实现。
 - Phase 7 已实现 owner 隔离、依赖闭包、预算/deadline、required/optional 降级和可回放的研究 run 状态机；真实异步执行、Provider 与 Evidence/Finding 桥接仍未实现。
 - Phase 8 已实现 CrossValidationResult、ResearchObservation 与 Evidence 的确定性闭包校验，并只在完整支持条件下生成稳定 `VERIFIED Fact -> Finding`；Recommendation、独立合规闸门和真实执行仍未实现。
@@ -118,6 +118,14 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   Recommendation。阶段 `28` 项、全量 `377` 项回归、100 次固定评测、本地 100 并发
   基线、wheel 与真实浏览器路径均通过；这些仍是离线 fixture/ASGI 证据，不代表实时
   市场准确率或生产 SLA。详见 [可转债资产研究 Evidence Card](docs/convertible-bond-research-card.md)。
+- Phase 28 已把 Portfolio Engine 的第一版目标结构提案落成独立的确定性纵切：基于已确认
+  Risk Profile、Portfolio Exposure/Concentration 和 Risk Budget，以
+  `CAP_AND_REDISTRIBUTE_V1` 生成当前→目标权重、资产/行业/Technology 约束算术和失效
+  条件；基线、不同画像、PARTIAL 与 INFEASIBLE 场景均保持 owner 隔离且不写
+  DecisionEvent、不生成 Recommendation 或交易指令。阶段 `21` 项、全量 `398` 项回归、
+  100 次固定评测、并发、wheel、静态边界和真实浏览器验收通过；这些仍是离线
+  fixture/ASGI 证据，不代表相关性/流动性最优、实时市场准确率或生产 SLA。详见
+  [Portfolio Optimization 契约](docs/portfolio-optimization.md)。
 
 尚未实现：
 
@@ -125,6 +133,7 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
 - Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
 - 完整 Portfolio/Risk Profile CRUD、真实持仓导入和真实端到端场景；
+- 组合相关性/协方差、流动性压力、交易成本、资产类别上限、历史回测和全局最优求解；
 - 宏观、行业、个股、ETF/Fund、可转债的真实 SkillHub Provider、实时数据和完整工作台消费；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -218,6 +227,8 @@ python -m pytest
 - [Phase 26 ETF/Fund 资产研究计划与验收](docs/plans/2026-09-02-mvp-phase-26-fund-research.md)
 - [Phase 27 可转债资产研究 Evidence Card](docs/convertible-bond-research-card.md)
 - [Phase 27 可转债资产研究计划与验收](docs/plans/2026-09-02-mvp-phase-27-convertible-bond.md)
+- [Phase 28 Portfolio Optimization 契约](docs/portfolio-optimization.md)
+- [Phase 28 Portfolio Optimization 计划与验收](docs/plans/2026-09-02-mvp-phase-28-portfolio-optimization.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

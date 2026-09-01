@@ -1,6 +1,6 @@
 # Prism MVP Phase 28：确定性组合优化目标提案计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 日期：2026-09-02
 
@@ -93,6 +93,8 @@ Balanced/Growth 的预算上限改变时，目标提案必须发生可验证的�
 - 均值-方差、风险平价、相关性矩阵、协方差估计、波动/回撤预测、流动性压力、税费、
   汇率、交易成本、最小交易单位、历史回测、收益承诺或全市场资产选择。相关性和
   流动性在没有新鲜可验证输入前保持缺失，不写成“已优化”。
+- 现有 v1 `RiskBudget` 没有版本化的资产类别上限；本阶段不凭空新增 category 规则，
+  也不把行业/Technology 上限冒充资产类别约束。
 - 买入/卖出/持有 Recommendation、HOLD/REDUCE、仓位指令、订单执行、
   `DecisionEventStore` 写入、Advisor receipt 改写或绕过 Compliance。
 - 复制 `tradeeye-copilot`/`TradeEye` 运行时代码；只复用已记录的领域命名/审计思路，
@@ -171,5 +173,30 @@ Balanced/Growth 的预算上限改变时，目标提案必须发生可验证的�
 
 ## 7. 验收记录（实现后填写）
 
-- 待实现后填写实现提交、独立审查发现/修复、阶段与全量测试、评测/并发、wheel、
-  浏览器和最终状态。
+- 计划提交：`8ad10b5`；实现提交：`b7d118d`；第一轮审查修复：`9d343da`；第二轮
+  契约闭合、舍入、未分类规范化与对抗测试修复：`585809e`。
+- 阶段测试：`21 passed`；全量回归：`398 passed`，仅已知 Starlette/httpx
+  deprecation warning。`python -m compileall -q app`、公开 import、`node --check
+  app/api/static/app.js` 与 `git diff --check` 通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9 case 通过，所有指标
+  `1.0`；这仍是固定 fixture 语义回放，不代表市场准确率。
+- 本地 ASGI 100 并发（每 owner 一次 template + 一次 BASELINE_READY run）：
+  template/run 均 `100/100` HTTP 200，owner mismatch `0`，错误 `0`，
+  `DecisionEventStore` 行数 `0`；template P50/P95/P99=`178.984/247.547/276.055 ms`，
+  run P50/P95/P99=`199.332/246.561/256.845 ms`。这些是 fixture/ASGI 基线，不外推
+  真实外部 100 用户或 3 秒 SLA。
+- wheel 构建成功（`110` entries），包含 optimization contracts/service/fixture、
+  静态资源和 package-data；临时安装目录实例化
+  `FixturePortfolioOptimizationService` 成功并读取 manifest
+  `portfolio-optimization-demo-i-001`。
+- 运行时/静态边界扫描未发现外网、LLM/Gemini、上游运行时导入、凭据、HTML sink、
+  订单或 Recommendation 旁路；Optimization 结果不写 DecisionEventStore。
+- 真实本地浏览器完成新 worktree 页面：模板显示 3 个场景；确认 BALANCED 后
+  `BASELINE_READY` 显示 READY、当前→目标五资产和约束算术；切换并确认
+  CONSERVATIVE 后目标变化为五个 `20.00%`；`SOURCE_PARTIAL` 显示“待复核”且无目标，
+  `INFEASIBLE` 显示“已阻断”且无目标；切换 owner 后旧结果清空。浏览器控制台错误为
+  `[]`，页面请求保持本地同源。
+- 最终状态：Phase 28 已接受于独立 worktree
+  `D:\Github_Storage\prism-phase-28`，分支
+  `codex/mvp-phase-28-portfolio-optimization`；未 push。下一阶段必须从接受提交创建
+  全新 worktree 并先提交 Phase 29 计划书。

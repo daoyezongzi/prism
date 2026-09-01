@@ -1095,3 +1095,55 @@ Phase 26 已在本地 worktree 接受，未 push；下一阶段必须从 `21714f
 Phase 27 已在本地 worktree 接受，最终验收记录见
 `docs/plans/2026-09-02-mvp-phase-27-convertible-bond.md`；未 push。下一阶段必须从本
 阶段接受提交创建全新 worktree，并先提交 Phase 28 计划书。
+
+## 2026-09-02 — MVP Phase 28 确定性组合优化目标结构提案（Demo I）
+
+### 计划与 worktree
+
+- 从已接受的 Phase 27 提交 `5fbd022` 创建独立 worktree
+  `D:\Github_Storage\prism-phase-28`，分支为
+  `codex/mvp-phase-28-portfolio-optimization`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `8ad10b5`；本阶段保持 fixture-first，不接入真实 Provider、在线鉴权、LLM/Gemini、
+  生产持久化、相关性/流动性模型、交易执行或 Recommendation。
+
+### 本地实现
+
+- 新增 `app/optimization` 严格请求、模板、场景、目标、约束、Issue、Trace 和响应契约，
+  复用既有 Portfolio/Exposure/Concentration/Risk Budget/Profile 确认边界；READY 目标、
+  资产/行业/Technology/UNCLASSIFIED 约束和 Decimal 舍入均闭合，非 READY 不返回目标。
+- 新增五资产、多行业、双状态 replay 的合成 optimization fixture 与
+  `FixturePortfolioOptimizationService`，实现单一版本化 `CAP_AND_REDISTRIBUTE_V1`：
+  按画像预算截断超限 bucket，按稳定 headroom 重分配，并在行业内以单资产 cap 和整数
+  百分点余数闭合到 100.00%。
+- 新增 owner-scoped `portfolio-optimization-template` / `portfolio-optimization-runs`
+  API 与静态 Optimization 工作台；复用 owner/sequence 清理、DOM text-only 渲染和
+  同源 fetch。所有结果只读展示，不写 `DecisionEventStore`，不进入 Recommendation/Receipt。
+- 初版实现提交 `b7d118d`；首次审查发现响应未强制目标行与资产/行业/聚合约束精确闭合、
+  多个 Technology 标签可能突破全局上限，随后在 `9d343da` 修复。第二轮审查又发现
+  一个百分点级 sector current rounding 闭合风险、FrozenDict 规则可变性测试缺口、
+  缺少 look-through/画像/bundle 注入回归和未分类标签规范化，最终在 `585809e` 收口：
+  约束全引用、无代表 aggregate 只能为零、非 READY 不暴露 constraints，并拒绝显式
+  UNCLASSIFIED 被当作已知行业。
+
+### 独立审查与验收
+
+- Phase-specific tests：`21 passed`；300 组随机整数百分点权重 fuzz 均保持 READY、
+  100.00% 总和和单资产 cap（另有 profile 轮换）。
+- 全量回归：`398 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开 import、`node --check`、`git diff --check` 和固定评测（9/9、
+  全部指标 `1.0`）通过。
+- 本地 ASGI 100 并发（每 owner 一次 template + 一次 BASELINE_READY run）全部 HTTP
+  200，owner mismatch/error 均为 0，DecisionEventStore 行数为 0；template
+  P50/P95/P99=`178.984/247.547/276.055 ms`，run P50/P95/P99=`199.332/246.561/256.845 ms`。
+  这些是 fixture/ASGI 基线，不外推真实外部 100 用户或 3 秒 SLA。
+- wheel 共 `110` entries，包含 optimization contracts/service/fixture、静态资源和
+  package-data；临时安装目录实例化 service 并读取
+  `portfolio-optimization-demo-i-001` 成功。运行时范围扫描未发现外网、LLM/Gemini、
+  上游导入、凭据、HTML sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成模板、BALANCED/CONSERVATIVE 目标变化、PARTIAL/INFEASIBLE 阻断
+  和 owner 切换清理；方法、当前→目标权重、cap/delta、约束算术、画像/报告身份与
+  失效条件可见，控制台错误为 `[]`，请求保持本地同源。
+- 明确产品差异：不输出黑箱最优权重或买卖列表，而是把画像、快照、暴露、预算、约束
+  算术和失效条件绑定在可重放提案上；输入不完整时保留 REVIEW_REQUIRED/BLOCKED，绝不
+  以零值掩盖缺失。Phase 28 已在独立 worktree 接受，未 push。

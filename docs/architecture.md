@@ -17,6 +17,7 @@ app/
 ├── validation/        口径对齐、交叉验证与分歧
 ├── research/          macro、industry、stock、fund/etf
 ├── portfolio/         暴露、约束、情景和最小调整
+├── optimization/      确定性组合目标结构提案（不执行交易）
 ├── risk/              独立风险规则与压力场景
 ├── compliance/        独立适当性与输出守卫
 ├── recommendation/    组合结构化结果，不创造事实
@@ -57,6 +58,12 @@ EMPTY 和 FAILED 只保留 Evidence、validation 与节点降级原因，不生�
 风险结论；API 对注入输出重新校验 owner/request/scope/scenario、双节点和七项原始
 validation。该卡不写 DecisionEvent、不生成 Recommendation，仍不接入网络、LLM/Gemini、
 认证或生产存储。
+Phase 28 在既有 Portfolio/Exposure/Concentration/Risk Budget 边界上增加独立的
+`CAP_AND_REDISTRIBUTE_V1` 目标结构提案：完整、已分类的 owner-scoped snapshot 才能
+产生 READY；超限可确定性修复但仍保留 `assessment_status=REVIEW_REQUIRED`，部分/失败/
+不可行输入保持 REVIEW_REQUIRED/BLOCKED。目标、资产/行业/Technology/UNCLASSIFIED
+约束和舍入算术在同一响应中闭合，结果不写 DecisionEvent、不生成 Recommendation 或
+订单，不接入实时行情、相关性/流动性模型、LLM/Gemini 或生产持久化。
 
 ## 数据流
 
@@ -127,9 +134,10 @@ Provider 统一返回四类结果：
 
 ## Web 工作台
 
-首版只实现四个核心区域：
+首版只实现以下核心区域：
 
 - Portfolio：当前持仓、穿透暴露和调整前后对比；
+- Optimization：画像条件的当前→目标结构、约束算术、数据质量状态和失效条件；
 - Advisor：任务、研究节点状态和三类调整方案；
 - Research Tracks：四类研究节点、独立 lineage 验证和 Finding → Fact → Evidence；
 - Evidence：证据回执、来源、期间、新鲜度和冲突；
@@ -145,9 +153,10 @@ Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/�
 Query 工作台、Phase 16 的四轨道研究节点矩阵、Phase 17 的 Research Tracks API/UI
 切片、Phase 18 的只读 Portfolio 快照/Risk Profile 问卷上下文视图、Phase 19
 的本地 fixture 负载测试骨架，以及 Phase 25 的个股研究 Evidence Card API/UI。
-Phase 26 的 ETF/Fund 资产研究 Evidence Card API/UI 与 Phase 27 的可转债资产研究
-Evidence Card API/UI 也已完成，并保留非 READY 阻断、双 lineage Evidence 展开和
-确定性派生公式语义。
+Phase 26 的 ETF/Fund 资产研究 Evidence Card API/UI、Phase 27 的可转债资产研究
+Evidence Card API/UI 和 Phase 28 的确定性组合目标结构提案 API/UI 也已完成；它们均
+保留非 READY 阻断、双 lineage Evidence 或约束算术展开和确定性派生语义。Phase 28
+只复用现有 Risk Budget 的四个维度，不凭空增加资产类别上限。
 真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
 专用多研究 Agent、Portfolio/Risk Profile CRUD、真实持仓导入、云压测和外部真实
 旗舰流/SLA 仍未完成；README 与 TODO 必须持续保持这一事实边界。

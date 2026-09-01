@@ -6,9 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 27 Convertible Bond Evidence Card is accepted in the dedicated
-> `D:\Github_Storage\prism-phase-27` worktree; Phase 28 starts only after a new worktree
-> is created and its plan is submitted.
+> Active phase: Phase 28 Portfolio Optimization target-structure proposal is accepted in the
+> dedicated `D:\Github_Storage\prism-phase-28` worktree; Phase 29 starts only after a new
+> worktree is created and its plan is submitted.
 
 ## P0 — Foundation
 
@@ -31,7 +31,7 @@
 - [x] Define structured profile extraction proposals and explicit conflict confirmation (without LLM parsing).
 - [x] Define portfolio and fund/ETF position import contracts.
 - [x] Calculate look-through technology exposure and data coverage.
-- [x] Implement concentration and profile-conditioned risk-budget findings; correlation, liquidity and optimization remain deferred.
+- [x] Implement concentration and profile-conditioned risk-budget findings; correlation, liquidity and advanced optimization remain deferred.
 - [x] Generate conservative, balanced and growth-oriented allocation ranges (constraint envelope; final Recommendation remains deferred).
 - [x] Show deterministic per-constraint pre/post impact and profile/snapshot invalidation conditions.
 - [x] Prove that the same evidence produces materially different valid outputs for different profiles.
@@ -79,6 +79,10 @@
   deterministic concentration/cost/volatility/drawdown Findings, five safe replay scenarios
   and visible node degradation reasons; keep live market data, portfolio adjustment and
   Recommendation effects deferred.
+- [x] Add the independent Phase 28 Portfolio Optimization target-structure proposal with
+  `CAP_AND_REDISTRIBUTE_V1`, owner-scoped API/UI, profile-conditioned caps, closed target /
+  constraint arithmetic, and explicit REVIEW_REQUIRED/BLOCKED scenarios; keep correlation,
+  liquidity, asset-category caps, backtest, trading and Recommendation effects deferred.
 
 ## External inputs / decisions
 
@@ -99,7 +103,8 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 27 is accepted in the dedicated `D:\Github_Storage\prism-phase-27` worktree. Create
-a new worktree for Phase 28 and submit that phase's plan before implementation; keep real
-authentication, live Provider access, production persistence and broad conversational
-memory deferred.
+Phase 28 is accepted in the dedicated `D:\Github_Storage\prism-phase-28` worktree; its final
+browser, concurrency, wheel and regression evidence is recorded in the Phase 28 plan. Create
+a new worktree for Phase 29 and submit that phase's plan before implementation. Keep real
+authentication, live Provider access, production persistence and broad conversational memory
+deferred.
