@@ -75,6 +75,7 @@ _SCENARIO_DEFINITIONS = (
     ),
 )
 _SCENARIO_BY_ID = {item.scenario_id: item for item in _SCENARIO_DEFINITIONS}
+_UNSET = object()
 
 
 def _validated_result(
@@ -84,7 +85,7 @@ def _validated_result(
     records: tuple[ProviderRecord, ...] | None = None,
     missing_fields: tuple[str, ...] | None = None,
     issues: tuple[ProviderIssue, ...] | None = None,
-    scope_description: str | None | object = None,
+    scope_description: str | None | object = _UNSET,
 ) -> ProviderResult:
     """Rebuild an overlay result through the Provider contract validators."""
 
@@ -97,7 +98,7 @@ def _validated_result(
         payload["missing_fields"] = missing_fields
     if issues is not None:
         payload["issues"] = issues
-    if scope_description is not None:
+    if scope_description is not _UNSET:
         payload["scope_description"] = scope_description
     return ProviderResult.model_validate(payload)
 
@@ -336,7 +337,10 @@ class FixtureResearchSpecialistMatrixService:
             raise SpecialistMatrixError("specialist matrix template was refused") from exc
 
     @staticmethod
-    def _plan(matrix: ResearchSpecialistMatrix):
+    def _plan(
+        matrix: ResearchSpecialistMatrix,
+        scenario_id: ResearchScenarioId = ResearchScenarioId.BASELINE_READY,
+    ):
         nodes = tuple(
             ResearchNodeSpec(
                 node_id=node.node_id,
@@ -348,7 +352,10 @@ class FixtureResearchSpecialistMatrixService:
             )
             for node in matrix.nodes
         )
-        return build_research_plan(matrix.owner_id, matrix.scope_description, nodes)
+        scope_description = matrix.scope_description
+        if scenario_id != ResearchScenarioId.BASELINE_READY:
+            scope_description = f"{scope_description} · replay {scenario_id.value}"
+        return build_research_plan(matrix.owner_id, scope_description, nodes)
 
     @staticmethod
     def _requests(matrix: ResearchSpecialistMatrix) -> dict[str, ResearchNodeRequest]:
@@ -485,7 +492,7 @@ class FixtureResearchSpecialistMatrixService:
 
         try:
             matrix = self.matrix_template(request.owner_id)
-            plan = self._plan(matrix)
+            plan = self._plan(matrix, request.scenario_id)
             state = create_research_run(
                 plan,
                 request.request_id,

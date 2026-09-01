@@ -162,6 +162,29 @@ def test_disagreement_exposes_both_values_without_promoting_fact() -> None:
     store.close()
 
 
+def test_scenario_changes_are_part_of_run_identity() -> None:
+    client, store = _client()
+    base_payload = _payload(request_id="phase24-same-request", scenario_id="BASELINE_READY")
+    conflict_payload = _payload(
+        request_id="phase24-same-request",
+        scenario_id=ResearchScenarioId.SOURCE_DISAGREEMENT.value,
+    )
+    base = client.post(
+        "/api/v1/advisor/research-runs",
+        headers={"X-Owner-ID": base_payload["owner_id"]},
+        json=base_payload,
+    )
+    conflict = client.post(
+        "/api/v1/advisor/research-runs",
+        headers={"X-Owner-ID": conflict_payload["owner_id"]},
+        json=conflict_payload,
+    )
+    assert base.status_code == conflict.status_code == 200
+    assert base.json()["run_id"] != conflict.json()["run_id"]
+    assert store.list(base_payload["owner_id"]) == ()
+    store.close()
+
+
 @pytest.mark.parametrize("scenario_id", [item.value for item in ResearchScenarioId])
 def test_scenario_replay_is_stable_and_side_effect_free(scenario_id: str) -> None:
     client, store = _client()

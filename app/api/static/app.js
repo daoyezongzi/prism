@@ -1043,6 +1043,20 @@
     }
   }
 
+  async function loadResearchScenarioCatalog(ownerId) {
+    const sequence = ++state.researchSequence;
+    const response = await fetch("/api/v1/advisor/research-matrix-template", {
+      headers: { "X-Owner-ID": ownerId },
+    });
+    if (!response.ok) throw await apiError(response);
+    const template = await response.json();
+    if (state.ownerId !== ownerId || state.researchSequence !== sequence) return null;
+    state.researchTemplate = template;
+    renderResearchScenarioOptions(template.scenarios);
+    byId("research-template-meta").textContent = `Matrix ${text(template.matrix_id)} · ${text(template.node_count)} nodes · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    return template;
+  }
+
   async function previewProfileProposal() {
     const requestOwner = byId("owner-id").value.trim();
     const raw = byId("profile-proposal-json").value.trim();
@@ -1439,6 +1453,16 @@
       } catch (error) {
         if (state.ownerId === requestOwner && state.templateSequence === templateSequence) {
           setError(error.message || "读取 Portfolio/Risk Profile 模板失败");
+        }
+      }
+      if (state.ownerId === requestOwner && !state.researchTemplate) {
+        try {
+          await loadResearchScenarioCatalog(requestOwner);
+        } catch (error) {
+          if (state.ownerId === requestOwner) {
+            clearResearchScenarioOptions();
+            setError(error.message || "读取研究场景目录失败");
+          }
         }
       }
       if (state.events.length) await loadEvent(state.events[0].event_id);
