@@ -1,0 +1,22 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "missing-lookthrough-blocked",
+  "title": "Missing ETF look-through remains blocked",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-missing-lookthrough-questionnaire",
+    "owner_id": "eval-owner-missing",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20"
+  },
+  "portfolio_variant": "missing_lookthrough",
+  "provider_variant": "complete",
+  "expected_status": "BLOCKED",
+  "expected_actions": [],
+  "expect_receipt": false
+}

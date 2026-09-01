@@ -23,7 +23,10 @@ web = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "tools*"]
+
+[tool.setuptools.data-files]
+"eval_cases" = ["eval_cases/*.json"]
 
 [tool.setuptools.package-data]
 app = [

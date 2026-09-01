@@ -1,0 +1,22 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "technology-concentration-blocked",
+  "title": "Technology concentration has no executable aggregate mapping",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-technology-concentration-questionnaire",
+    "owner_id": "eval-owner-concentration",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20"
+  },
+  "portfolio_variant": "technology_concentrated",
+  "provider_variant": "complete",
+  "expected_status": "BLOCKED",
+  "expected_actions": [],
+  "expect_receipt": false
+}

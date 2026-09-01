@@ -1,1 +1,1 @@
-"""Developer-only diagnostics and repeatable local tools."""
+"""Local development and evaluation tools for Prism."""

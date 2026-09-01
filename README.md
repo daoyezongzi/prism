@@ -156,6 +156,8 @@ python -m pytest
 - [Phase 19 负载测试计划与验收](docs/plans/2026-09-02-mvp-phase-19-load-test-harness.md)
 - [Phase 20 结构化上下文确认](docs/context-input.md)
 - [Phase 20 上下文确认计划与验收](docs/plans/2026-09-02-mvp-phase-20-context-input-confirmation.md)
+- [Phase 21 MVP 固定评测集](docs/mvp-evaluation.md)
+- [Phase 21 固定评测与回放计划](docs/plans/2026-09-02-mvp-phase-21-evaluation-harness.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

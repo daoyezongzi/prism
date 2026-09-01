@@ -1,0 +1,23 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "provider-conflict-error",
+  "title": "Conflicting fixture lineage is refused safely",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-provider-conflict-questionnaire",
+    "owner_id": "eval-owner-conflict",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20"
+  },
+  "portfolio_variant": "template",
+  "provider_variant": "conflict",
+  "expected_status": "ERROR",
+  "expected_actions": [],
+  "expect_receipt": false,
+  "expected_error_code": "ADVISOR_QUERY_ERROR"
+}

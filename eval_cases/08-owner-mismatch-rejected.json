@@ -1,0 +1,23 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "owner-mismatch-rejected",
+  "title": "Cross-owner input is rejected before calculation",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-owner-mismatch-questionnaire",
+    "owner_id": "eval-owner-closed",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 3,
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20"
+  },
+  "input_variant": "owner_mismatch",
+  "request_owner_id": "eval-other-owner",
+  "expected_status": "REJECTED",
+  "expected_actions": [],
+  "expect_receipt": false,
+  "expected_error_code": "OWNER_SCOPE"
+}

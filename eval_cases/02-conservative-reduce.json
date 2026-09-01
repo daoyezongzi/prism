@@ -1,0 +1,22 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "conservative-reduce",
+  "title": "Conservative short-horizon profile reduces exposure",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-conservative-reduce-questionnaire",
+    "owner_id": "eval-owner-conservative",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 1,
+    "investment_horizon": "SHORT",
+    "liquidity_need": "HIGH",
+    "experience_level": "NOVICE",
+    "return_expectation": "LOW",
+    "max_drawdown_tolerance_pct": "10"
+  },
+  "portfolio_variant": "template",
+  "provider_variant": "complete",
+  "expected_status": "PASS",
+  "expected_actions": ["REDUCE"],
+  "expect_receipt": true
+}

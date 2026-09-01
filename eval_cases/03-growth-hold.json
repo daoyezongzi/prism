@@ -1,0 +1,22 @@
+{
+  "schema_version": "mvp-eval-case.v1",
+  "case_id": "growth-hold",
+  "title": "Growth profile keeps diversified evidence eligible",
+  "fixture_id": "advisor-research-two-lineage-001",
+  "profile": {
+    "questionnaire_id": "eval-growth-hold-questionnaire",
+    "owner_id": "eval-owner-growth",
+    "answered_at": "2026-09-02T01:00:00Z",
+    "loss_tolerance_score": 5,
+    "investment_horizon": "LONG",
+    "liquidity_need": "LOW",
+    "experience_level": "EXPERIENCED",
+    "return_expectation": "HIGH",
+    "max_drawdown_tolerance_pct": "40"
+  },
+  "portfolio_variant": "template",
+  "provider_variant": "complete",
+  "expected_status": "PASS",
+  "expected_actions": ["HOLD"],
+  "expect_receipt": true
+}
