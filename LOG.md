@@ -678,3 +678,45 @@ worktree，并先提交计划书。
 
 Phase 18 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
 worktree，并先提交计划书。
+
+## 2026-09-02 — MVP Phase 19 早期负载测试骨架
+
+### 计划与 worktree
+
+- 在已接受的 Phase 18 `1bcaddb` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-19`，分支为
+  `codex/mvp-phase-19-load-test`。
+- 先提交范围、复用边界、产品差异化、验收门和明确不做项计划
+  `6ab60c8`；本阶段只建立本地基线，不宣称真实外部 100 用户/3 秒/99.9% SLA。
+
+### 本地实现
+
+- 新增 `tools.load_test`，复用 `create_app`、既有 API contracts、owner dependency
+  和 `SQLiteDecisionEventStore`，支持 `template`、`research`、`advisor` 三种场景、
+  有界 concurrency/requests-per-user 参数和版本化 JSON 报告。
+- 报告记录逻辑操作数、HTTP 请求数、完成/失败、状态与安全错误分类、P50/P95/P99、
+  owner mismatch 和事件存储前后行数；Advisor 显式记录模板→查询两步，模板/研究
+  场景预期无 DecisionEvent 副作用。
+- 新增九项 Phase 19 负载/契约测试，覆盖 100 并发 owner 闭合、Advisor 事件隔离、
+  percentile 边界、空样本、非法参数、HTTP 失败、敏感错误 payload、owner mismatch
+  和 CLI smoke；失败不会被吞掉或改写成成功。
+- 新增 [早期负载测试工具文档](docs/load-test.md)，说明 ASGI transport 与真实部署
+  的差异和禁止外推的指标边界。
+
+### 独立审查与验收
+
+- 实现提交为 `b77cd16`，随后以 `dc23e01` 修正失败报告计数/Research trace 完整性
+  不变量；没有修改 `app/` 生产业务规则。
+- 全量回归：`276 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开导入、CLI smoke、`git diff --check` 和 wheel package-data
+  检查通过。
+- 最终 100 并发本地 ASGI fixture 基线：Template P50/P95/P99
+  `81.790/93.394/95.937 ms`，Research `578.552/796.039/807.497 ms`，Advisor
+  模板→查询 `873.164/1419.673/1451.030 ms`；三场景均 100/100 完成、owner mismatch
+  为 0、error 为 0，Advisor 写入 100 条 owner-scoped 事件，其余为 0。
+- adversarial review 确认只有 in-process ASGI transport 和现有 API，错误/敏感响应
+  分类安全，无外部 Provider、LLM/Gemini、凭据、金融重算、订单/交易或 raw exception
+  泄露路径；基线数字不代表生产 SLA。
+
+Phase 19 在本地 worktree 接受，未 push；下一阶段必须从本阶段接受提交创建新
+worktree，并先提交计划书。

@@ -118,4 +118,34 @@ fixture 和本地运行时的事实，不把 ASGI 进程内结果包装成真实
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record (2026-09-02)
+
+- Worktree: `D:\Github_Storage\prism-phase-19`, branch
+  `codex/mvp-phase-19-load-test`; plan commit `6ab60c8` preceded implementation.
+  Implementation commits are `b77cd16` and `dc23e01`.
+- Added reusable `python -m tools.load_test` runner with `template`, `research` and
+  `advisor` scenarios. It reports versioned JSON with logical operations, actual HTTP
+  request count, completion/error categories, status counts, operation latency
+  min/P50/P95/P99/max, owner mismatches and store row deltas. Advisor measures the
+  existing template→query path; no production business module was changed.
+- Added nine Phase 19 tests covering percentile/empty samples, workload validation,
+  100-concurrent template and Research owner closure, Advisor event scope, CLI smoke,
+  HTTP failure classification, sensitive error rejection and owner mismatch detection.
+- Full regression: `python -m pytest -o addopts=` → `276 passed`, with only the known
+  Starlette/httpx deprecation warning. `compileall`, public imports, CLI smoke,
+  `git diff --check` and final wheel package-data checks pass.
+- Final local ASGI fixture baselines (100 concurrent, one operation per owner):
+  template P50/P95/P99 `81.790/93.394/95.937 ms`, Research
+  `578.552/796.039/807.497 ms`, Advisor end-to-end template→query
+  `873.164/1419.673/1451.030 ms`; all completed with zero owner mismatch and zero
+  errors. Advisor used 200 HTTP requests and stored 100 owner-scoped events; the other
+  two scenarios stored none.
+- Boundary review confirms the runner uses only in-process `httpx.ASGITransport` and
+  the existing app/API contracts; no external Provider, LLM/Gemini, credentials,
+  financial recalculation, order/trade path or raw exception/response leakage was added.
+  The measured numbers are local fixture baselines only, not evidence of real 100-user,
+  3-second or 99.9% production SLA compliance.
+- Phase 19 is accepted locally; no push was performed. Phase 20 must start in a new
+  worktree with a plan-only commit.

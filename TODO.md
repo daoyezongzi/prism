@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 18 accepted locally; the next phase plan must start in a new worktree.
+> Active phase: Phase 19 accepted locally; the next phase plan must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -20,7 +20,8 @@
 - [x] Add recorded, synthetic Wencai/Tushare fixtures without credentials or private data.
 - [x] Define schema versioning and Decision Receipt content hashes.
 - [x] Add an owner-scoped local decision-event store and migration; PostgreSQL-oriented profile/evidence storage remains deferred.
-- [ ] Add an early load-test harness before implementing the full research graph.
+- [x] Add an early load-test harness before implementing the full research graph; record
+  local fixture P50/P95/P99 and keep production SLA claims deferred.
 
 ## P0 — Flagship vertical slice
 
@@ -78,7 +79,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 18 is accepted locally at the current `HEAD` in the dedicated
-`D:\Github_Storage\prism-phase-18` worktree. Create a new worktree for the next
+Phase 19 is accepted locally at the current `HEAD` in the dedicated
+`D:\Github_Storage\prism-phase-19` worktree. Create a new worktree for the next
 plan before implementation; keep real authentication, live Provider access and
 production persistence deferred.

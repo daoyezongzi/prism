@@ -60,6 +60,10 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   原值，并在 owner 切换或异步失败时清空旧上下文；不新增计算、CRUD、交易或外部
   Provider。`267` 项回归、100 次模板重放、真实浏览器 Portfolio/Risk/Advisor/Research
   路径和静态边界审查通过。
+- Phase 19 已加入可重复的本地早期负载测试骨架：`template`、`research`、`advisor`
+  三场景通过 `asyncio`/`httpx.ASGITransport` 输出 P50/P95/P99、错误分类、owner
+  闭合和 DecisionEvent 副作用；100 并发合成基线已记录，但不外推为真实外部 SLA。
+  `276` 项回归、CLI smoke、打包和边界审查通过。
 
 尚未实现：
 
@@ -142,6 +146,8 @@ python -m pytest
 - [Phase 17 研究工作台计划与验收](docs/plans/2026-09-02-mvp-phase-17-research-workbench.md)
 - [Phase 18 Portfolio/Risk Profile 上下文工作台](docs/flagship-context-workbench.md)
 - [Phase 18 旗舰上下文工作台计划与验收](docs/plans/2026-09-02-mvp-phase-18-flagship-context-workbench.md)
+- [Phase 19 早期负载测试工具](docs/load-test.md)
+- [Phase 19 负载测试计划与验收](docs/plans/2026-09-02-mvp-phase-19-load-test-harness.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 
