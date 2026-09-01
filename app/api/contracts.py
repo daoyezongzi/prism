@@ -22,7 +22,13 @@ from app.research import (
 )
 from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
-from app.profile import RiskProfile, RiskQuestionnaire
+from app.profile import (
+    ConflictResolution,
+    ProfileDraft,
+    ProfileExtractionProposal,
+    RiskProfile,
+    RiskQuestionnaire,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -202,6 +208,79 @@ class AdvisorProfileContextResponse(ContractModel):
         return self
 
 
+class AdvisorProfileProposalRequest(ContractModel):
+    """Strict typed profile extraction proposal; no raw natural-language field."""
+
+    schema_version: Literal["advisor-profile-proposal-request.v1"] = (
+        "advisor-profile-proposal-request.v1"
+    )
+    questionnaire: RiskQuestionnaire
+    extraction: ProfileExtractionProposal
+
+    @model_validator(mode="after")
+    def validate_request(self) -> Self:
+        if self.questionnaire.owner_id != self.extraction.owner_id:
+            raise ValueError("profile proposal owners must match")
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile proposal request"
+        )
+        return self
+
+
+class AdvisorProfileProposalResponse(ContractModel):
+    """Rebuilt draft with explicit conflicts and no generated decision."""
+
+    schema_version: Literal["advisor-profile-proposal-response.v1"] = (
+        "advisor-profile-proposal-response.v1"
+    )
+    draft: ProfileDraft
+
+    @model_validator(mode="after")
+    def validate_response(self) -> Self:
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile proposal response"
+        )
+        return self
+
+
+class AdvisorProfileConfirmationRequest(ContractModel):
+    """Typed proposal plus explicit choices; clients cannot submit a draft."""
+
+    schema_version: Literal["advisor-profile-confirmation-request.v1"] = (
+        "advisor-profile-confirmation-request.v1"
+    )
+    questionnaire: RiskQuestionnaire
+    extraction: ProfileExtractionProposal
+    resolutions: dict[str, ConflictResolution] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_request(self) -> Self:
+        if self.questionnaire.owner_id != self.extraction.owner_id:
+            raise ValueError("profile confirmation owners must match")
+        if any(not isinstance(key, str) or not key.strip() for key in self.resolutions):
+            raise ValueError("profile confirmation conflict IDs must be non-empty")
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile confirmation request"
+        )
+        return self
+
+
+class AdvisorProfileConfirmationResponse(ContractModel):
+    """A deterministic, resolved RiskProfile with conflict choices retained."""
+
+    schema_version: Literal["advisor-profile-confirmation-response.v1"] = (
+        "advisor-profile-confirmation-response.v1"
+    )
+    profile: RiskProfile
+
+    @model_validator(mode="after")
+    def validate_response(self) -> Self:
+        _validate_context_payload_safety(
+            self.model_dump_json(), "profile confirmation response"
+        )
+        return self
+
+
 class ResearchMatrixTemplateResponse(ContractModel):
     schema_version: Literal["research-matrix-template.v1"] = (
         "research-matrix-template.v1"
@@ -313,6 +392,8 @@ class ResearchMatrixResponse(ContractModel):
 __all__ = [
     "AdvisorIntentRequest",
     "AdvisorPlanResponse",
+    "AdvisorProfileConfirmationRequest",
+    "AdvisorProfileConfirmationResponse",
     "DecisionEventListResponse",
     "DecisionEventWriteResponse",
     "AdvisorQueryResponse",
@@ -321,6 +402,8 @@ __all__ = [
     "AdvisorPortfolioContextResponse",
     "AdvisorProfileContextRequest",
     "AdvisorProfileContextResponse",
+    "AdvisorProfileProposalRequest",
+    "AdvisorProfileProposalResponse",
     "ResearchMatrixTemplateResponse",
     "ResearchMatrixIssueResponse",
     "ResearchMatrixNodeResponse",

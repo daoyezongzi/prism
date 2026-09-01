@@ -140,6 +140,21 @@ class ProfileExtractionProposal(ContractModel):
             values = getattr(self, field_name)
             if len(set(values)) != len(values):
                 raise ValueError(f"{field_name} must not contain duplicates")
+        serialized = self.model_dump_json().casefold().replace("-", "_")
+        for forbidden in (
+            "api_key",
+            "apikey",
+            "authorization",
+            "password",
+            "private_key",
+            "privatekey",
+            "secret",
+            "token",
+            "credential",
+            "cookie",
+        ):
+            if forbidden in serialized:
+                raise ValueError("profile extraction must not contain sensitive fields")
         return self
 
 

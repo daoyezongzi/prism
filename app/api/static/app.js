@@ -10,6 +10,12 @@
     templateSequence: 0,
     portfolioContext: null,
     profileContext: null,
+    profileProposalDraft: null,
+    profileProposalQuestionnaire: null,
+    profileProposalExtraction: null,
+    profileProposalProfile: null,
+    profileProposalResolutions: {},
+    profileProposalSequence: 0,
     advisorPlan: null,
     researchTemplate: null,
     researchRun: null,
@@ -272,6 +278,156 @@
     const node = byId("profile-context-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
+  }
+
+  function setProfileProposalStatus(message, className = "") {
+    const node = byId("profile-proposal-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function setProfileProposalConfirmStatus(message, className = "") {
+    const node = byId("profile-proposal-confirm-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function profileDimensionLabel(dimension) {
+    return {
+      investment_horizon: "Investment horizon",
+      liquidity_need: "Liquidity need",
+      experience_level: "Experience level",
+      return_expectation: "Return expectation",
+      max_drawdown_tolerance_pct: "Max drawdown tolerance",
+      expected_return_range: "Expected return range",
+    }[dimension] || text(dimension);
+  }
+
+  function renderProfileProposalResult(profile) {
+    const panel = byId("profile-proposal-result");
+    clear(panel);
+    if (!profile) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "确认提案后查看保留冲突选择的 Risk Profile。";
+      panel.append(empty);
+      return;
+    }
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Profile", profile.profile_id);
+    addMetadata(metadata, "Risk score", profile.risk_score);
+    addMetadata(metadata, "Risk level", profile.risk_level);
+    addMetadata(metadata, "Questionnaire", profile.questionnaire_id);
+    addMetadata(metadata, "Extraction", profile.extraction_id);
+    addMetadata(metadata, "Confidence", profile.confidence);
+    addMetadata(metadata, "Confirmed at", profile.created_at);
+    panel.append(metadata);
+    const conflicts = profile.conflicts || [];
+    if (conflicts.length) {
+      const heading = document.createElement("h4");
+      heading.className = "context-heading";
+      heading.textContent = "Resolved conflicts";
+      panel.append(heading);
+      const list = document.createElement("div");
+      list.className = "profile-proposal-resolved";
+      conflicts.forEach((conflict) => {
+        const row = document.createElement("div");
+        row.textContent = `${profileDimensionLabel(conflict.dimension)} · ${text(conflict.resolution)} · ${text(conflict.resolved_value)}`;
+        list.append(row);
+      });
+      panel.append(list);
+    }
+  }
+
+  function renderProfileProposal(draft) {
+    const panel = byId("profile-proposal-content");
+    clear(panel);
+    const confirm = byId("confirm-profile-proposal");
+    confirm.disabled = !draft;
+    if (!draft) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "粘贴提案后查看问卷与提取值的冲突。";
+      panel.append(empty);
+      return;
+    }
+    const meta = document.createElement("div");
+    meta.className = "profile-proposal-meta";
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Draft", draft.draft_id);
+    addMetadata(metadata, "Owner", draft.owner_id);
+    addMetadata(metadata, "Status", draft.status);
+    addMetadata(metadata, "Extraction", draft.extraction?.extraction_id);
+    addMetadata(metadata, "Confidence", draft.extraction?.confidence);
+    addMetadata(metadata, "Input digest", draft.extraction?.input_digest);
+    meta.append(metadata);
+    if (!(draft.conflicts || []).length) {
+      const ready = document.createElement("p");
+      ready.textContent = "没有维度冲突；仍需显式确认后生成 Profile。";
+      meta.append(ready);
+    }
+    panel.append(meta);
+
+    (draft.conflicts || []).forEach((conflict) => {
+      const card = document.createElement("article");
+      card.className = "profile-conflict";
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = profileDimensionLabel(conflict.dimension);
+      header.append(title, chip("需要确认", "review"));
+      card.append(header);
+      const values = document.createElement("dl");
+      values.className = "profile-conflict-values";
+      addMetadata(values, "Questionnaire", conflict.questionnaire_value);
+      addMetadata(values, "Extraction", conflict.extracted_value);
+      card.append(values);
+      const resolution = document.createElement("label");
+      resolution.className = "profile-resolution";
+      resolution.textContent = "选择生效值";
+      const select = document.createElement("select");
+      select.dataset.conflictId = conflict.conflict_id;
+      const placeholder = document.createElement("option");
+      placeholder.value = "UNRESOLVED";
+      placeholder.textContent = "请选择";
+      select.append(placeholder);
+      [
+        ["USE_QUESTIONNAIRE", "使用问卷值"],
+        ["USE_EXTRACTION", "使用提取值"],
+      ].forEach(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        select.append(option);
+      });
+      const selected = state.profileProposalResolutions[conflict.conflict_id];
+      if (selected) select.value = selected;
+      select.addEventListener("change", () => {
+        if (select.value === "UNRESOLVED") delete state.profileProposalResolutions[conflict.conflict_id];
+        else state.profileProposalResolutions[conflict.conflict_id] = select.value;
+        state.profileProposalProfile = null;
+        renderProfileProposalResult(null);
+        setProfileProposalConfirmStatus("待确认");
+      });
+      resolution.append(select);
+      card.append(resolution);
+      panel.append(card);
+    });
+  }
+
+  function clearProfileProposal({ clearInput = true } = {}) {
+    state.profileProposalSequence += 1;
+    state.profileProposalDraft = null;
+    state.profileProposalQuestionnaire = null;
+    state.profileProposalExtraction = null;
+    state.profileProposalProfile = null;
+    state.profileProposalResolutions = {};
+    if (clearInput) byId("profile-proposal-json").value = "";
+    setProfileProposalStatus("未预览");
+    setProfileProposalConfirmStatus("未确认");
+    renderProfileProposal(null);
+    renderProfileProposalResult(null);
   }
 
   function setAdvisorPlanStatus(message, className = "") {
@@ -722,6 +878,7 @@
     const requestOwner = byId("owner-id").value.trim();
     const submit = byId("confirm-profile");
     clearAdvisorPlan();
+    clearProfileProposal();
     if (!requestOwner) {
       state.profileContext = null;
       renderConfirmedProfile(null);
@@ -778,6 +935,7 @@
     setPortfolioContextStatus("未确认");
     setProfileContextStatus("未确认");
     renderConfirmedProfile(null);
+    clearProfileProposal();
     clearAdvisorPlan();
   }
 
@@ -813,6 +971,159 @@
         clearTemplateContext({ clearConfirmed: true });
       }
       throw error;
+    }
+  }
+
+  async function previewProfileProposal() {
+    const requestOwner = byId("owner-id").value.trim();
+    const raw = byId("profile-proposal-json").value.trim();
+    const submit = byId("preview-profile-proposal");
+    if (!requestOwner) {
+      clearProfileProposal({ clearInput: false });
+      clearAdvisorPlan();
+      setProfileProposalStatus("需要 owner", "blocked");
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (!raw) {
+      clearProfileProposal({ clearInput: false });
+      clearAdvisorPlan();
+      setProfileProposalStatus("未提供 JSON", "blocked");
+      setError("请粘贴已脱敏的 ProfileExtractionProposal JSON。");
+      return;
+    }
+    let extraction;
+    try {
+      extraction = JSON.parse(raw);
+      if (!extraction || typeof extraction !== "object" || Array.isArray(extraction)) {
+        throw new Error("not an object");
+      }
+    } catch (_) {
+      clearProfileProposal({ clearInput: false });
+      clearAdvisorPlan();
+      setProfileProposalStatus("JSON 无效", "blocked");
+      setError("Profile 提案 JSON 无法解析；输入原文不会写入错误信息。");
+      return;
+    }
+    if (requestOwner !== state.ownerId) {
+      state.ownerId = requestOwner;
+      resetOwnerScopedViews();
+      byId("profile-proposal-json").value = raw;
+    }
+    clearAdvisorPlan();
+    clearProfileProposal({ clearInput: false });
+    const proposalSequence = ++state.profileProposalSequence;
+    let templateSequence = state.templateSequence;
+    if (!state.queryTemplate) templateSequence = ++state.templateSequence;
+    setError("");
+    submit.disabled = true;
+    setProfileProposalStatus("验证中…");
+    try {
+      const template = state.queryTemplate || await loadTemplateContext(requestOwner, templateSequence);
+      if (!template) return;
+      const questionnaire = buildQuestionnaire(template);
+      const response = await fetch("/api/v1/advisor/profile-proposals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "advisor-profile-proposal-request.v1",
+          questionnaire,
+          extraction,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (
+        state.ownerId !== requestOwner
+        || state.templateSequence !== templateSequence
+        || state.profileProposalSequence !== proposalSequence
+      ) return;
+      const result = await response.json();
+      state.profileProposalDraft = result.draft;
+      state.profileProposalQuestionnaire = questionnaire;
+      state.profileProposalExtraction = extraction;
+      state.profileProposalProfile = null;
+      state.profileProposalResolutions = {};
+      renderProfileProposal(result.draft);
+      renderProfileProposalResult(null);
+      const conflictCount = (result.draft.conflicts || []).length;
+      setProfileProposalStatus(
+        conflictCount ? `${conflictCount} conflicts` : "无冲突 · 可确认",
+        conflictCount ? "review" : "pass",
+      );
+      setProfileProposalConfirmStatus(conflictCount ? "待选择" : "待确认");
+    } catch (error) {
+      if (
+        state.ownerId === requestOwner
+        && state.templateSequence === templateSequence
+        && state.profileProposalSequence === proposalSequence
+      ) {
+        clearProfileProposal({ clearInput: false });
+        setProfileProposalStatus("未生成", "blocked");
+      }
+      setError(error.message || "Profile 提案验证失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  async function confirmProfileProposal() {
+    const draft = state.profileProposalDraft;
+    const questionnaire = state.profileProposalQuestionnaire;
+    const extraction = state.profileProposalExtraction;
+    const submit = byId("confirm-profile-proposal");
+    if (!draft || !questionnaire || !extraction) {
+      setProfileProposalConfirmStatus("请先预览", "blocked");
+      setError("请先预览结构化 Profile 提案。");
+      return;
+    }
+    const resolutions = {};
+    let unresolved = false;
+    byId("profile-proposal-content").querySelectorAll("select[data-conflict-id]").forEach((select) => {
+      if (!select.value || select.value === "UNRESOLVED") unresolved = true;
+      else resolutions[select.dataset.conflictId] = select.value;
+    });
+    if (unresolved) {
+      setProfileProposalConfirmStatus("需逐项选择", "blocked");
+      setError("请为每个画像冲突选择问卷值或提取值。");
+      return;
+    }
+    const requestOwner = state.ownerId;
+    const confirmationSequence = ++state.profileProposalSequence;
+    setError("");
+    submit.disabled = true;
+    setProfileProposalConfirmStatus("确认中…");
+    try {
+      const response = await fetch("/api/v1/advisor/profile-proposals/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "advisor-profile-confirmation-request.v1",
+          questionnaire,
+          extraction,
+          resolutions,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.profileProposalSequence !== confirmationSequence) return;
+      const result = await response.json();
+      state.profileProposalProfile = result.profile;
+      renderProfileProposalResult(state.profileProposalProfile);
+      setProfileProposalConfirmStatus(`已确认 · ${text(result.profile.risk_level)}`, "pass");
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.profileProposalSequence === confirmationSequence) {
+        state.profileProposalProfile = null;
+        renderProfileProposalResult(null);
+        setProfileProposalConfirmStatus("未确认", "blocked");
+      }
+      setError(error.message || "Profile 提案确认失败");
+    } finally {
+      submit.disabled = false;
     }
   }
 
@@ -1076,6 +1387,8 @@
   byId("advisor-query-form").addEventListener("submit", runAdvisorQuery);
   byId("confirm-portfolio").addEventListener("click", confirmPortfolioContext);
   byId("confirm-profile").addEventListener("click", confirmProfileContext);
+  byId("preview-profile-proposal").addEventListener("click", previewProfileProposal);
+  byId("confirm-profile-proposal").addEventListener("click", confirmProfileProposal);
   byId("preview-advisor-plan").addEventListener("click", previewAdvisorPlan);
   byId("intent-type").addEventListener("change", clearAdvisorPlan);
   byId("run-research-matrix").addEventListener("click", runResearchMatrix);
@@ -1093,6 +1406,7 @@
   ].forEach((id) => {
     byId(id).addEventListener("change", () => {
       clearAdvisorPlan();
+      clearProfileProposal();
       if (!state.profileContext) return;
       state.profileContext = null;
       renderConfirmedProfile(null);

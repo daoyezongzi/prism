@@ -25,6 +25,11 @@ from app.service.intent_planning import (
     InvestmentIntentType,
     build_intent_plan,
 )
+from app.service.profile_proposal import (
+    ProfileProposalError,
+    build_profile_proposal,
+    confirm_profile_proposal,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -42,4 +47,7 @@ __all__ = [
     "IntentPlanningError",
     "InvestmentIntentType",
     "build_intent_plan",
+    "ProfileProposalError",
+    "build_profile_proposal",
+    "confirm_profile_proposal",
 ]

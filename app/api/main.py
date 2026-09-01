@@ -18,6 +18,10 @@ from app.api.contracts import (
     AdvisorPortfolioContextResponse,
     AdvisorProfileContextRequest,
     AdvisorProfileContextResponse,
+    AdvisorProfileConfirmationRequest,
+    AdvisorProfileConfirmationResponse,
+    AdvisorProfileProposalRequest,
+    AdvisorProfileProposalResponse,
     AdvisorQueryResponse,
     AdvisorQueryTemplateResponse,
     DecisionEventListResponse,
@@ -43,6 +47,9 @@ from app.service import (
     confirm_questionnaire,
     IntentPlanningError,
     build_intent_plan,
+    ProfileProposalError,
+    build_profile_proposal,
+    confirm_profile_proposal,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -225,6 +232,16 @@ def create_app(
             "advisor intent plan was refused",
         )
 
+    @api.exception_handler(ProfileProposalError)
+    async def profile_proposal_error_handler(
+        _: Request, __: ProfileProposalError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "PROFILE_PROPOSAL_ERROR",
+            "profile proposal was refused",
+        )
+
     @api.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
         if exc.status_code == 404:
@@ -359,6 +376,42 @@ def create_app(
             questionnaire=questionnaire,
             profile=profile,
         )
+
+    @api.post(
+        "/api/v1/advisor/profile-proposals",
+        response_model=AdvisorProfileProposalResponse,
+    )
+    def create_profile_proposal(
+        request: AdvisorProfileProposalRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorProfileProposalResponse:
+        if (
+            request.questionnaire.owner_id != owner_id
+            or request.extraction.owner_id != owner_id
+        ):
+            raise StoreOwnerError("profile proposal owner does not match owner scope")
+        draft = build_profile_proposal(request.questionnaire, request.extraction)
+        return AdvisorProfileProposalResponse(draft=draft)
+
+    @api.post(
+        "/api/v1/advisor/profile-proposals/confirm",
+        response_model=AdvisorProfileConfirmationResponse,
+    )
+    def confirm_profile_proposal_endpoint(
+        request: AdvisorProfileConfirmationRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorProfileConfirmationResponse:
+        if (
+            request.questionnaire.owner_id != owner_id
+            or request.extraction.owner_id != owner_id
+        ):
+            raise StoreOwnerError("profile confirmation owner does not match owner scope")
+        profile = confirm_profile_proposal(
+            request.questionnaire,
+            request.extraction,
+            request.resolutions,
+        )
+        return AdvisorProfileConfirmationResponse(profile=profile)
 
     @api.post(
         "/api/v1/advisor/plans",

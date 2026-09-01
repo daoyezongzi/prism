@@ -251,6 +251,39 @@
             <div id="profile-confirmation-content" class="profile-confirmation" aria-live="polite">
               <div class="empty-state">确认问卷后查看确定性画像结果。</div>
             </div>
+            <div class="profile-proposal" aria-labelledby="profile-proposal-title">
+              <div class="context-confirm-actions">
+                <div>
+                  <strong id="profile-proposal-title">审阅结构化提取提案</strong>
+                  <small>仅接受已脱敏的 typed values 与 input digest；不解析或保存自然语言原文。</small>
+                </div>
+                <div class="context-import-actions">
+                  <button id="preview-profile-proposal" class="query-submit" type="button">预览画像提案</button>
+                  <span id="profile-proposal-status" class="status-chip">未预览</span>
+                </div>
+              </div>
+              <div class="context-import">
+                <label for="profile-proposal-json">粘贴已脱敏的 ProfileExtractionProposal JSON</label>
+                <textarea id="profile-proposal-json" rows="7" autocomplete="off" spellcheck="false" placeholder="仅粘贴 profile-extraction.v1；只保留结构化候选值与 64 位 input_digest"></textarea>
+                <small>提案只在当前会话使用；owner 必须与上方隔离标识及当前问卷一致。</small>
+              </div>
+              <div id="profile-proposal-content" class="profile-proposal-content" aria-live="polite">
+                <div class="empty-state">粘贴提案后查看问卷与提取值的冲突。</div>
+              </div>
+              <div class="context-confirm-actions profile-proposal-confirm-actions">
+                <div>
+                  <strong>确认提案选择</strong>
+                  <small>所有冲突必须逐项选择；未确认不会生成 Risk Profile。</small>
+                </div>
+                <div class="context-import-actions">
+                  <button id="confirm-profile-proposal" class="query-submit" type="button" disabled>确认画像提案</button>
+                  <span id="profile-proposal-confirm-status" class="status-chip">未确认</span>
+                </div>
+              </div>
+              <div id="profile-proposal-result" class="profile-proposal-result" aria-live="polite">
+                <div class="empty-state">确认提案后查看保留冲突选择的 Risk Profile。</div>
+              </div>
+            </div>
             <div id="profile-content" class="profile-content">
               <div class="empty-state">回执会绑定画像版本、持仓快照和风险预算。</div>
             </div>
