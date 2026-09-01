@@ -82,6 +82,22 @@
               <div class="query-meta" id="query-template-meta">
                 运行时读取合成持仓模板；不会提交自然语言或订单。
               </div>
+              <div class="intent-planning">
+                <label for="intent-type">
+                  <span>研究问题类型</span>
+                  <select id="intent-type" name="intent_type">
+                    <option value="TECHNOLOGY_EXPOSURE_REVIEW">科技暴露复核</option>
+                    <option value="PORTFOLIO_RISK_REVIEW">组合风险复核</option>
+                  </select>
+                </label>
+                <div class="intent-planning-action">
+                  <button id="preview-advisor-plan" class="query-submit" type="button">预览任务计划</button>
+                  <span id="advisor-plan-status" class="status-chip">未预览</span>
+                </div>
+              </div>
+              <div id="advisor-plan-content" class="intent-plan-content" aria-live="polite">
+                <div class="empty-state">选择一个结构化研究问题后预览四轨道任务。</div>
+              </div>
               <div class="query-fields">
                 <label>
                   <span>Query ID</span>

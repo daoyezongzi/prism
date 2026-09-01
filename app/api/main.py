@@ -31,6 +31,8 @@ from app.api.contracts import (
 from app.recommendation import RecommendationCompositionResult
 from app.research import ResearchSpecialistMatrixRequest
 from app.service import (
+    AdvisorIntentRequest,
+    AdvisorPlanResponse,
     AdvisorQueryError,
     AdvisorQueryRequest,
     FixtureAdvisorQueryService,
@@ -39,6 +41,8 @@ from app.service import (
     SpecialistMatrixOutput,
     ProfileConfirmationError,
     confirm_questionnaire,
+    IntentPlanningError,
+    build_intent_plan,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -211,6 +215,16 @@ def create_app(
             "risk profile confirmation was refused",
         )
 
+    @api.exception_handler(IntentPlanningError)
+    async def intent_planning_error_handler(
+        _: Request, __: IntentPlanningError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "INTENT_PLAN_ERROR",
+            "advisor intent plan was refused",
+        )
+
     @api.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
         if exc.status_code == 404:
@@ -345,6 +359,24 @@ def create_app(
             questionnaire=questionnaire,
             profile=profile,
         )
+
+    @api.post(
+        "/api/v1/advisor/plans",
+        response_model=AdvisorPlanResponse,
+    )
+    def create_advisor_plan(
+        request: AdvisorIntentRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvisorPlanResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("intent owner does not match owner scope")
+        try:
+            matrix = active_specialist.matrix_template(owner_id)
+            return build_intent_plan(request, matrix)
+        except IntentPlanningError:
+            raise
+        except Exception as exc:
+            raise IntentPlanningError("advisor intent plan was refused") from exc
 
     @api.get(
         "/api/v1/advisor/research-matrix-template",

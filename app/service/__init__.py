@@ -18,6 +18,13 @@ from app.service.profile_confirmation import (
     ProfileConfirmationError,
     confirm_questionnaire,
 )
+from app.service.intent_planning import (
+    AdvisorIntentRequest,
+    AdvisorPlanResponse,
+    IntentPlanningError,
+    InvestmentIntentType,
+    build_intent_plan,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -30,4 +37,9 @@ __all__ = [
     "SpecialistMatrixOutput",
     "ProfileConfirmationError",
     "confirm_questionnaire",
+    "AdvisorIntentRequest",
+    "AdvisorPlanResponse",
+    "IntentPlanningError",
+    "InvestmentIntentType",
+    "build_intent_plan",
 ]

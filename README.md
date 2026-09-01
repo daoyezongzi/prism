@@ -74,6 +74,11 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   HOLD/REDUCE 个性化差异、集中度/穿透缺失、Provider 降级/冲突和 owner/时间拒绝，
   支持最多 100 次语义回放；`288` 项回归和本地 fixture 评测通过。报告不代表市场
   准确率、投资收益或真实部署 SLA。
+- Phase 22 已加入显式 `advisor-intent-request.v1` 与只读
+  `advisor-plan-response.v1`：用户可在 Advisor 工作台选择科技暴露复核或组合风险
+  复核，预览复用既有 Macro/Industry/Stock/ETF-Fund 四轨道的确定性任务计划，再
+  显式运行原有 HOLD/REDUCE 纵切；计划不运行 Provider、不写 DecisionEvent，也不把
+  自然语言或 LLM/Gemini 当作问题理解。详见 [Intent/Plan 契约](docs/intent-planning.md)。
 
 尚未实现：
 
@@ -162,6 +167,8 @@ python -m pytest
 - [Phase 20 上下文确认计划与验收](docs/plans/2026-09-02-mvp-phase-20-context-input-confirmation.md)
 - [Phase 21 MVP 固定评测集](docs/mvp-evaluation.md)
 - [Phase 21 固定评测与回放计划](docs/plans/2026-09-02-mvp-phase-21-evaluation-harness.md)
+- [Phase 22 Intent/Plan 契约](docs/intent-planning.md)
+- [Phase 22 结构化意图与任务计划预览计划](docs/plans/2026-09-02-mvp-phase-22-intent-planning.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

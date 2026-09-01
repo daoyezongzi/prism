@@ -24,7 +24,10 @@ from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskProfile, RiskQuestionnaire
 from app.service import (
+    AdvisorIntentRequest,
+    AdvisorPlanResponse,
     AdvisorQueryRequest,
+    InvestmentIntentType,
 )
 from pydantic import Field
 from pydantic import model_validator
@@ -308,6 +311,8 @@ class ResearchMatrixResponse(ContractModel):
 
 
 __all__ = [
+    "AdvisorIntentRequest",
+    "AdvisorPlanResponse",
     "DecisionEventListResponse",
     "DecisionEventWriteResponse",
     "AdvisorQueryResponse",
@@ -322,5 +327,6 @@ __all__ = [
     "ResearchMatrixResponse",
     "ErrorResponse",
     "AdvisorQueryRequest",
+    "InvestmentIntentType",
     "ResearchSpecialistMatrixRequest",
 ]

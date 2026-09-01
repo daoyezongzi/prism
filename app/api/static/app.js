@@ -10,6 +10,7 @@
     templateSequence: 0,
     portfolioContext: null,
     profileContext: null,
+    advisorPlan: null,
     researchTemplate: null,
     researchRun: null,
     researchSequence: 0,
@@ -271,6 +272,50 @@
     const node = byId("profile-context-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
+  }
+
+  function setAdvisorPlanStatus(message, className = "") {
+    const node = byId("advisor-plan-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function renderAdvisorPlan(plan) {
+    const panel = byId("advisor-plan-content");
+    clear(panel);
+    if (!plan) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "选择一个结构化研究问题后预览四轨道任务。";
+      panel.append(empty);
+      return;
+    }
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Plan", plan.plan_id);
+    addMetadata(metadata, "Intent", `${text(plan.intent_type)} · ${text(plan.intent_id)}`);
+    addMetadata(metadata, "Owner", plan.owner_id);
+    addMetadata(metadata, "Portfolio bundle", plan.portfolio_bundle_id);
+    addMetadata(metadata, "Position snapshot", plan.position_snapshot_id);
+    addMetadata(metadata, "Questionnaire", plan.questionnaire_id);
+    addMetadata(metadata, "Scope", plan.scope_description);
+    addMetadata(metadata, "Nodes", plan.node_count);
+    panel.append(metadata);
+
+    const heading = document.createElement("h4");
+    heading.className = "context-heading";
+    heading.textContent = "Specialist tracks";
+    panel.append(heading);
+    const roles = document.createElement("div");
+    roles.className = "intent-plan-roles";
+    (plan.roles || []).forEach((role) => roles.append(chip(researchRoleLabel(role), "pass")));
+    panel.append(roles);
+  }
+
+  function clearAdvisorPlan() {
+    state.advisorPlan = null;
+    setAdvisorPlanStatus("未预览");
+    renderAdvisorPlan(null);
   }
 
   function renderProfile(receipt) {
@@ -603,6 +648,7 @@
     const requestOwner = byId("owner-id").value.trim();
     const raw = byId("portfolio-json").value.trim();
     const submit = byId("confirm-portfolio");
+    clearAdvisorPlan();
     if (!requestOwner) {
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
@@ -675,6 +721,7 @@
   async function confirmProfileContext() {
     const requestOwner = byId("owner-id").value.trim();
     const submit = byId("confirm-profile");
+    clearAdvisorPlan();
     if (!requestOwner) {
       state.profileContext = null;
       renderConfirmedProfile(null);
@@ -731,6 +778,7 @@
     setPortfolioContextStatus("未确认");
     setProfileContextStatus("未确认");
     renderConfirmedProfile(null);
+    clearAdvisorPlan();
   }
 
   function clearTemplateContext({ clearConfirmed = false } = {}) {
@@ -765,6 +813,63 @@
         clearTemplateContext({ clearConfirmed: true });
       }
       throw error;
+    }
+  }
+
+  async function previewAdvisorPlan() {
+    const requestOwner = byId("owner-id").value.trim();
+    const submit = byId("preview-advisor-plan");
+    if (!requestOwner) {
+      clearAdvisorPlan();
+      setAdvisorPlanStatus("需要 owner", "blocked");
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (requestOwner !== state.ownerId) {
+      state.ownerId = requestOwner;
+      resetOwnerScopedViews();
+    }
+    const planSequence = ++state.templateSequence;
+    setError("");
+    submit.disabled = true;
+    clearAdvisorPlan();
+    setAdvisorPlanStatus("生成中…");
+    try {
+      const template = state.queryTemplate || await loadTemplateContext(requestOwner, planSequence);
+      if (!template) return;
+      const portfolio = state.portfolioContext || template.portfolio;
+      const questionnaire = buildQuestionnaire(template);
+      const intentType = byId("intent-type").value;
+      const response = await fetch("/api/v1/advisor/plans", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "advisor-intent-request.v1",
+          intent_id: `${questionnaire.questionnaire_id}-plan`,
+          owner_id: requestOwner,
+          intent_type: intentType,
+          generated_at: template.generated_at,
+          portfolio_bundle_id: portfolio.bundle_id,
+          position_snapshot_id: portfolio.position_snapshot.snapshot_id,
+          questionnaire_id: questionnaire.questionnaire_id,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.templateSequence !== planSequence) return;
+      state.advisorPlan = await response.json();
+      renderAdvisorPlan(state.advisorPlan);
+      setAdvisorPlanStatus(`已生成 · ${text(state.advisorPlan.node_count)} nodes`, "pass");
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.templateSequence === planSequence) {
+        clearAdvisorPlan();
+        setAdvisorPlanStatus("未生成", "blocked");
+      }
+      setError(error.message || "任务计划生成失败");
+    } finally {
+      submit.disabled = false;
     }
   }
 
@@ -971,6 +1076,8 @@
   byId("advisor-query-form").addEventListener("submit", runAdvisorQuery);
   byId("confirm-portfolio").addEventListener("click", confirmPortfolioContext);
   byId("confirm-profile").addEventListener("click", confirmProfileContext);
+  byId("preview-advisor-plan").addEventListener("click", previewAdvisorPlan);
+  byId("intent-type").addEventListener("change", clearAdvisorPlan);
   byId("run-research-matrix").addEventListener("click", runResearchMatrix);
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
@@ -985,6 +1092,7 @@
     "max-drawdown",
   ].forEach((id) => {
     byId(id).addEventListener("change", () => {
+      clearAdvisorPlan();
       if (!state.profileContext) return;
       state.profileContext = null;
       renderConfirmedProfile(null);
