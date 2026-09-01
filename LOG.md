@@ -761,3 +761,41 @@ worktree，并先提交计划书。
 - 独立边界审查确认无前端金融重算、认证假象、跨 owner 泄露、Recommendation 伪造、
   外部网络、LLM/Gemini、订单或交易路径。Phase 20 已接受，本地未 push；下一阶段必须
   从本提交创建新 worktree 并先提交计划书。
+
+## 2026-09-02 — MVP Phase 21 固定评测集与语义回放
+
+### 计划与 worktree
+
+- 在已接受的 Phase 20 `b241b4c` 上创建独立 worktree
+  `D:\Github_Storage\prism-phase-21`，分支为
+  `codex/mvp-phase-21-evaluation-harness`。
+- 先提交计划书 `9797f45`，落实 `Prism.md` 的固定评测集/指标要求；真实市场准确率、
+  收益回测、SkillHub、LLM、认证、生产监控和交易均明确不做。
+
+### 本地实现
+
+- 新增 9 个严格 `mvp-eval-case.v1` 案例，覆盖 BALANCED/HOLD、CONSERVATIVE/REDUCE、
+  GROWTH/HOLD、科技集中阻断、穿透缺失阻断、Provider PARTIAL、Provider 冲突安全错误、
+  跨 owner 拒绝和无时区拒绝。
+- 新增 `tools.evaluate_mvp` 与 `mvp-evaluation-report.v1`，复用既有 Advisor、Profile、
+  Portfolio、Research、Gate、Recommendation/Receipt contracts；输出安全 case 摘要、
+  status/action、Evidence/Fact/Finding 计数、错误分类、语义 fingerprint 和 P50/P95，
+  支持最多 100 次语义回放。新增 `docs/mvp-evaluation.md`，并将 evaluator/cases 加入
+  wheel data。
+- 评测器只在临时目录变体复制既有 Provider fixture，不写 DecisionEventStore、不访问
+  外网、不引入新金融公式或运行时分支。
+
+### 独立审查与验收
+
+- 实现提交为 `680ffed`；复查后以 `02dc8bd` 补齐报告计数闭合/安装路径，
+  `73d926f` 将语义回放上限提升至 100 并完成 100 次检查。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9 case 通过，case/profile
+  alignment、risk/compliance coverage、evidence coverage、semantic replay equality
+  均为 `1.0`；Provider 冲突和非法输入只保留安全错误分类。
+- Phase-specific tests：`5 passed`；全量回归：`288 passed`，仅已知 Starlette/httpx
+  deprecation warning。`compileall`、公开导入、CLI smoke、fixture/schema、静态边界、
+  `node --check`、`git diff --check` 和 wheel package-data 检查通过；wheel 包含 evaluator
+  和 9 个案例。
+- 独立审查确认评测指标没有冒充市场准确率/收益/SLA，且无前端金融重算、认证假象、
+  Recommendation 伪造、外部网络、LLM/Gemini、订单/交易或持久化路径。Phase 21 已接受，
+  本地未 push；下一阶段必须从本提交创建新 worktree 并先提交计划书。

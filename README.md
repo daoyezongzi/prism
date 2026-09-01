@@ -70,6 +70,10 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   用户提交的 bundle/snapshot。工作台在 owner 切换或失败时清空确认状态；真实账户
   上传、认证、Provider、LLM 与生产持久化仍未实现。`283` 项回归、真实浏览器路径、
   本地 100 并发基线和打包边界审查已通过。
+- Phase 21 已加入 9 个固定 `eval_cases/` 与版本化 `mvp-evaluation-report.v1`：覆盖
+  HOLD/REDUCE 个性化差异、集中度/穿透缺失、Provider 降级/冲突和 owner/时间拒绝，
+  支持最多 100 次语义回放；`288` 项回归和本地 fixture 评测通过。报告不代表市场
+  准确率、投资收益或真实部署 SLA。
 
 尚未实现：
 

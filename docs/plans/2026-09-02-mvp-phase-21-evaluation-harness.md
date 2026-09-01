@@ -112,4 +112,24 @@ Receipt` 作为可复核对象：同一证据下 BALANCED 可以 HOLD、保守�
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record
+
+- Implementation commits: `680ffed` (fixed cases, evaluator, report contract and docs),
+  `02dc8bd` (portable/closed report invariants), and `73d926f` (bounded replay up to 100).
+- Fixed set contains 9 cases spanning three profile outcomes, concentration and missing
+  look-through blocks, Provider partial/conflict, cross-owner refusal and timezone refusal.
+- `python -m tools.evaluate_mvp --repeat 100 --json` completed all 9 cases with
+  `case_pass_rate=1.0`, `profile_alignment_rate=1.0`, `risk_detection_coverage=1.0`,
+  `compliance_block_coverage=1.0`, `evidence_coverage=1.0` and
+  `semantic_replay_equality=1.0`. The report exposes only safe summaries and error classes.
+- Phase-specific tests: `5 passed`; full regression: `288 passed`, with only the known
+  Starlette/httpx deprecation warning. `compileall`, public import, CLI smoke, fixture
+  schema, `node --check`, static boundary and `git diff --check` passed.
+- Wheel verification confirmed `tools/evaluate_mvp.py`, all 9 `eval_cases` data files and
+  existing static assets are packaged; the evaluator resolves data-file installation paths.
+- Independent review confirmed the evaluator only delegates to existing deterministic
+  Advisor/Profile/Portfolio/Research/Gate/Receipt modules. No new financial formula,
+  market accuracy claim, external network, LLM/Gemini, auth, order or persistence path was
+  introduced. Phase 21 is accepted; the next phase must use a new worktree and plan.
