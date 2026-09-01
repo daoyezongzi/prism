@@ -40,14 +40,15 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 9 已实现注入式 Fixture-backed 异步研究执行：ready 节点并行、依赖门控、四态 Provider 映射、预算边界和 Evidence/Observation 输出；真实 SkillHub、CrossValidation 自动接线、风险合规和 Recommendation 仍未实现。
 - Phase 10 已实现 run-aware 研究证据流水线：完整 run 才能将两条独立 lineage 的支持结论接入 Phase 8，并生成闭合 DecisionTrace；partial/failed/empty、冲突和缺失均保持待复核/阻断。
 - Phase 11 已实现独立风险/合规闸门：画像、研究证据、风险预算与 allocation envelope 必须跨模块闭合；缺披露保持待复核，保证收益/目标收益和篡改输入会阻断。闸门只输出后续建议资格，仍不生成 Recommendation。
-- Phase 12 已实现确定性 Recommendation Composer 与 Decision Receipt：双 PASS 后无 breach 只生成当前权重 HOLD，完整 breach 只生成带 breach 闭合的 REDUCE；回执绑定画像、持仓/风险/研究/gate/证据和规则版本并自校验 hash。真实 API、持久化和 UI 仍未实现。
-- Phase 13 计划接入 owner-scoped 决策事件持久化、FastAPI 读写边界和首个可解释工作台切片；在本阶段验收前不宣称 API、持久化或浏览器闭环已完成。
+- Phase 12 已实现确定性 Recommendation Composer 与 Decision Receipt：双 PASS 后无 breach 只生成当前权重 HOLD，完整 breach 只生成带 breach 闭合的 REDUCE；回执绑定画像、持仓/风险/研究/gate/证据和规则版本并自校验 hash。API、持久化和 UI 在 Phase 13 接入。
+- Phase 13 已实现 owner-scoped SQLite 决策事件持久化、FastAPI 健康/写入/列表/详情边界和首个可解释工作台切片；真实认证、PostgreSQL、API 内部编排和旗舰浏览器全流程仍未实现。
+- Phase 13 的脱敏状态 fixture 覆盖 BALANCED/HOLD、CONSERVATIVE/REDUCE、REVIEW_REQUIRED 与 BLOCKED；浏览器验收只展示安全结构化回执，不展示原始 Provider 或私有持仓。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
-- Recommendation/Decision Receipt 的持久化审计与 API 展示；
+- Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
 - Web 工作台与真实端到端场景；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
@@ -112,6 +113,7 @@ python -m pytest
 - [Phase 12 Recommendation/Decision Receipt 计划](docs/plans/2026-09-02-mvp-phase-12-recommendation-decision-receipt.md)
 - [Phase 12 Recommendation/Decision Receipt 契约](docs/recommendation-decision-receipt.md)
 - [Phase 13 Owner-scoped API/Persistence/UI 计划](docs/plans/2026-09-02-mvp-phase-13-owner-scoped-api-persistence-ui.md)
+- [Phase 13 Decision Events API 与工作台](docs/decision-events-api.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

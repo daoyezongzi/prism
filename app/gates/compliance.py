@@ -137,6 +137,14 @@ def _scan_values(
     return tuple(codes)
 
 
+def scan_compliance_texts(
+    *, metadata: tuple[str, ...] = (), texts: tuple[str, ...] = ()
+) -> tuple[ComplianceGateIssueCode, ...]:
+    """Reuse the gate's bounded text policy at downstream trust boundaries."""
+
+    return _scan_values(metadata, texts)
+
+
 def _scan_candidate(candidate: AdvisoryCandidate) -> tuple[ComplianceGateIssueCode, ...]:
     return _scan_values(
         (candidate.candidate_id, candidate.owner_id, *candidate.finding_ids),

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <meta name="description" content="Prism 可解释投资研究工作台">
+    <title>Prism · Decision Workspace</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">P</span>
+          <div>
+            <strong>Prism</strong>
+            <span>Decision workspace</span>
+          </div>
+        </div>
+        <nav class="nav-list">
+          <a class="nav-item active" href="#overview">Overview</a>
+          <a class="nav-item" href="#advisor">Advisor</a>
+          <a class="nav-item" href="#evidence">Evidence</a>
+          <a class="nav-item" href="#profile">Risk Profile</a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="eyebrow">AUDIT FIRST</span>
+          <p>每个动作都绑定画像、风险约束与证据回执。</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">INVESTMENT RESEARCH WORKSPACE</span>
+            <h1>决策回执</h1>
+          </div>
+          <div class="health" id="health-status" aria-live="polite">
+            <span class="health-dot" aria-hidden="true"></span> API 检查中
+          </div>
+        </header>
+
+        <section class="hero" id="overview">
+          <div>
+            <span class="eyebrow clay">PROFILE-CONDITIONED</span>
+            <h2>同一持仓，不同约束，<em>不同答案。</em></h2>
+            <p>Prism 不只保存建议文本，而是保存建议为何成立、何时失效的完整回执。</p>
+          </div>
+          <div class="owner-form">
+            <label for="owner-id">当前 owner</label>
+            <div class="owner-input">
+              <input id="owner-id" value="demo-owner" autocomplete="off" spellcheck="false">
+              <button id="load-events" type="button">读取回执</button>
+            </div>
+            <small>本地 MVP 隔离标识，不等同于身份认证。</small>
+          </div>
+        </section>
+
+        <div id="global-error" class="notice error" role="alert" hidden></div>
+
+        <div class="workspace-grid">
+          <section class="panel advisor-panel" id="advisor" aria-labelledby="advisor-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">ADVISOR</span>
+                <h2 id="advisor-title">最近决策</h2>
+              </div>
+              <span class="count-pill" id="event-count">0 events</span>
+            </div>
+            <div id="event-list" class="event-list" aria-live="polite">
+              <div class="empty-state">输入 owner 后读取已保存的决策事件。</div>
+            </div>
+          </section>
+
+          <section class="panel detail-panel" aria-labelledby="detail-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">DECISION RECEIPT</span>
+                <h2 id="detail-title">选择一条回执</h2>
+              </div>
+              <span id="detail-status" class="status-chip">待读取</span>
+            </div>
+            <div id="detail-content" class="detail-content">
+              <div class="empty-state">这里会显示动作、约束区间和完整证据链。</div>
+            </div>
+          </section>
+
+          <section class="panel evidence-panel" id="evidence" aria-labelledby="evidence-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">TRACE</span>
+                <h2 id="evidence-title">Evidence chain</h2>
+              </div>
+              <span class="muted">Finding → Fact → Evidence</span>
+            </div>
+            <div id="evidence-content" class="evidence-content">
+              <div class="empty-state">选择 PASS 回执后展开证据。</div>
+            </div>
+          </section>
+
+          <section class="panel profile-panel" id="profile" aria-labelledby="profile-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">RISK PROFILE</span>
+                <h2 id="profile-title">约束上下文</h2>
+              </div>
+            </div>
+            <div id="profile-content" class="profile-content">
+              <div class="empty-state">回执会绑定画像版本、持仓快照和风险预算。</div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

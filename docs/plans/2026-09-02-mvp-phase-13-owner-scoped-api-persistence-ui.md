@@ -154,6 +154,20 @@
   Profile/Portfolio CRUD、Fixture advisor query 或真实 Provider；仍必须新建
   worktree 并先写计划。
 
+## Review result
+
+- Implementation commit: `e7eddd2` (`feat: add owner-scoped decision events api and workbench`).
+- Independent post-commit review: clean worktree; `227 passed` with one harmless
+  Starlette/httpx deprecation warning; compile/import, fixture JSON, wheel package
+  data, diff, full-app network/LLM boundary and static DOM safety scans passed.
+- Real local browser: four owner-scoped fixture events loaded from the API; balanced
+  `HOLD`, conservative `REDUCE`, expanded `Finding → Fact → Evidence`, and explicit
+  `REVIEW_REQUIRED`/`BLOCKED` refusal states were verified. No Receipt or executable
+  recommendation appeared for non-PASS states.
+- Adversarial checks covered owner isolation, idempotent retry/conflict protection,
+  payload/hash/timestamp corruption, sensitive input rejection, immutable contract
+  revalidation, and no dynamic HTML injection.
+
 ## Status
 
-`PLANNED`
+`ACCEPTED`

@@ -1,6 +1,6 @@
 # TODO
 
-> Updated: 2026-09-01
+> Updated: 2026-09-02
 >
 > Source of truth for product scope: [Prism.md](Prism.md)
 >
@@ -18,8 +18,8 @@
 - [x] Define a fixture-first Provider Protocol with distinct `SUCCESS`, `PARTIAL`, `EMPTY`, and `FAILED` results.
 - [x] Add per-call correlation IDs, deterministic request fingerprints, time budgets and redacted diagnostics.
 - [x] Add recorded, synthetic Wencai/Tushare fixtures without credentials or private data.
-- [ ] Define schema versioning and Decision Receipt content hashes.
-- [ ] Add PostgreSQL-oriented storage models and migrations for owner-isolated profiles, evidence and decision events.
+- [x] Define schema versioning and Decision Receipt content hashes.
+- [x] Add an owner-scoped local decision-event store and migration; PostgreSQL-oriented profile/evidence storage remains deferred.
 - [ ] Add an early load-test harness before implementing the full research graph.
 
 ## P0 — Flagship vertical slice
@@ -45,6 +45,7 @@
 - [x] Implement and independently accept the risk and compliance gates.
 - [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
 - [x] Compose deterministic HOLD/REDUCE Recommendations from a dual-PASS gate and create a self-validating Decision Receipt.
+- [x] Expose stored decision receipts through a FastAPI boundary and the first explainable workbench slice.
 - [ ] Verify the complete flagship flow in a real browser.
 
 ## External inputs / decisions
@@ -67,4 +68,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 13 plan is committed. Implement the store/API/UI slice in this worktree, then run independent review and real browser verification before acceptance.
+Phase 13 is accepted locally. Create a new Phase 14 worktree and plan the
+API-triggered fixture query plus Profile/Portfolio integration; keep real
+authentication, live Provider access and production persistence deferred.

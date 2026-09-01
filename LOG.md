@@ -431,3 +431,49 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
   events, FastAPI health/create/list/detail boundaries, and a zero-build
   explainable workbench first slice. Real authentication, PostgreSQL, live
   providers and API-triggered orchestration remain explicitly out of scope.
+
+### Implemented locally
+
+- Added immutable `DecisionEvent`/summary contracts, idempotent content hashes,
+  a migration-backed SQLite store with owner queries, conflict detection,
+  corruption checks and serialized read/write revalidation.
+- Added FastAPI app factory with safe validation/conflict/scope errors and
+  health/create/list/detail routes. `PASS` events retain a closed Receipt;
+  `REVIEW_REQUIRED`/`BLOCKED` events remain empty-trace refusals.
+- Added the Prism workbench first slice with Overview, Advisor, Evidence and
+  Risk Profile panels, CSP, text-only DOM insertion and the reused warm-white /
+  deep-ink / clay visual grammar.
+- Added Phase 13 unit/API tests and updated architecture/API documentation.
+
+### Pre-commit verification
+
+- Phase-specific store/API/fixture tests: `12 passed` (one upstream
+  Starlette/httpx deprecation warning only).
+- Full regression suite: `227 passed`; `python -m compileall -q app`, public API/store
+  imports, all fixture JSON parsing, `git diff --check`, and static DOM/boundary
+  scans passed.
+- Built a local wheel with `--no-build-isolation` and confirmed the SQLite migration
+  and all three static workbench assets are packaged.
+- Real local browser acceptance against uvicorn: the owner-scoped workbench loaded
+  four fixture events, showed balanced `HOLD` and conservative `REDUCE`, expanded
+  `Finding → Fact → Evidence`, and rendered explicit `待复核`/`已阻断` empty-result
+  states without a Receipt or executable recommendation.
+
+Independent post-commit adversarial review and final acceptance are still pending.
+
+### Independent post-commit review and acceptance
+
+- Re-ran the committed tree at `e7eddd2`: full suite `227 passed`, with only the
+  installed Starlette/httpx deprecation warning; compile/import, all fixture JSON,
+  `git diff --check`, full-app network/LLM boundary, static DOM safety, and wheel
+  package-data checks passed.
+- Replayed owner isolation, idempotent retry/conflict, JSON/hash corruption,
+  sensitive owner/body rejection, and non-PASS Receipt/trace invariants through the
+  tests and store/API boundary.
+- Restarted uvicorn from the committed worktree and verified the real browser: four
+  owner-scoped events, BALANCED `HOLD`, CONSERVATIVE `REDUCE`, expandable
+  `Finding → Fact → Evidence`, and explicit `待复核`/`已阻断` states. The latter two
+  expose no Receipt or executable recommendation.
+- Phase 13 is accepted locally. No push was performed. The next phase must start in
+  a new worktree from `e7eddd2` and keep the API owner-scoped while adding only the
+  planned fixture-query/Profile/Portfolio integration.

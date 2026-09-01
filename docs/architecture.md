@@ -24,7 +24,9 @@ app/
 └── service/           用例边界
 ```
 
-当前只创建已经具有可测试行为的包；不使用空目录伪装完成度。
+当前只创建已经具有可测试行为的包；不使用空目录伪装完成度。Phase 13
+新增 `app/store` 的 owner-scoped SQLite 决策事件 adapter 和 `app/api` 的
+FastAPI/静态工作台边界；真实认证、PostgreSQL 与 API 触发的研究编排仍未实现。
 
 ## 数据流
 
@@ -106,4 +108,8 @@ Provider 统一返回四类结果：
 
 ## 当前实现边界
 
-已经实现 Evidence Contract 及其闭包验证。Provider、数据库、画像、研究、组合、风险、合规、HTTP 和 Web 模块仍为计划状态，README 与 TODO 必须持续保持这一事实边界。
+已经实现 Evidence、Provider、画像/持仓、暴露/风险、研究、合规闸门、
+Recommendation/Decision Receipt，以及 Phase 13 的本地决策事件存储、FastAPI
+读写和首个解释工作台。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、
+API 内部编排和完整浏览器旗舰流仍未完成；README 与 TODO 必须持续保持这一
+事实边界。

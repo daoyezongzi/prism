@@ -1,6 +1,6 @@
 """Independent risk/compliance eligibility gates for Prism."""
 
-from app.gates.compliance import evaluate_compliance_gate
+from app.gates.compliance import evaluate_compliance_gate, scan_compliance_texts
 from app.gates.contracts import (
     REQUIRED_DISCLOSURES,
     AdvisoryCandidate,
@@ -32,4 +32,5 @@ __all__ = [
     "evaluate_compliance_gate",
     "evaluate_decision_gates",
     "evaluate_risk_gate",
+    "scan_compliance_texts",
 ]

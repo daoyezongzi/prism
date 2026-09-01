@@ -1,0 +1,45 @@
+{
+  "schema_version": "decision-event-fixture.v1",
+  "fixture_id": "decision-event-cases-001",
+  "source": "offline-test-only",
+  "owner_id": "fixture-owner-001",
+  "generated_at": "2026-09-02T01:00:00Z",
+  "cases": [
+    {
+      "case_id": "balanced-hold",
+      "risk_level": "BALANCED",
+      "expected_status": "PASS",
+      "expected_action": "HOLD",
+      "requires_receipt": true
+    },
+    {
+      "case_id": "conservative-reduce",
+      "risk_level": "CONSERVATIVE",
+      "expected_status": "PASS",
+      "expected_action": "REDUCE",
+      "requires_receipt": true
+    },
+    {
+      "case_id": "insufficient-coverage-review",
+      "risk_level": "BALANCED",
+      "expected_status": "REVIEW_REQUIRED",
+      "expected_action": null,
+      "requires_receipt": false
+    },
+    {
+      "case_id": "invalid-input-blocked",
+      "risk_level": "BALANCED",
+      "expected_status": "BLOCKED",
+      "expected_action": null,
+      "requires_receipt": false
+    }
+  ],
+  "forbidden_output_fields": [
+    "expected_return",
+    "target_price",
+    "quantity",
+    "order",
+    "raw_provider_payload",
+    "credential"
+  ]
+}
