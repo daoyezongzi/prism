@@ -301,6 +301,8 @@ def _validate_research(
     trace = payload.get("trace")
     if not isinstance(trace, dict) or trace.get("recommendations"):
         return "UNEXPECTED_RECOMMENDATION"
+    if not trace.get("facts") or not trace.get("findings"):
+        return "TRACE_INCOMPLETE"
     return None
 
 
@@ -490,7 +492,9 @@ async def run_load_test(
     expected_rows = logical_operations if config.scenario == "advisor" else 0
     if after - before != expected_rows:
         error_counts["STORE_SIDE_EFFECT"] += 1
-        failed = max(failed, 1)
+        if failed == 0:
+            completed -= 1
+            failed = 1
     if any(result.error_code == "OWNER_MISMATCH" for result in results):
         error_counts["OWNER_MISMATCH"] = sum(
             result.error_code == "OWNER_MISMATCH" for result in results
