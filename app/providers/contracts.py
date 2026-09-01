@@ -10,6 +10,7 @@ from typing import Any, Protocol, Self
 from pydantic import (
     Field,
     GetCoreSchemaHandler,
+    JsonValue,
     model_validator,
 )
 from pydantic_core import core_schema
@@ -21,20 +22,10 @@ class FrozenDict(dict):
     """Immutable dictionary that deep-freezes nested mappings and collections."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        for k, v in list(self.items()):
-            if isinstance(v, dict) and not isinstance(v, FrozenDict):
-                super().__setitem__(k, FrozenDict(v))
-            elif isinstance(v, list):
-                super().__setitem__(
-                    k,
-                    tuple(FrozenDict(x) if isinstance(x, dict) else x for x in v),
-                )
-            elif isinstance(v, tuple):
-                super().__setitem__(
-                    k,
-                    tuple(FrozenDict(x) if isinstance(x, dict) else x for x in v),
-                )
+        raw = dict(*args, **kwargs)
+        dict.__init__(self)
+        for key, value in raw.items():
+            dict.__setitem__(self, key, _freeze_json_value(value))
 
     def __setitem__(self, key: Any, value: Any) -> None:
         raise TypeError("FrozenDict is immutable")
@@ -48,6 +39,9 @@ class FrozenDict(dict):
     def update(self, *args: Any, **kwargs: Any) -> None:
         raise TypeError("FrozenDict is immutable")
 
+    def __ior__(self, other: Any) -> Self:
+        raise TypeError("FrozenDict is immutable")
+
     def setdefault(self, key: Any, default: Any = None) -> Any:
         raise TypeError("FrozenDict is immutable")
 
@@ -57,23 +51,43 @@ class FrozenDict(dict):
     def popitem(self) -> Any:
         raise TypeError("FrozenDict is immutable")
 
+    def __reduce__(self) -> Any:
+        return (FrozenDict, (dict(self),))
+
     @classmethod
     def __get_pydantic_core_schema__(
         cls, source_type: Any, handler: GetCoreSchemaHandler
     ) -> core_schema.CoreSchema:
+        json_value_schema = handler.generate_schema(JsonValue)
         return core_schema.no_info_after_validator_function(
-            lambda v: FrozenDict(v) if isinstance(v, dict) else v,
+            lambda v: FrozenDict(v),
             core_schema.dict_schema(
                 core_schema.str_schema(),
-                core_schema.any_schema(),
+                json_value_schema,
             ),
             serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda v: dict(v),
-                return_schema=core_schema.dict_schema(
-                    core_schema.str_schema(), core_schema.any_schema()
-                ),
+                _thaw_json_value,
+                return_schema=core_schema.any_schema(),
             ),
         )
+
+
+def _freeze_json_value(value: Any) -> Any:
+    if isinstance(value, FrozenDict):
+        return value
+    if isinstance(value, Mapping):
+        return FrozenDict(value)
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_json_value(item) for item in value)
+    return value
+
+
+def _thaw_json_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _thaw_json_value(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_thaw_json_value(item) for item in value]
+    return value
 
 
 class ProviderOperation(StrEnum):
@@ -198,6 +212,17 @@ class ProviderRecord(ContractModel):
         if not self.fields:
             raise ValueError("record fields must not be empty")
 
+        invalid_units = [
+            field_name
+            for field_name, unit in self.units.items()
+            if not isinstance(unit, str)
+        ]
+        if invalid_units:
+            raise ValueError(
+                "record units must be strings for fields: "
+                + ", ".join(sorted(invalid_units))
+            )
+
         return self
 
 
@@ -314,32 +339,37 @@ def validate_result_for_request(
                         f"required field {req_field!r} (or has None value)"
                     )
     elif result.status == ProviderStatus.PARTIAL:
-        # Validate that declared missing_fields are actually missing and requested
-        if result.missing_fields:
-            for missing_f in result.missing_fields:
-                if request.required_fields and missing_f not in request.required_fields:
-                    raise ValueError(
-                        f"PARTIAL result claims missing field {missing_f!r} which was not in request.required_fields"
-                    )
-                # Check that at least one record actually misses this field or has None value
-                if all(
-                    missing_f in rec.fields and rec.fields[missing_f] is not None
-                    for rec in result.records
-                ):
-                    raise ValueError(
-                        f"PARTIAL result claims missing field {missing_f!r} but all records contain valid values"
-                    )
-        # Validate that if no issues exist, at least one required field is genuinely missing in records
-        if not result.issues:
-            if not result.missing_fields:
-                raise ValueError(
-                    "PARTIAL result requires either missing_fields or issues"
-                )
-            if request.required_fields and not any(
-                req_field not in rec.fields or rec.fields[req_field] is None
-                for rec in result.records
-                for req_field in request.required_fields
-            ):
-                raise ValueError(
-                    "PARTIAL result has no missing required fields in any record and no issues"
-                )
+        requested_fields = set(request.required_fields)
+        declared_missing = set(result.missing_fields)
+        actual_missing = {
+            req_field
+            for req_field in request.required_fields
+            if any(
+                req_field not in record.fields or record.fields[req_field] is None
+                for record in result.records
+            )
+        }
+
+        phantom_fields = declared_missing - requested_fields
+        if phantom_fields:
+            field_list = ", ".join(sorted(phantom_fields))
+            raise ValueError(
+                "PARTIAL result claims missing field(s) not in "
+                f"request.required_fields: {field_list}"
+            )
+
+        declared_but_present = declared_missing - actual_missing
+        if declared_but_present:
+            field_list = ", ".join(sorted(declared_but_present))
+            raise ValueError(
+                "PARTIAL result claims missing field(s) "
+                f"{field_list!r} but all records contain valid values"
+            )
+
+        omitted_actual = actual_missing - declared_missing
+        if omitted_actual:
+            field_list = ", ".join(sorted(omitted_actual))
+            raise ValueError(
+                "PARTIAL result omits actual missing required field(s): "
+                f"{field_list}"
+            )

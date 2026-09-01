@@ -119,3 +119,41 @@ passed
 ### Current evidence boundary
 
 - Live SkillHub network requests, production credentials, storage persistence, user profiles, research DAG, and UI workbench remain un-implemented and are explicitly out-of-scope for Phase 1.
+
+## 2026-09-01 — Phase 1 hardening and takeover
+
+### Decisions
+
+- Codex took over the phase gate after an independent review of Gemini's `68ed7ff` implementation. Phase 2 remains blocked until this hardening pass is independently verified.
+- The original `JsonValue` semantics are preserved while adding recursive freezing; `FrozenDict` must reject non-JSON values and `ProviderRecord.units` must contain strings.
+- `PARTIAL.missing_fields` must exactly account for requested fields missing or null in any record; issue-only partial results may keep the set empty when no required field is missing.
+- Evidence IDs encode provider/source/record/field/period and request fingerprint, and duplicate effective record identities are rejected before creating Evidence.
+
+### Implemented
+
+- Added `docs/plans/2026-09-01-mvp-phase-1-hardening.md` with explicit scope, non-goals, design decisions, acceptance cases and stop conditions.
+- Added regression tests for non-JSON values, deep nested sequence mutation, `|=`, unit types, omitted partial fields, duplicate record IDs, missing record identity, delimiter-safe IDs and cross-request ID isolation.
+- Preserved fixture-first, offline-only behavior; no upstream, network, credential, storage or UI changes.
+
+### Verification
+
+```text
+python -m pytest
+50 passed
+
+python -m compileall -q app
+passed
+
+python -c "from app.providers import FinancialProvider, FixtureFinancialProvider, FrozenDict; print('provider-import-ok')"
+provider-import-ok
+
+git diff --check
+passed
+```
+
+Independent adversarial checks passed: actual PARTIAL omissions are rejected; non-JSON parameters are rejected; nested sequences and `|=` cannot mutate requests; duplicate record identities are rejected; delimiter-containing and cross-request Evidence IDs remain distinct.
+
+### Current evidence boundary
+
+- Phase 1 hardening is implemented locally and is ready for final review/commit acceptance; Phase 2 remains intentionally unstarted.
+- Real external providers, credentials, production concurrency/SLA and all later product layers remain unimplemented.

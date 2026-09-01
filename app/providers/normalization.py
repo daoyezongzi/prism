@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from urllib.parse import quote
+
 from app.contracts.evidence import (
     Evidence,
     EvidenceQualityStatus,
 )
-from app.providers.contracts import ProviderResult, ProviderStatus
+from app.providers.contracts import ProviderRecord, ProviderResult, ProviderStatus
 
 
 def _build_evidence_id(
@@ -15,9 +17,29 @@ def _build_evidence_id(
     record_identity: str,
     field: str,
     period: str | None,
+    request_fingerprint: str,
 ) -> str:
-    period_part = period or "current"
-    return f"ev:{provider}:{source}:{record_identity}:{field}:{period_part}"
+    components = (
+        provider,
+        source,
+        record_identity,
+        field,
+        period or "current",
+        request_fingerprint,
+    )
+    return "ev:" + ":".join(quote(component, safe="") for component in components)
+
+
+def _record_identity(record: ProviderRecord, index: int) -> str:
+    record_id = record.record_id
+    lineage_id = record.lineage_id
+    if record_id:
+        return record_id
+    if lineage_id:
+        return lineage_id
+    raise ValueError(
+        f"record at index {index} requires record_id or lineage_id for stable Evidence IDs"
+    )
 
 
 def normalize_result_to_evidence(
@@ -28,10 +50,21 @@ def normalize_result_to_evidence(
         return ()
 
     evidence_items: list[Evidence] = []
+    seen_record_identities: set[tuple[str, str]] = set()
+    effective_identities: dict[int, str] = {}
+    for idx, record in enumerate(result.records):
+        identity = _record_identity(record, idx)
+        key = (record.source, identity)
+        if key in seen_record_identities:
+            raise ValueError(
+                f"duplicate record identity {identity!r} for source {record.source!r}"
+            )
+        seen_record_identities.add(key)
+        effective_identities[idx] = identity
 
     if result.status == ProviderStatus.SUCCESS:
         for idx, record in enumerate(result.records):
-            record_identity = record.record_id or record.lineage_id or f"rec_{idx}"
+            record_identity = effective_identities[idx]
             for field_name, field_value in record.fields.items():
                 if field_value is None:
                     continue
@@ -41,6 +74,7 @@ def normalize_result_to_evidence(
                     record_identity,
                     field_name,
                     record.period,
+                    result.request_fingerprint,
                 )
                 evidence_items.append(
                     Evidence(
@@ -65,7 +99,7 @@ def normalize_result_to_evidence(
             else "partial payload"
         )
         for idx, record in enumerate(result.records):
-            record_identity = record.record_id or record.lineage_id or f"rec_{idx}"
+            record_identity = effective_identities[idx]
             for field_name, field_value in record.fields.items():
                 if field_value is None:
                     continue
@@ -75,6 +109,7 @@ def normalize_result_to_evidence(
                     record_identity,
                     field_name,
                     record.period,
+                    result.request_fingerprint,
                 )
                 evidence_items.append(
                     Evidence(

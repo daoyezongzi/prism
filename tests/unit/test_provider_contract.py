@@ -160,6 +160,25 @@ def test_3_partial_claimed_missing_field_actually_present_rejected() -> None:
         validate_result_for_request(req, result)
 
 
+def test_3_partial_cannot_omit_an_actual_missing_field_when_issue_exists() -> None:
+    req = make_request(required_fields=("fund_name", "technology_weight_pct"))
+    rec = make_record(fields={"fund_name": "Tech Fund"})
+    result = make_result(
+        req,
+        status=ProviderStatus.PARTIAL,
+        records=(rec,),
+        missing_fields=(),
+        issues=(make_issue(safe_message="Response was truncated"),),
+    )
+    with pytest.raises(ValueError, match="actual missing|required field"):
+        validate_result_for_request(req, result)
+
+
+def test_record_units_must_be_strings() -> None:
+    with pytest.raises(ValidationError):
+        make_record(units={"technology_weight_pct": 123})
+
+
 def test_4_empty_with_records_rejected() -> None:
     req = make_request()
     with pytest.raises(ValidationError, match="EMPTY result must not contain records"):
@@ -377,3 +396,73 @@ def test_multi_records_generate_unique_evidence_ids_and_pass_decision_trace() ->
         recommendations=(rec,),
     )
     assert len(trace.evidence) == 2
+
+
+def test_duplicate_record_identity_is_rejected_before_decision_trace() -> None:
+    req = make_request(required_fields=("technology_weight_pct",))
+    rec1 = make_record(
+        record_id="duplicate",
+        fields={"technology_weight_pct": 63.5},
+        period="2026-06-30",
+    )
+    rec2 = make_record(
+        record_id="duplicate",
+        fields={"technology_weight_pct": 45.0},
+        period="2026-06-30",
+    )
+    result = make_result(req, records=(rec1, rec2))
+
+    with pytest.raises(ValueError, match="duplicate record identity"):
+        normalize_result_to_evidence(result)
+
+
+def test_normalization_requires_a_stable_record_identity() -> None:
+    req = make_request(required_fields=("technology_weight_pct",))
+    record = make_record(
+        lineage_id=None,
+        record_id=None,
+        fields={"technology_weight_pct": 63.5},
+        period="2026-06-30",
+    )
+    result = make_result(req, records=(record,))
+
+    with pytest.raises(ValueError, match="requires record_id or lineage_id"):
+        normalize_result_to_evidence(result)
+
+
+def test_evidence_id_escapes_delimiters_and_separates_requests() -> None:
+    req_a = make_request(required_fields=("technology_weight_pct",), subject="FUND_A")
+    req_b = make_request(required_fields=("technology_weight_pct",), subject="FUND_B")
+    result_a = make_result(
+        req_a,
+        records=(
+            make_record(
+                source="source:a",
+                record_id="record",
+                fields={"technology_weight_pct": 63.5},
+                period="2026-06-30",
+            ),
+            make_record(
+                source="source",
+                record_id="a:record",
+                fields={"technology_weight_pct": 45.0},
+                period="2026-06-30",
+            ),
+        ),
+    )
+    result_b = make_result(
+        req_b,
+        records=(
+            make_record(
+                source="source:a",
+                record_id="record",
+                fields={"technology_weight_pct": 63.5},
+                period="2026-06-30",
+            ),
+        ),
+    )
+
+    ids_a = [item.evidence_id for item in normalize_result_to_evidence(result_a)]
+    ids_b = [item.evidence_id for item in normalize_result_to_evidence(result_b)]
+    assert len(ids_a) == len(set(ids_a)) == 2
+    assert set(ids_a).isdisjoint(ids_b)

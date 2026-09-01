@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active delegated phase: [MVP Phase 1 Provider Protocol](docs/plans/2026-09-01-mvp-phase-1-provider-protocol.md)
+> Active phase: [MVP Phase 1 Hardening](docs/plans/2026-09-01-mvp-phase-1-hardening.md)
 
 ## P0 — Foundation
 

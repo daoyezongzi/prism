@@ -181,3 +181,32 @@ def test_request_parameters_deeply_immutable() -> None:
 
     with pytest.raises(TypeError, match="FrozenDict is immutable"):
         req.parameters["nested"]["k"] = "new_v"
+
+
+def test_request_rejects_non_json_parameter_values() -> None:
+    non_json_values = [object(), {"unordered"}]
+    for value in non_json_values:
+        with pytest.raises(ValidationError):
+            ProviderRequest(
+                request_id="req-non-json",
+                operation=ProviderOperation.FUND_DATA,
+                subject="FUND_001",
+                parameters={"value": value},
+            )
+
+
+def test_frozen_dict_freezes_deep_sequences_and_in_place_union() -> None:
+    req = ProviderRequest(
+        request_id="req-immut-deep",
+        operation=ProviderOperation.FUND_DATA,
+        subject="FUND_001",
+        parameters={"layers": [[{"safe": 1}]]},
+    )
+
+    with pytest.raises(AttributeError):
+        req.parameters["layers"][0].append("mutated")
+
+    with pytest.raises(TypeError, match="FrozenDict is immutable"):
+        req.parameters.__ior__({"added": 1})
+
+    assert "added" not in req.parameters

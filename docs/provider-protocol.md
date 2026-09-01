@@ -70,7 +70,7 @@ class FinancialProvider(Protocol):
 - `SUCCESS` $\rightarrow$ 提取各字段为 `VERIFIED` Evidence，`quality_note=None`；
 - `PARTIAL` $\rightarrow$ 提取各字段为 `PARTIAL` Evidence，附带真实缺失字段说明的 `quality_note`；
 - `EMPTY` / `FAILED` $\rightarrow$ 返回空元组 `()`；
-- 稳定生成包含记录标识的 Evidence ID：`ev:{provider}:{source}:{record_identity}:{field}:{period}`，确保多条记录在同一期间与字段下拥有全局唯一 ID，完全满足 `DecisionTrace` 闭包校验。
+- 稳定生成包含记录标识和 request fingerprint 的 Evidence ID：`ev:{provider}:{source}:{record_identity}:{field}:{period}:{request_fingerprint}`；各组件进行无分隔符歧义的编码，同一来源下重复记录身份会被拒绝，确保多条记录与不同请求不会发生 ID 碰撞并满足 `DecisionTrace` 闭包校验。参与归一化的记录必须提供 `record_id` 或 `lineage_id`，不能退化为数组下标。
 
 ### 7. `FixtureFinancialProvider`
 
