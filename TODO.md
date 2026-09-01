@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: [MVP Phase 10 Research-to-Evidence Pipeline](docs/plans/2026-09-01-mvp-phase-10-research-evidence-pipeline.md)
+> Active phase: [MVP Phase 11 Independent Risk and Compliance Gates](docs/plans/2026-09-01-mvp-phase-11-risk-compliance-gates.md)
 
 ## P0 — Foundation
 
@@ -42,7 +42,7 @@
 - [ ] Add macro, industry, stock and fund/ETF research nodes.
 - [x] Implement source-lineage-aware cross validation and disagreement handling for executed fixture observations; live provider nodes remain deferred.
 - [x] Consume complete-run validation through the Evidence/Finding bridge and emit a closed DecisionTrace; degraded runs remain review/blocked.
-- [ ] Implement independent risk and compliance gates.
+- [x] Implement and independently accept the risk and compliance gates.
 - [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
 - [ ] Verify the complete flagship flow in a real browser.
 
@@ -66,4 +66,4 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 10 is accepted only after its independent review evidence is recorded; the next phase must use a new worktree for independent risk/compliance gates and Recommendation eligibility.
+Create a dedicated Phase 12 worktree from the accepted Phase 11 commit, write its plan first, and compose Recommendation/Decision Receipt only from a dual-PASS gate result.

@@ -36,9 +36,10 @@ Recommendation 组装的资格，不创建 Recommendation、不决定买卖动�
 - 要求 research pipeline 为 `READY`，并重新验证 `DecisionTrace` 中所有
   Fact/Finding/Evidence 的引用、`VERIFIED` 状态和唯一 ID；不暴露
   Recommendation；
-- 要求 risk budget 为 `PASS`、allocation 为 `READY`，并核对 envelope 与
-  assessment 的预算/报告身份；`REVIEW_REQUIRED` 向上保持待复核，`BLOCKED`
-  向上保持阻断；
+- risk budget `PASS` + allocation `READY` 可以通过；完整数据下已确认 breach
+  且 allocation 用闭合的 `OVER_LIMIT` 区间逐项覆盖时，也可显式标记
+  `remediation_required` 后通过，供下一阶段**只组装降险建议**；partial issue、
+  `UNRESOLVED` 区间继续保持待复核，`BLOCKED` 向上保持阻断；
 - 只输出是否具备进入建议组装的风险资格和静态安全 issue，不产生任何交易
   动作、再平衡数量或收益目标。
 
@@ -117,9 +118,10 @@ Prism 将风险闸门与合规闸门置于 Recommendation 之前并保持独立�
 2. 完整、同 owner、同 profile 的 READY pipeline + PASS budget + READY
    allocation + 四类披露候选得到两个 PASS 子闸门和
    `eligible_for_recommendation=True`，但结果仍没有 Recommendation。
-3. 研究 `REVIEW_REQUIRED/BLOCKED`、风险预算 `REVIEW_REQUIRED/BLOCKED`、
-   allocation `REVIEW_REQUIRED/BLOCKED` 按规则传播，不得降级为 PASS 或填充
-   缺失事实；身份不匹配、未知 Finding、伪造 trace/状态必须 BLOCKED。
+3. 研究 `REVIEW_REQUIRED/BLOCKED` 和任何 partial/`UNRESOLVED` 风险输入按规则
+   传播，不得降级为 PASS 或填充缺失事实；唯一例外是完整数据下、assessment
+   breach 与 `OVER_LIMIT` allocation 区间完全闭合的降险资格。身份不匹配、
+   未知 Finding、伪造 trace/状态必须 BLOCKED。
 4. 非 VERIFIED Fact/Evidence、缺少证据闭包、重复/未知引用不能通过；输出只
    含安全 issue code/message 和稳定 ID，不泄漏候选原文、异常或秘密。
 5. 缺任一披露为 REVIEW_REQUIRED；保证收益、无风险、必涨或数字化目标收益
@@ -142,4 +144,4 @@ Prism 将风险闸门与合规闸门置于 Recommendation 之前并保持独立�
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`

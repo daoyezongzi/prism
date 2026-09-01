@@ -1,0 +1,225 @@
+{
+  "schema_version": "risk-compliance-gate-fixture.v1",
+  "fixture_id": "risk-compliance-gate-case-001",
+  "source": "offline-test-only",
+  "profile": {
+    "schema_version": "risk-profile.v1",
+    "profile_id": "gate-profile-balanced-001",
+    "owner_id": "gate-owner-001",
+    "profile_version": 1,
+    "questionnaire_id": "gate-questionnaire-001",
+    "extraction_id": null,
+    "created_at": "2026-09-01T12:00:00Z",
+    "risk_score": "50",
+    "risk_level": "BALANCED",
+    "investment_horizon": "MEDIUM",
+    "liquidity_need": "MEDIUM",
+    "experience_level": "INTERMEDIATE",
+    "return_expectation": "MODERATE",
+    "max_drawdown_tolerance_pct": "20",
+    "expected_return_range": null,
+    "asset_preferences": [],
+    "sector_preferences": [],
+    "exclusions": [],
+    "confidence": "1",
+    "conflicts": []
+  },
+  "portfolio": {
+    "schema_version": "portfolio-import-bundle.v1",
+    "bundle_id": "gate-bundle-001",
+    "owner_id": "gate-owner-001",
+    "created_at": "2026-09-01T12:00:00Z",
+    "position_snapshot": {
+      "schema_version": "position-snapshot.v1",
+      "snapshot_id": "gate-position-snapshot-001",
+      "owner_id": "gate-owner-001",
+      "as_of": "2026-08-31T16:00:00Z",
+      "base_currency": "CNY",
+      "source": "synthetic-gate-portfolio",
+      "positions": [
+        {
+          "position_id": "gate-position-etf-001",
+          "owner_id": "gate-owner-001",
+          "asset_id": "gate-etf-001",
+          "asset_type": "ETF",
+          "asset_name": "Synthetic Balanced ETF",
+          "quantity": "1",
+          "market_value": "1000",
+          "currency": "CNY",
+          "as_of": "2026-08-31T16:00:00Z",
+          "source": "synthetic-gate-portfolio"
+        }
+      ]
+    },
+    "fund_holdings": [
+      {
+        "schema_version": "fund-holdings-snapshot.v1",
+        "snapshot_id": "gate-fund-snapshot-001",
+        "owner_id": "gate-owner-001",
+        "parent_asset_id": "gate-etf-001",
+        "parent_asset_type": "ETF",
+        "as_of": "2026-08-31T16:00:00Z",
+        "source": "synthetic-gate-portfolio",
+        "coverage_pct": "100",
+        "holdings": [
+          {
+            "holding_id": "gate-holding-tech",
+            "parent_asset_id": "gate-etf-001",
+            "underlying_asset_id": "gate-stock-tech",
+            "underlying_name": "Synthetic Technology Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Technology",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-gate-portfolio"
+          },
+          {
+            "holding_id": "gate-holding-health",
+            "parent_asset_id": "gate-etf-001",
+            "underlying_asset_id": "gate-stock-health",
+            "underlying_name": "Synthetic Healthcare Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Healthcare",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-gate-portfolio"
+          },
+          {
+            "holding_id": "gate-holding-finance",
+            "parent_asset_id": "gate-etf-001",
+            "underlying_asset_id": "gate-stock-finance",
+            "underlying_name": "Synthetic Finance Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Finance",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-gate-portfolio"
+          },
+          {
+            "holding_id": "gate-holding-industrials",
+            "parent_asset_id": "gate-etf-001",
+            "underlying_asset_id": "gate-stock-industrials",
+            "underlying_name": "Synthetic Industrials Stock",
+            "asset_type": "STOCK",
+            "weight_pct": "25",
+            "sector": "Industrials",
+            "as_of": "2026-08-31T16:00:00Z",
+            "source": "synthetic-gate-portfolio"
+          }
+        ]
+      }
+    ]
+  },
+  "claim": {
+    "schema_version": "validation-claim.v1",
+    "claim_id": "gate-claim-revenue-001",
+    "owner_id": "gate-owner-001",
+    "subject": "GATE_STOCK_001",
+    "metric": "revenue",
+    "unit": "CNY",
+    "period": "2026-Q2",
+    "expected_value": "10.00"
+  },
+  "evidence": [
+    {
+      "evidence_id": "gate-evidence-a",
+      "provider": "gate-provider-a",
+      "source": "gate-source-a",
+      "field": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "observed_at": "2026-09-01T12:00:00Z",
+      "retrieved_at": "2026-09-01T12:00:00Z",
+      "quality_status": "VERIFIED",
+      "quality_note": null,
+      "lineage_id": "gate-lineage-a"
+    },
+    {
+      "evidence_id": "gate-evidence-b",
+      "provider": "gate-provider-b",
+      "source": "gate-source-b",
+      "field": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "observed_at": "2026-09-01T12:00:00Z",
+      "retrieved_at": "2026-09-01T12:00:00Z",
+      "quality_status": "VERIFIED",
+      "quality_note": null,
+      "lineage_id": "gate-lineage-b"
+    }
+  ],
+  "observations": [
+    {
+      "schema_version": "research-observation.v1",
+      "observation_id": "gate-observation-a",
+      "owner_id": "gate-owner-001",
+      "evidence_id": "gate-evidence-a",
+      "subject": "GATE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "gate-provider-a",
+      "source": "gate-source-a",
+      "lineage_id": "gate-lineage-a",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-09-01T12:00:00Z",
+      "retrieved_at": "2026-09-01T12:00:00Z"
+    },
+    {
+      "schema_version": "research-observation.v1",
+      "observation_id": "gate-observation-b",
+      "owner_id": "gate-owner-001",
+      "evidence_id": "gate-evidence-b",
+      "subject": "GATE_STOCK_001",
+      "metric": "revenue",
+      "value": "10.00",
+      "unit": "CNY",
+      "period": "2026-Q2",
+      "provider": "gate-provider-b",
+      "source": "gate-source-b",
+      "lineage_id": "gate-lineage-b",
+      "quality_status": "VERIFIED",
+      "observed_at": "2026-09-01T12:00:00Z",
+      "retrieved_at": "2026-09-01T12:00:00Z"
+    }
+  ],
+  "finding": {
+    "kind": "REVENUE_STABLE",
+    "severity": "INFO",
+    "statement": "两个独立来源对该报告期的收入数值一致。"
+  },
+  "candidate": {
+    "schema_version": "advisory-candidate.v1",
+    "candidate_id": "gate-candidate-001",
+    "owner_id": "gate-owner-001",
+    "statement": "基于当前证据与画像约束进入后续建议组装。",
+    "rationale": "研究事实、风险预算与配置约束均已闭合。",
+    "invalidation_conditions": [
+      "用户风险画像版本变化",
+      "持仓或研究证据发生变化"
+    ],
+    "disclosure_codes": [
+      "NO_GUARANTEE",
+      "LOSS_RISK",
+      "EVIDENCE_SCOPE",
+      "INVALIDATION_CONDITIONS"
+    ]
+  },
+  "expected": {
+    "risk_status": "PASS",
+    "compliance_status": "PASS",
+    "decision_status": "PASS",
+    "eligible_for_recommendation": true,
+    "forbidden_output_fields": [
+      "statement",
+      "rationale",
+      "action_type",
+      "allocation_range",
+      "recommendations",
+      "order"
+    ]
+  }
+}

@@ -363,3 +363,27 @@ Independent adversarial checks passed: actual PARTIAL omissions are rejected; no
 - Verified complete/partial/contradictory/single-lineage semantics, forged execution/evidence, duplicate/foreign claims, sensitive text, closed DecisionTrace and input immutability.
 - `python -m compileall -q app`, imports from both orchestration and research pipeline modules, `git diff --check`, fixture JSON and sensitive-value scans all pass.
 - Phase 10 is accepted in this worktree; the next independent risk/compliance gate plan must use a new worktree.
+
+## 2026-09-02 — MVP Phase 11 independent risk and compliance gates
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-11` on branch `codex/mvp-phase-11-risk-compliance-gates` from the accepted Phase 10 commit `039c7c8`.
+- Added `docs/plans/2026-09-01-mvp-phase-11-risk-compliance-gates.md` and committed the plan before implementation (`98dc23f`).
+- The phase is limited to independent Recommendation eligibility checks over existing profile, research, risk-budget, and allocation artifacts. It does not create a Recommendation or call a network/LLM/storage/UI boundary.
+
+### Implemented locally
+
+- Added frozen `AdvisoryCandidate`, risk/compliance issue and result contracts, `DecisionGateResult`, fixed disclosure codes, and `PASS`/`REVIEW_REQUIRED`/`BLOCKED` semantics under `app/gates`.
+- Added `evaluate_risk_gate`, which revalidates every input and closes owner/profile/version/drawdown, research trace quality, budget limits, report identities, timestamps, band limits, breach references, and assessment/allocation status. A complete deterministic breach may pass only as explicit remediation eligibility bound to the exact breach IDs; partial or unresolved risk data still requires review.
+- Added `evaluate_compliance_gate`, which closes candidate Finding references through VERIFIED Facts/Evidence, requires four explicit disclosures, and blocks credential-shaped input, guarantee/no-loss language, and numeric target-return promises without echoing rejected prose.
+- Added `evaluate_decision_gates`; Recommendation eligibility is true only when both independent gates PASS. Gate IDs bind full inputs through local content signatures, while outputs contain no candidate prose, Recommendation, action, order, or return target.
+- Added a full offline fixture and unit/integration counterexamples. No real SkillHub, credential, LLM, persistence, API, UI, order execution, optimization, or legal-coverage claim was introduced.
+
+### Independent review evidence
+
+- Phase-specific gate tests: `20 passed`.
+- Final full regression suite after adversarial hardening: `197 passed` (Phase 1–10's 177 tests remain green).
+- `python -m compileall -q app`, public gate imports, all 15 fixture JSON files, `git diff --check`, no-network/storage/LLM import scan, and fixture sensitive-key scan passed.
+- Independent post-commit checks passed for wrong-type inputs, 100-run determinism, immutable inputs, sensitive owner redaction, combined review/block precedence, candidate prose non-echo, content-bound IDs, deterministic breach remediation, bridge/trace divergence, and absence of Recommendation/action fields.
+- Phase 11 is accepted in this worktree. Phase 12 must start from this accepted commit in a new worktree and may consume only a dual-PASS gate result; no push was performed.
