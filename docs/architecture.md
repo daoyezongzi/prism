@@ -30,7 +30,9 @@ FastAPI/静态工作台边界；Phase 14 新增 `app/service` 的结构化 fixtu
 Advisor query 编排，并把结果保存回同一 DecisionEvent 边界。真实认证、
 PostgreSQL、SkillHub 网络和生产级 Provider 仍未实现。Phase 15 在同一边界上增加
 owner-scoped query template 与结构化表单；它不改变服务端决策链，也不引入自然语言
-或交易入口。
+或交易入口。Phase 16 增加 `ResearchSpecialistMatrix` 和 fixture-first 四轨道
+（Macro/Industry/Stock/FUND）配方；它复用同一 bounded executor、Cross Validation
+和 Evidence/Finding bridge，不复制状态机，也不宣称实时专员或 LLM 已接入。
 
 ## 数据流
 
@@ -114,6 +116,6 @@ Provider 统一返回四类结果：
 
 已经实现 Evidence、Provider、画像/持仓、暴露/风险、研究、合规闸门、
 Recommendation/Decision Receipt、Phase 13 的本地决策事件存储/FastAPI/首个
-解释工作台，以及 Phase 14 的 API 触发 fixture-first Advisor 纵切。真实
-SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整工作台
+解释工作台、Phase 14 的 API 触发 fixture-first Advisor 纵切、Phase 15 的结构化
+Query 工作台和 Phase 16 的四轨道研究节点矩阵。真实 SkillHub/Tushare、身份认证、生产 PostgreSQL、专用多研究 Agent、完整工作台
 交互和外部浏览器旗舰流仍未完成；README 与 TODO 必须持续保持这一事实边界。

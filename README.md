@@ -48,6 +48,9 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Phase 15 已把 Advisor Query 接成结构化表单工作台：模板按 owner 重绑定，表单触发既有
   fixture-first 纵切，支持 BALANCED/HOLD、CONSERVATIVE/REDUCE、回执复用和 Evidence
   展开；`243` 项回归与真实浏览器路径已通过，仍明确是离线合成演示。
+- Phase 16 已把四类研究职责落成可复用矩阵：Macro、Industry、Stock、ETF/Fund
+  各有双 lineage 来源，8 个节点有界并行执行后形成 8 条 Evidence、4 个 Fact 和
+  4 个 Finding；`257` 项回归、100 次并发与边界审查通过，真实 Provider 仍未接入。
 
 尚未实现：
 
@@ -55,7 +58,7 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
 - Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
 - 完整 Portfolio/Advisor/Evidence/Risk Profile 工作台交互与真实端到端场景；
-- 宏观、行业、个股、ETF/Fund 专用研究节点及真实 SkillHub Provider；
+- 宏观、行业、个股、ETF/Fund 的真实 SkillHub Provider、实时数据和完整工作台消费；
 - 真实外部 100 并发、3 秒响应和长期可用性验证。
 
 ## 核心不变量
@@ -124,6 +127,8 @@ python -m pytest
 - [Phase 14 Advisor Query/Profile/Portfolio 计划](docs/plans/2026-09-02-mvp-phase-14-advisor-query-profile-portfolio.md)
 - [Phase 15 Advisor Query 结构化工作台](docs/advisor-query-workbench.md)
 - [Phase 15 结构化工作台计划与验收](docs/plans/2026-09-02-mvp-phase-15-advisor-query-workbench.md)
+- [Phase 16 四类研究专员节点矩阵](docs/research-specialist-matrix.md)
+- [Phase 16 研究节点矩阵计划与验收](docs/plans/2026-09-02-mvp-phase-16-research-node-matrix.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

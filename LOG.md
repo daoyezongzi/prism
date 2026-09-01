@@ -526,6 +526,45 @@ Independent post-commit adversarial review and final acceptance are still pendin
   performed; the next phase
   must start in a new worktree with a plan committed before implementation.
 
+## 2026-09-02 — MVP Phase 16 four-track research specialist matrix
+
+### Plan and worktree
+
+- Created dedicated worktree `D:\Github_Storage\prism-phase-16` on branch
+  `codex/mvp-phase-16-research-node-matrix` from accepted Phase 15 `HEAD`.
+- Committed the plan before implementation as `33892dd`. Scope is deterministic
+  Macro/Industry/Stock/ETF-Fund source recipes and a fixture-first matrix runner;
+  SkillHub/Tushare, authentication, Gemini/LLM, persistence, UI and orders remain
+  explicitly out of scope.
+
+### Implemented locally
+
+- Added `ResearchSpecialistRole`, owner-closed `ResearchSpecialistNode` and
+  `ResearchSpecialistMatrix` contracts with a shared kind→Provider operation whitelist,
+  deterministic dependency validation, dual-lineage claim closure and safe replay request.
+- Added packaged four-track manifest and eight synthetic Provider fixtures. The service
+  rebinds owner, creates the existing `ResearchPlan`, runs all roots through the existing
+  bounded executor, scopes multi-claim observations safely and consumes the existing
+  Cross Validation/Evidence bridge.
+- Extended `ResearchClaimSpec` with an explicit observation scope that cannot omit an
+  executed observation of the same subject/metric/unit/period; repeated pipeline issue
+  codes are aggregated without losing per-claim bridge detail.
+- Added unit/integration/adversarial tests, package-data configuration and the
+  [research specialist matrix contract](research-specialist-matrix.md).
+
+### Independent review and acceptance
+
+- Full regression: `257 passed` with only the installed Starlette/httpx deprecation
+  warning; compile/import, JSON/fixture, wheel, static and `git diff --check` checks passed.
+- Review covered four-kind/operation and cycle rejection, owner/Pydantic bypass, source
+  and Provider identity tampering, conflict/partial/failed/timeout degradation, no-zero
+  semantics, deterministic replay, scope anti-bypass, and 100 concurrent runs.
+- No network, LLM/Gemini, transaction, recommendation or order path was introduced.
+  Phase 15 API/UI regression remains green; no new browser flow was required by this
+  plan because it does not change the UI.
+- Phase 16 is accepted locally at the current worktree `HEAD`; no push was performed.
+  The next phase must begin in a new worktree with a plan-only commit.
+
 ## 2026-09-02 — MVP Phase 15 structured Advisor Query workbench
 
 ### Plan and worktree

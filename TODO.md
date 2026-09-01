@@ -6,7 +6,7 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 15 accepted locally; the next phase plan must start in a new worktree.
+> Active phase: Phase 16 accepted locally; the next phase plan must start in a new worktree.
 
 ## P0 — Foundation
 
@@ -39,7 +39,8 @@
 - [x] Define bounded owner-scoped research-run state, dependency closure and deadline semantics; async execution remains deferred.
 - [x] Bridge only fully supported cross-validation claims into closed `VERIFIED Fact -> Finding` objects; degraded and mismatched evidence remains review/blocked.
 - [x] Implement bounded Fixture-backed async orchestration with structured `ResearchRunState`, dependency gating and four-state mapping; live execution remains deferred.
-- [ ] Add macro, industry, stock and fund/ETF research nodes.
+- [x] Add deterministic Macro, Industry, Stock and Fund/ETF specialist node recipes with
+  dual-lineage fixture execution; live Provider access remains deferred.
 - [x] Implement source-lineage-aware cross validation and disagreement handling for executed fixture observations; live provider nodes remain deferred.
 - [x] Consume complete-run validation through the Evidence/Finding bridge and emit a closed DecisionTrace; degraded runs remain review/blocked.
 - [x] Implement and independently accept the risk and compliance gates.
@@ -73,7 +74,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 15 is accepted locally at the current `HEAD` in the dedicated
-`D:\Github_Storage\prism-phase-15` worktree. Create a new worktree for the next
+Phase 16 is accepted locally at the current `HEAD` in the dedicated
+`D:\Github_Storage\prism-phase-16` worktree. Create a new worktree for the next
 plan before implementation; keep real authentication, live Provider access and
 production persistence deferred.

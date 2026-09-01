@@ -157,4 +157,31 @@
 
 ## Status
 
-`PLANNED`
+`ACCEPTED`
+
+## Acceptance record
+
+- The plan was committed first as `33892dd`; all implementation and review work stayed
+  in the dedicated `D:\Github_Storage\prism-phase-16` worktree based on Phase 15
+  acceptance. No push was performed.
+- The matrix contract now covers Macro, Industry, Stock and ETF/Fund (`FUND`) roles,
+  validates role/kind/operation compatibility, deterministic IDs, dependency cycles,
+  owner closure and two independent lineages per claim. The executor consumes the
+  shared operation whitelist instead of a second mapping.
+- The packaged offline matrix executes eight source nodes in parallel and produces
+  eight Evidence, eight scalar Observations, four `SUPPORTED` validations, four Facts
+  and four Findings in a READY pipeline. A scoped multi-claim extension cannot hide
+  same-subject matching observations.
+- Full regression: `python -m pytest -o addopts=` → `257 passed` with only the
+  installed Starlette/httpx deprecation warning. `compileall`, public imports,
+  `node --check`, JSON/fixture validation, wheel package-data and `git diff --check`
+  passed.
+- Adversarial review passed owner rebinding/isolation, Pydantic bypass refusal, cycle,
+  duplicate/identity drift, wrong Provider identity, conflict and required partial
+  degradation, no-zero semantics, 100 concurrent deterministic runs, and no
+  network/LLM/transaction/recommendation side effect scan.
+- This phase intentionally has no new UI or browser flow; Phase 15 API/workbench tests
+  remain green. The matrix is ready for a later workbench view, while live SkillHub,
+  authentication, LLM/Gemini and production persistence remain deferred.
+- Phase 16 is accepted locally at the current worktree `HEAD`. Only after this
+  acceptance may the next phase start in a new worktree with its own plan-only commit.
