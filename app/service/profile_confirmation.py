@@ -12,9 +12,7 @@ class ProfileConfirmationError(RuntimeError):
 
 
 def _stable_profile_id(questionnaire: RiskQuestionnaire) -> str:
-    payload = "\x1f".join(
-        (questionnaire.owner_id, questionnaire.questionnaire_id)
-    ).encode("utf-8")
+    payload = questionnaire.model_dump_json().encode("utf-8")
     return "profile-context:" + sha256(payload).hexdigest()[:32]
 
 

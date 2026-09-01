@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from copy import deepcopy
-import json
-
 from fastapi.testclient import TestClient
 
 from app.api import create_app
@@ -84,6 +82,15 @@ def test_profile_context_confirmation_reuses_existing_scorer_deterministically()
     ]
     assert first_body["profile"]["risk_score"] == "50.00"
     assert first_body["profile"]["risk_level"] == "BALANCED"
+    changed = deepcopy(payload)
+    changed["questionnaire"]["loss_tolerance_score"] = 1
+    changed_response = client.post(
+        "/api/v1/advisor/context/profile",
+        headers={"X-Owner-ID": OWNER},
+        json=changed,
+    )
+    assert changed_response.status_code == 200
+    assert changed_response.json()["profile"]["profile_id"] != first_body["profile"]["profile_id"]
     assert store.list(OWNER) == ()
     store.close()
 
@@ -144,6 +151,50 @@ def test_context_confirmation_rejects_owner_mismatch_extra_sensitive_and_bad_tim
     )
     assert bad_time_response.status_code == 422
     assert bad_time_response.json()["error_code"] == "INVALID_INPUT"
+    store.close()
+
+
+def test_profile_context_rejects_extra_sensitive_and_missing_owner_safely() -> None:
+    client, store = _client()
+    template = _template(client)
+    questionnaire = deepcopy(template["questionnaire"])
+
+    extra = {
+        "schema_version": "profile-context-request.v1",
+        "questionnaire": questionnaire,
+        "unexpected": True,
+    }
+    extra_response = client.post(
+        "/api/v1/advisor/context/profile",
+        headers={"X-Owner-ID": OWNER},
+        json=extra,
+    )
+    assert extra_response.status_code == 422
+    assert extra_response.json()["error_code"] == "INVALID_INPUT"
+
+    sensitive = deepcopy(questionnaire)
+    sensitive["questionnaire_id"] = "secret-questionnaire"
+    sensitive_response = client.post(
+        "/api/v1/advisor/context/profile",
+        headers={"X-Owner-ID": OWNER},
+        json={
+            "schema_version": "profile-context-request.v1",
+            "questionnaire": sensitive,
+        },
+    )
+    assert sensitive_response.status_code == 422
+    assert sensitive_response.json()["error_code"] == "INVALID_INPUT"
+    assert "secret-questionnaire" not in sensitive_response.text
+
+    missing_owner = client.post(
+        "/api/v1/advisor/context/profile",
+        json={
+            "schema_version": "profile-context-request.v1",
+            "questionnaire": questionnaire,
+        },
+    )
+    assert missing_owner.status_code == 403
+    assert missing_owner.json()["error_code"] == "OWNER_SCOPE"
     store.close()
 
 
