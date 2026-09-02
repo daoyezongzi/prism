@@ -362,10 +362,54 @@
           <section class="panel evidence-panel" id="evidence" aria-labelledby="evidence-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">TRACE</span>
-                <h2 id="evidence-title">Evidence chain</h2>
+                <span class="eyebrow">TRACE · ADVANCED</span>
+                <h2 id="evidence-title">Evidence explorer</h2>
               </div>
-              <span class="muted">Finding → Fact → Evidence</span>
+              <span class="muted">来源 · 新鲜度 · 闭合路径</span>
+            </div>
+            <div class="advanced-evidence-intro">
+              <strong>只浏览当前 owner 已加载的 Evidence</strong>
+              <span>陈旧缓存与备用来源会保留原始身份，并明确标记为需复核；不会升级为 VERIFIED 事实。</span>
+            </div>
+            <div id="advanced-evidence-explorer" class="advanced-evidence-explorer" aria-live="polite">
+              <div class="advanced-evidence-controls" aria-label="Evidence filters">
+                <label class="advanced-evidence-search">
+                  <span>搜索 Evidence</span>
+                  <input id="advanced-evidence-search" type="search" autocomplete="off" spellcheck="false" placeholder="ID / source / field / period">
+                </label>
+                <label>
+                  <span>质量状态</span>
+                  <select id="advanced-evidence-quality">
+                    <option value="ALL">全部质量</option>
+                  </select>
+                </label>
+                <label>
+                  <span>送达模式</span>
+                  <select id="advanced-evidence-mode">
+                    <option value="ALL">全部模式</option>
+                  </select>
+                </label>
+                <label>
+                  <span>研究轨道</span>
+                  <select id="advanced-evidence-source">
+                    <option value="ALL">全部轨道</option>
+                  </select>
+                </label>
+                <label>
+                  <span>闭合状态</span>
+                  <select id="advanced-evidence-promotion">
+                    <option value="ALL">全部状态</option>
+                  </select>
+                </label>
+                <button id="clear-advanced-evidence-filters" class="query-submit secondary" type="button">清除筛选</button>
+              </div>
+              <div id="advanced-evidence-summary" class="advanced-evidence-summary" aria-live="polite"></div>
+              <div class="advanced-evidence-layout">
+                <div id="advanced-evidence-list" class="advanced-evidence-list" role="listbox" aria-label="Evidence records"></div>
+                <aside id="advanced-evidence-detail" class="advanced-evidence-detail" aria-live="polite">
+                  <div class="empty-state">运行研究或选择 PASS 回执后查看 Evidence 详情。</div>
+                </aside>
+              </div>
             </div>
             <div id="evidence-content" class="evidence-content">
               <div class="empty-state">选择 PASS 回执后展开证据。</div>

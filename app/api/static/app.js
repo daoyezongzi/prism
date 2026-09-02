@@ -35,6 +35,13 @@
     contextMemoryRecords: [],
     contextMemorySelected: null,
     contextMemorySequence: 0,
+    selectedDecisionEvent: null,
+    advancedEvidenceSearch: "",
+    advancedEvidenceQuality: "ALL",
+    advancedEvidenceMode: "ALL",
+    advancedEvidenceSource: "ALL",
+    advancedEvidencePromotion: "ALL",
+    advancedEvidenceSelectedKey: "",
   };
   const byId = (id) => document.getElementById(id);
 
@@ -994,6 +1001,7 @@
 
   function renderDetail(event) {
     state.selected = event.event_id;
+    state.selectedDecisionEvent = event;
     renderEvents();
     const result = event.result;
     const detail = byId("detail-content");
@@ -1079,6 +1087,7 @@
       empty.className = "empty-state";
       empty.textContent = "选择 PASS 回执后展开证据。";
       panel.append(empty);
+      renderAdvancedEvidence();
       return;
     }
     const evidenceById = new Map((result.trace.evidence || []).map((item) => [item.evidence_id, item]));
@@ -1116,11 +1125,421 @@
       empty.textContent = "该回执没有可展示的 Finding。";
       panel.append(empty);
     }
+    renderAdvancedEvidence();
+  }
+
+  const ADVANCED_EVIDENCE_QUALITY_LABELS = Object.freeze({
+    VERIFIED: "VERIFIED · 已验证",
+    STALE: "STALE · 陈旧/需复核",
+    PARTIAL: "PARTIAL · 部分可用",
+    CONFLICTING: "CONFLICTING · 来源冲突",
+    INVALID: "INVALID · 无效",
+  });
+  const ADVANCED_EVIDENCE_MODE_LABELS = Object.freeze({
+    DIRECT: "DIRECT · 主 Provider 直连",
+    CACHE_FRESH: "CACHE_FRESH · 新鲜缓存",
+    FALLBACK_PROVIDER: "FALLBACK_PROVIDER · 备用 Provider",
+    CACHE_STALE_FALLBACK: "CACHE_STALE_FALLBACK · 陈旧缓存 fallback",
+    UNAVAILABLE: "未提供 serving metadata",
+  });
+  const ADVANCED_EVIDENCE_SOURCE_LABELS = Object.freeze({
+    ADVISOR: "Advisor receipt",
+    RESEARCH_MATRIX: "Research Matrix",
+    STOCK: "Stock Research",
+    FUND: "ETF / Fund Research",
+    CONVERTIBLE_BOND: "Convertible Bond Research",
+  });
+  const ADVANCED_EVIDENCE_PROMOTION_LABELS = Object.freeze({
+    FINDING: "已闭合 Finding",
+    FACT: "已进入 Fact",
+    AVAILABLE: "Available · 未升级",
+  });
+
+  function advancedEvidenceModeLabel(mode) {
+    return ADVANCED_EVIDENCE_MODE_LABELS[mode] || text(mode, ADVANCED_EVIDENCE_MODE_LABELS.UNAVAILABLE);
+  }
+
+  function advancedEvidenceQualityLabel(status) {
+    return ADVANCED_EVIDENCE_QUALITY_LABELS[status] || text(status, "未知质量");
+  }
+
+  function advancedEvidenceQualityClass(status) {
+    if (status === "VERIFIED") return "pass";
+    if (status === "STALE" || status === "PARTIAL" || status === "CONFLICTING") return "review";
+    return "blocked";
+  }
+
+  function advancedEvidencePromotionLabel(promotion) {
+    return ADVANCED_EVIDENCE_PROMOTION_LABELS[promotion] || text(promotion);
+  }
+
+  function advancedEvidenceValue(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    if (typeof value === "object") return "[结构化值]";
+    return String(value);
+  }
+
+  function advancedEvidenceCacheAgeLabel(age) {
+    if (age === null || age === undefined || age === "") return "未提供";
+    const numericAge = Number(age);
+    if (!Number.isFinite(numericAge) || numericAge < 0) return "未提供";
+    if (numericAge < 1000) return `${Math.round(numericAge)} ms`;
+    if (numericAge < 60000) return `${(numericAge / 1000).toFixed(1)} s · ${Math.round(numericAge)} ms`;
+    return `${(numericAge / 60000).toFixed(1)} min · ${Math.round(numericAge)} ms`;
+  }
+
+  function advancedEvidenceRunId(result, fallback) {
+    return result && (result.run_id || result.request_id || result.matrix_id) || fallback;
+  }
+
+  function advancedEvidenceTraceEntries(sourceKey, sourceLabel, result, ownerId, fallbackRunId) {
+    if (!result || !result.trace || !ownerId || ownerId !== state.ownerId) return [];
+    const trace = result.trace;
+    const evidenceItems = Array.isArray(trace.evidence) ? trace.evidence : [];
+    const facts = Array.isArray(trace.facts) ? trace.facts : [];
+    const findings = Array.isArray(trace.findings) ? trace.findings : [];
+    const validations = Array.isArray(result.validations) ? result.validations : [];
+    const factsById = new Map(facts.map((fact) => [fact.fact_id, fact]));
+    const findingsByFactId = new Map();
+    findings.forEach((finding) => {
+      (finding.fact_ids || []).forEach((factId) => {
+        const existing = findingsByFactId.get(factId) || [];
+        existing.push(finding);
+        findingsByFactId.set(factId, existing);
+      });
+    });
+    const nodes = Array.isArray(result.nodes) ? result.nodes : [];
+    const resultIssues = Array.isArray(result.issues) ? result.issues : [];
+    const runId = advancedEvidenceRunId(result, fallbackRunId);
+    return evidenceItems.map((evidence) => {
+      const relatedFacts = facts.filter((fact) => (fact.evidence_ids || []).includes(evidence.evidence_id));
+      const relatedFindings = relatedFacts.flatMap((fact) => findingsByFactId.get(fact.fact_id) || []);
+      const relatedValidations = validations.filter((validation) => [
+        "supporting_evidence_ids",
+        "contradicting_evidence_ids",
+        "duplicate_lineage_evidence_ids",
+        "unlinked_evidence_ids",
+        "unresolved_evidence_ids",
+      ].some((field) => (validation[field] || []).includes(evidence.evidence_id)));
+      const matchingNodes = nodes.filter((node) => node.provider && node.provider === evidence.provider);
+      const node = matchingNodes[0] || null;
+      const inferredMode = evidence.quality_status === "STALE"
+        ? "CACHE_STALE_FALLBACK"
+        : node?.provider_serving_mode || "UNAVAILABLE";
+      const mode = node?.provider_serving_mode || inferredMode;
+      const promotion = relatedFindings.length ? "FINDING" : relatedFacts.length ? "FACT" : "AVAILABLE";
+      const issueLines = [];
+      relatedValidations.forEach((validation) => {
+        (validation.issues || []).forEach((issue) => {
+          const line = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          if (!issueLines.includes(line)) issueLines.push(line);
+        });
+      });
+      if (!relatedValidations.length && resultIssues.length && promotion === "AVAILABLE") {
+        resultIssues.forEach((issue) => {
+          const line = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          if (!issueLines.includes(line)) issueLines.push(line);
+        });
+      }
+      const searchText = [
+        evidence.evidence_id,
+        evidence.provider,
+        evidence.source,
+        evidence.field,
+        evidence.period,
+        evidence.lineage_id,
+        sourceLabel,
+        advancedEvidenceQualityLabel(evidence.quality_status),
+        advancedEvidenceModeLabel(mode),
+        advancedEvidencePromotionLabel(promotion),
+      ].map((value) => text(value, "")).join(" ").toLocaleLowerCase();
+      return {
+        key: `${sourceKey}:${text(evidence.evidence_id, "unknown")}`,
+        sourceKey,
+        sourceLabel,
+        ownerId,
+        runId,
+        pipelineStatus: result.pipeline_status || result.status || "UNAVAILABLE",
+        evidence,
+        facts: relatedFacts,
+        findings: relatedFindings,
+        validations: relatedValidations,
+        issues: issueLines,
+        node,
+        mode,
+        cacheAgeMs: node?.provider_cache_age_ms ?? null,
+        promotion,
+        searchText,
+      };
+    });
+  }
+
+  function collectAdvancedEvidenceEntries() {
+    if (!state.ownerId) return [];
+    const entries = [];
+    const selectedEvent = state.selectedDecisionEvent;
+    if (selectedEvent && selectedEvent.owner_id === state.ownerId && selectedEvent.result) {
+      entries.push(...advancedEvidenceTraceEntries(
+        "ADVISOR",
+        ADVANCED_EVIDENCE_SOURCE_LABELS.ADVISOR,
+        selectedEvent.result,
+        selectedEvent.owner_id,
+        selectedEvent.event_id,
+      ));
+    }
+    [
+      ["RESEARCH_MATRIX", state.researchRun, "Research Matrix"],
+      ["STOCK", state.stockResearchRun, "Stock Research"],
+      ["FUND", state.fundResearchRun, "ETF / Fund Research"],
+      ["CONVERTIBLE_BOND", state.convertibleBondResearchRun, "Convertible Bond Research"],
+    ].forEach(([sourceKey, result, sourceLabel]) => {
+      if (!result || result.owner_id !== state.ownerId) return;
+      entries.push(...advancedEvidenceTraceEntries(sourceKey, sourceLabel, result, result.owner_id, null));
+    });
+    return entries.sort((left, right) => {
+      const sourceOrder = left.sourceKey.localeCompare(right.sourceKey);
+      return sourceOrder || text(left.evidence.evidence_id, "").localeCompare(text(right.evidence.evidence_id, ""));
+    });
+  }
+
+  function setAdvancedEvidenceSelect(id, stateKey, values, labels, allLabel) {
+    const select = byId(id);
+    if (!select) return;
+    const current = state[stateKey] || "ALL";
+    clear(select);
+    const all = document.createElement("option");
+    all.value = "ALL";
+    all.textContent = allLabel;
+    select.append(all);
+    values.forEach((value) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = labels[value] || value;
+      select.append(option);
+    });
+    const allowed = ["ALL", ...values];
+    state[stateKey] = allowed.includes(current) ? current : "ALL";
+    select.value = state[stateKey];
+  }
+
+  function renderAdvancedEvidenceDetail(panel, entry) {
+    clear(panel);
+    if (!entry) {
+      const empty = document.createElement("div");
+      empty.className = "advanced-evidence-empty";
+      empty.textContent = "当前筛选没有匹配的 Evidence。";
+      panel.append(empty);
+      return;
+    }
+    const header = document.createElement("header");
+    const title = document.createElement("strong");
+    title.textContent = entry.evidence.evidence_id;
+    header.append(title);
+    const badges = document.createElement("div");
+    badges.className = "advanced-evidence-badges";
+    badges.append(
+      chip(advancedEvidenceQualityLabel(entry.evidence.quality_status), advancedEvidenceQualityClass(entry.evidence.quality_status)),
+      chip(advancedEvidenceModeLabel(entry.mode), entry.mode === "CACHE_STALE_FALLBACK" ? "review" : entry.mode === "UNAVAILABLE" ? "" : "pass"),
+      chip(advancedEvidencePromotionLabel(entry.promotion), entry.promotion === "FINDING" ? "pass" : "review"),
+    );
+    panel.append(header, badges);
+
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "研究轨道", entry.sourceLabel);
+    addMetadata(metadata, "Owner", entry.ownerId);
+    addMetadata(metadata, "Run", entry.runId);
+    addMetadata(metadata, "Provider", entry.evidence.provider);
+    addMetadata(metadata, "Source", entry.evidence.source);
+    addMetadata(metadata, "Field", entry.evidence.field);
+    addMetadata(metadata, "Value", `${advancedEvidenceValue(entry.evidence.value)} ${text(entry.evidence.unit, "")}`.trim());
+    addMetadata(metadata, "Period", entry.evidence.period);
+    addMetadata(metadata, "Observed at", entry.evidence.observed_at);
+    addMetadata(metadata, "Retrieved at", entry.evidence.retrieved_at);
+    addMetadata(metadata, "Lineage", entry.evidence.lineage_id);
+    addMetadata(metadata, "Cache age", advancedEvidenceCacheAgeLabel(entry.cacheAgeMs));
+    addMetadata(metadata, "Pipeline", entry.pipelineStatus);
+    panel.append(metadata);
+
+    if (entry.evidence.quality_note) {
+      const note = document.createElement("div");
+      note.className = "advanced-evidence-notice";
+      note.textContent = `质量说明：${entry.evidence.quality_note}`;
+      panel.append(note);
+    }
+    if (entry.mode === "CACHE_STALE_FALLBACK" || entry.evidence.quality_status === "STALE") {
+      const notice = document.createElement("div");
+      notice.className = "advanced-evidence-notice blocked";
+      notice.textContent = "陈旧缓存 fallback：需要人工复核，不能作为 VERIFIED Fact 或可执行建议。";
+      panel.append(notice);
+    } else if (entry.mode === "FALLBACK_PROVIDER") {
+      const notice = document.createElement("div");
+      notice.className = "advanced-evidence-notice";
+      notice.textContent = "备用 Provider 已送达：保留备用来源与 lineage，使用前仍应检查独立验证状态。";
+      panel.append(notice);
+    }
+
+    const pathHeading = document.createElement("h4");
+    pathHeading.className = "context-heading";
+    pathHeading.textContent = "审计路径 · Finding → Fact → Evidence";
+    panel.append(pathHeading);
+    const path = document.createElement("ul");
+    path.className = "advanced-evidence-path";
+    const evidencePath = document.createElement("li");
+    evidencePath.className = "path-primary";
+    evidencePath.textContent = `Evidence · ${entry.evidence.evidence_id} · ${text(entry.evidence.field)} · ${advancedEvidenceQualityLabel(entry.evidence.quality_status)}`;
+    path.append(evidencePath);
+    entry.facts.forEach((fact) => {
+      const item = document.createElement("li");
+      item.textContent = `Fact · ${text(fact.fact_id)} · ${text(fact.metric)} = ${advancedEvidenceValue(fact.value)} ${text(fact.unit, "")} · ${text(fact.status)}`.trim();
+      path.append(item);
+    });
+    entry.findings.forEach((finding) => {
+      const item = document.createElement("li");
+      item.textContent = `Finding · ${text(finding.finding_id)} · ${text(finding.kind)} · ${text(finding.severity)} · ${text(finding.statement)}`;
+      path.append(item);
+    });
+    entry.validations.forEach((validation) => {
+      const item = document.createElement("li");
+      item.textContent = `Validation · ${text(validation.metric)} · ${text(validation.status)} · ${text(validation.independent_lineage_count, "0")} independent lineages`;
+      path.append(item);
+    });
+    if (!entry.facts.length && !entry.findings.length) {
+      const item = document.createElement("li");
+      item.textContent = "当前 Evidence 尚未进入 Fact/Finding；它仍可审计，但不构成结论。";
+      path.append(item);
+    }
+    panel.append(path);
+
+    if (entry.issues.length) {
+      const issueHeading = document.createElement("h4");
+      issueHeading.className = "context-heading";
+      issueHeading.textContent = "需复核的安全 issue";
+      panel.append(issueHeading);
+      const issues = document.createElement("ul");
+      issues.className = "advanced-evidence-issues";
+      entry.issues.forEach((line) => {
+        const item = document.createElement("li");
+        item.textContent = line;
+        issues.append(item);
+      });
+      panel.append(issues);
+    }
+  }
+
+  function renderAdvancedEvidence() {
+    const explorer = byId("advanced-evidence-explorer");
+    if (!explorer) return;
+    const entries = collectAdvancedEvidenceEntries();
+    setAdvancedEvidenceSelect(
+      "advanced-evidence-quality",
+      "advancedEvidenceQuality",
+      Object.keys(ADVANCED_EVIDENCE_QUALITY_LABELS),
+      ADVANCED_EVIDENCE_QUALITY_LABELS,
+      "全部质量",
+    );
+    setAdvancedEvidenceSelect(
+      "advanced-evidence-mode",
+      "advancedEvidenceMode",
+      Object.keys(ADVANCED_EVIDENCE_MODE_LABELS),
+      ADVANCED_EVIDENCE_MODE_LABELS,
+      "全部模式",
+    );
+    const sourceValues = [...new Set(entries.map((entry) => entry.sourceKey))].sort();
+    setAdvancedEvidenceSelect(
+      "advanced-evidence-source",
+      "advancedEvidenceSource",
+      sourceValues,
+      ADVANCED_EVIDENCE_SOURCE_LABELS,
+      "全部轨道",
+    );
+    setAdvancedEvidenceSelect(
+      "advanced-evidence-promotion",
+      "advancedEvidencePromotion",
+      Object.keys(ADVANCED_EVIDENCE_PROMOTION_LABELS),
+      ADVANCED_EVIDENCE_PROMOTION_LABELS,
+      "全部状态",
+    );
+
+    const search = byId("advanced-evidence-search");
+    if (search && search.value !== state.advancedEvidenceSearch) search.value = state.advancedEvidenceSearch;
+    const needle = state.advancedEvidenceSearch.trim().toLocaleLowerCase();
+    const filtered = entries.filter((entry) => {
+      if (needle && !entry.searchText.includes(needle)) return false;
+      if (state.advancedEvidenceQuality !== "ALL" && entry.evidence.quality_status !== state.advancedEvidenceQuality) return false;
+      if (state.advancedEvidenceMode !== "ALL" && entry.mode !== state.advancedEvidenceMode) return false;
+      if (state.advancedEvidenceSource !== "ALL" && entry.sourceKey !== state.advancedEvidenceSource) return false;
+      if (state.advancedEvidencePromotion !== "ALL" && entry.promotion !== state.advancedEvidencePromotion) return false;
+      return true;
+    });
+    const summary = byId("advanced-evidence-summary");
+    const list = byId("advanced-evidence-list");
+    const detail = byId("advanced-evidence-detail");
+    clear(summary);
+    clear(list);
+    const closedCount = entries.filter((entry) => entry.promotion === "FINDING").length;
+    const reviewCount = entries.filter((entry) => entry.evidence.quality_status !== "VERIFIED" || entry.promotion !== "FINDING").length;
+    summary.append(
+      chip(`${entries.length} Evidence`, entries.length ? "" : "review"),
+      chip(`${filtered.length} shown`, filtered.length === entries.length ? "" : "review"),
+      chip(`${closedCount} closed`, closedCount ? "pass" : ""),
+      chip(`${reviewCount} review`, reviewCount ? "review" : "pass"),
+    );
+    const summaryText = document.createElement("span");
+    summaryText.textContent = entries.length
+      ? "只聚合当前 owner 的内存结果；切换 owner 或重新运行会清空旧选择。"
+      : "先运行研究轨道或选择 PASS 回执，才能建立当前会话的 Evidence 索引。";
+    summary.append(summaryText);
+
+    if (!entries.length) {
+      const empty = document.createElement("div");
+      empty.className = "advanced-evidence-empty";
+      empty.textContent = "暂无当前 owner 的 Evidence。运行研究或选择 PASS 回执后再查看。";
+      list.append(empty);
+      renderAdvancedEvidenceDetail(detail, null);
+      return;
+    }
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "advanced-evidence-empty";
+      empty.textContent = "当前筛选没有匹配的 Evidence；清除筛选后查看全部记录。";
+      list.append(empty);
+      renderAdvancedEvidenceDetail(detail, null);
+      return;
+    }
+    const selected = filtered.find((entry) => entry.key === state.advancedEvidenceSelectedKey) || filtered[0];
+    state.advancedEvidenceSelectedKey = selected.key;
+    filtered.forEach((entry) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = `advanced-evidence-row${entry.key === selected.key ? " selected" : ""}`;
+      row.setAttribute("role", "option");
+      row.setAttribute("aria-selected", String(entry.key === selected.key));
+      row.setAttribute("aria-label", `${entry.evidence.evidence_id} · ${advancedEvidenceQualityLabel(entry.evidence.quality_status)} · ${entry.sourceLabel}`);
+      row.addEventListener("click", () => {
+        state.advancedEvidenceSelectedKey = entry.key;
+        renderAdvancedEvidence();
+      });
+      const rowHeader = document.createElement("header");
+      const rowTitle = document.createElement("strong");
+      rowTitle.textContent = entry.evidence.evidence_id;
+      rowHeader.append(rowTitle, chip(advancedEvidenceQualityLabel(entry.evidence.quality_status), advancedEvidenceQualityClass(entry.evidence.quality_status)));
+      const rowSource = document.createElement("div");
+      rowSource.className = "advanced-evidence-row-source";
+      rowSource.textContent = `${entry.sourceLabel} · ${text(entry.evidence.field)} · ${text(entry.evidence.period)}`;
+      const rowMeta = document.createElement("div");
+      rowMeta.className = "advanced-evidence-row-meta";
+      rowMeta.textContent = `${advancedEvidenceModeLabel(entry.mode)} · ${advancedEvidencePromotionLabel(entry.promotion)} · ${text(entry.evidence.lineage_id, "no lineage")}`;
+      row.append(rowHeader, rowSource, rowMeta);
+      list.append(row);
+    });
+    renderAdvancedEvidenceDetail(detail, selected);
   }
 
   function renderResearchMatrix(result) {
     const panel = byId("research-matrix-content");
     clear(panel);
+    renderAdvancedEvidence();
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -1293,6 +1712,7 @@
   function renderStockResearch(result) {
     const panel = byId("stock-research-content");
     clear(panel);
+    renderAdvancedEvidence();
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -1521,6 +1941,7 @@
   function renderFundResearch(result) {
     const panel = byId("fund-research-content");
     clear(panel);
+    renderAdvancedEvidence();
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -1749,6 +2170,7 @@
   function renderConvertibleBondResearch(result) {
     const panel = byId("convertible-bond-research-content");
     clear(panel);
+    renderAdvancedEvidence();
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
@@ -2612,6 +3034,15 @@
     setQueryStatus("待运行");
     state.events = [];
     state.selected = null;
+    state.selectedDecisionEvent = null;
+    state.advancedEvidenceSearch = "";
+    state.advancedEvidenceQuality = "ALL";
+    state.advancedEvidenceMode = "ALL";
+    state.advancedEvidenceSource = "ALL";
+    state.advancedEvidencePromotion = "ALL";
+    state.advancedEvidenceSelectedKey = "";
+    const advancedSearch = byId("advanced-evidence-search");
+    if (advancedSearch) advancedSearch.value = "";
     renderEvents();
     renderProfile(null);
     renderEvidence(null);
@@ -3078,6 +3509,7 @@
       if (state.ownerId !== requestOwner || state.templateSequence !== templateSequence) return;
       state.events = (await response.json()).items || [];
       state.selected = null;
+      state.selectedDecisionEvent = null;
       renderEvents();
       renderProfile(null);
       renderEvidence(null);
@@ -3212,6 +3644,39 @@
     setConvertibleBondResearchStatus("待运行");
   });
   byId("run-portfolio-optimization").addEventListener("click", runPortfolioOptimization);
+  byId("advanced-evidence-search").addEventListener("input", (event) => {
+    state.advancedEvidenceSearch = event.target.value;
+    renderAdvancedEvidence();
+  });
+  byId("advanced-evidence-quality").addEventListener("change", (event) => {
+    state.advancedEvidenceQuality = event.target.value;
+    state.advancedEvidenceSelectedKey = "";
+    renderAdvancedEvidence();
+  });
+  byId("advanced-evidence-mode").addEventListener("change", (event) => {
+    state.advancedEvidenceMode = event.target.value;
+    state.advancedEvidenceSelectedKey = "";
+    renderAdvancedEvidence();
+  });
+  byId("advanced-evidence-source").addEventListener("change", (event) => {
+    state.advancedEvidenceSource = event.target.value;
+    state.advancedEvidenceSelectedKey = "";
+    renderAdvancedEvidence();
+  });
+  byId("advanced-evidence-promotion").addEventListener("change", (event) => {
+    state.advancedEvidencePromotion = event.target.value;
+    state.advancedEvidenceSelectedKey = "";
+    renderAdvancedEvidence();
+  });
+  byId("clear-advanced-evidence-filters").addEventListener("click", () => {
+    state.advancedEvidenceSearch = "";
+    state.advancedEvidenceQuality = "ALL";
+    state.advancedEvidenceMode = "ALL";
+    state.advancedEvidenceSource = "ALL";
+    state.advancedEvidencePromotion = "ALL";
+    state.advancedEvidenceSelectedKey = "";
+    renderAdvancedEvidence();
+  });
   byId("save-context-memory").addEventListener("click", saveContextMemory);
   byId("load-context-memory").addEventListener("click", () => {
     const nextOwnerId = byId("owner-id").value.trim();
