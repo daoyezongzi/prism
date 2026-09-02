@@ -275,7 +275,10 @@ class InMemoryProviderCache:
             raise ValueError("only DIRECT provider results may enter the cache")
         if result.status not in (ProviderStatus.SUCCESS, ProviderStatus.PARTIAL):
             return False
-        if _contains_sensitive_data(result.model_dump(mode="python")):
+        result_payload = result.model_dump(mode="python")
+        if _contains_sensitive_data(result_payload) or _contains_private_context(
+            result_payload
+        ):
             with self._lock:
                 self._bypasses += 1
             return False

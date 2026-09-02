@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
+from fastapi.testclient import TestClient
 
 from app.contracts.evidence import EvidenceQualityStatus
 from app.orchestration import (
@@ -32,6 +33,7 @@ from app.providers import (
 )
 from app.providers.fingerprint import compute_request_fingerprint
 from app.providers.normalization import normalize_result_to_evidence
+from app.api.main import create_app
 
 
 NOW = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
@@ -254,6 +256,30 @@ def test_sensitive_provider_payload_is_not_stored_in_cache() -> None:
     assert len(cache) == 0
 
 
+def test_private_provider_payload_is_not_stored_in_public_cache() -> None:
+    request = _request()
+    result = _success(request, "primary-provider")
+    private_result = ProviderResult.model_validate(
+        result.model_dump(mode="python")
+        | {
+            "records": (
+                ProviderRecord(
+                    source="primary-source",
+                    record_id="record-private",
+                    fields={"fund_name": "Synthetic Fund", "owner_id": "owner-a"},
+                    units={},
+                    period="2026-06-30",
+                    observed_at=NOW,
+                    lineage_id="lineage:primary:private",
+                ),
+            )
+        }
+    )
+    cache = InMemoryProviderCache(clock=lambda: NOW)
+    assert cache.put("primary-provider", request, private_result) is False
+    assert len(cache) == 0
+
+
 def test_lru_capacity_evicts_oldest_entry_without_corrupting_payload() -> None:
     cache = InMemoryProviderCache(max_entries=1, clock=lambda: NOW)
     provider = _StaticProvider("primary-provider")
@@ -344,3 +370,43 @@ def test_specialist_fixture_path_can_opt_into_shared_public_cache() -> None:
         for node in second.execution.state.nodes
     )
     assert cache.stats().entries == len(template.nodes)
+
+
+def test_research_api_exposes_provider_serving_mode_and_cache_age() -> None:
+    cache = InMemoryProviderCache(ttl_ms=10_000, clock=lambda: NOW)
+    service = FixtureResearchSpecialistMatrixService(
+        provider_policy=ProviderExecutionPolicy(cache=cache)
+    )
+    template = service.matrix_template("api-resilience-owner")
+    api = create_app(specialist_service=service)
+    payload = {
+        "matrix_id": template.matrix_id,
+        "request_id": "api-resilience-a",
+        "owner_id": template.owner_id,
+        "generated_at": NOW.isoformat(),
+        "scenario_id": ResearchScenarioId.BASELINE_READY.value,
+    }
+    with TestClient(api) as client:
+        first = client.post(
+            "/api/v1/advisor/research-runs",
+            headers={"X-Owner-ID": template.owner_id},
+            json=payload,
+        )
+        assert first.status_code == 200
+        second_payload = {**payload, "request_id": "api-resilience-b"}
+        second = client.post(
+            "/api/v1/advisor/research-runs",
+            headers={"X-Owner-ID": template.owner_id},
+            json=second_payload,
+        )
+        assert second.status_code == 200
+    assert all(
+        node["provider_serving_mode"] == ProviderServingMode.DIRECT.value
+        for node in first.json()["nodes"]
+    )
+    assert all(
+        node["provider_serving_mode"] == ProviderServingMode.CACHE_FRESH.value
+        and node["provider_cache_age_ms"] == 0
+        and node["provider"] == "fixture-provider"
+        for node in second.json()["nodes"]
+    )
