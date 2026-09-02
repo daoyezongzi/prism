@@ -3511,6 +3511,17 @@
     const requestOwner = state.ownerId;
     const templateSequence = ++state.templateSequence;
     setError("");
+    state.selected = null;
+    state.selectedDecisionEvent = null;
+    renderEvents();
+    renderEvidence(null);
+    byId("detail-status").className = "status-chip";
+    byId("detail-status").textContent = "读取中…";
+    clear(byId("detail-content"));
+    const loadingDetail = document.createElement("div");
+    loadingDetail.className = "empty-state";
+    loadingDetail.textContent = "读取当前 owner 的决策回执…";
+    byId("detail-content").append(loadingDetail);
     if (ownerChanged || !state.ownerId) {
       resetOwnerScopedViews();
     }
