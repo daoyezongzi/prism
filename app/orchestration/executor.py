@@ -29,7 +29,9 @@ from app.providers import (
     FinancialProvider,
     ProviderRequest,
     ProviderResult,
+    ProviderServingMode,
     ProviderStatus,
+    ProviderExecutionPolicy,
     execute_with_budget,
     normalize_result_to_evidence,
 )
@@ -375,6 +377,52 @@ def _normalize_provider_output(
     observations_tuple = tuple(sorted(observations, key=lambda item: item.evidence_id))
     safe_missing = _safe_missing_fields(provider_result)
     issues: list[ResearchNodeIssue] = []
+    if provider_result.serving_mode == ProviderServingMode.CACHE_STALE_FALLBACK:
+        issues.append(
+            _issue(
+                ResearchNodeIssueCode.SOURCE_UNAVAILABLE,
+                "provider served stale cached data because fresh data was unavailable",
+            )
+        )
+        if invalid_scalar_count:
+            issues.append(
+                _issue(
+                    ResearchNodeIssueCode.INVALID_OBSERVATION,
+                    "one or more stale provider fields were not usable as scalar observations",
+                )
+            )
+        if not observations_tuple:
+            return (
+                _failed_result(
+                    state=state,
+                    node=node,
+                    subject=subject,
+                    completed_at=completed_at,
+                    code=ResearchNodeIssueCode.INVALID_OBSERVATION,
+                    message="stale provider output contained no usable scalar observation",
+                ),
+                safe_evidence_tuple,
+                (),
+            )
+        return (
+            ResearchNodeResult(
+                request_id=state.request_id,
+                node_id=node.node_id,
+                owner_id=state.owner_id,
+                node_kind=node.node_kind,
+                subject=subject,
+                completed_at=completed_at,
+                status=ResearchNodeStatus.PARTIAL,
+                observations=observations_tuple,
+                missing_fields=safe_missing,
+                issues=tuple(issues[:2]),
+                provider=provider_result.provider,
+                provider_serving_mode=provider_result.serving_mode,
+                provider_cache_age_ms=provider_result.cache_age_ms,
+            ),
+            safe_evidence_tuple,
+            observations_tuple,
+        )
     if provider_result.status == ProviderStatus.SUCCESS:
         if not observations_tuple:
             return (
@@ -408,6 +456,9 @@ def _normalize_provider_output(
                     status=ResearchNodeStatus.PARTIAL,
                     observations=observations_tuple,
                     issues=tuple(issues),
+                    provider=provider_result.provider,
+                    provider_serving_mode=provider_result.serving_mode,
+                    provider_cache_age_ms=provider_result.cache_age_ms,
                 ),
                 safe_evidence_tuple,
                 observations_tuple,
@@ -422,6 +473,9 @@ def _normalize_provider_output(
                 completed_at=completed_at,
                 status=ResearchNodeStatus.COMPLETE,
                 observations=observations_tuple,
+                provider=provider_result.provider,
+                provider_serving_mode=provider_result.serving_mode,
+                provider_cache_age_ms=provider_result.cache_age_ms,
             ),
             safe_evidence_tuple,
             observations_tuple,
@@ -481,6 +535,9 @@ def _normalize_provider_output(
                 observations=observations_tuple,
                 missing_fields=safe_missing,
                 issues=tuple(issues[:2]),
+                provider=provider_result.provider,
+                provider_serving_mode=provider_result.serving_mode,
+                provider_cache_age_ms=provider_result.cache_age_ms,
             ),
             safe_evidence_tuple,
             observations_tuple,
@@ -497,6 +554,9 @@ def _normalize_provider_output(
                 completed_at=completed_at,
                 status=ResearchNodeStatus.EMPTY,
                 scope_description="provider returned no records for the requested scope",
+                provider=provider_result.provider,
+                provider_serving_mode=provider_result.serving_mode,
+                provider_cache_age_ms=provider_result.cache_age_ms,
             ),
             (),
             (),
@@ -523,6 +583,7 @@ async def _execute_node(
     request: ProviderRequest,
     provider: FinancialProvider,
     clock: Callable[[], datetime],
+    policy: ProviderExecutionPolicy | None = None,
 ) -> tuple[ResearchNodeResult, tuple[Evidence, ...], tuple[ResearchObservation, ...]]:
     subject = request.subject
     started_at = node.started_at or clock()
@@ -549,8 +610,11 @@ async def _execute_node(
         payload["timeout_ms"] = max(1, remaining_ms)
         bounded = ProviderRequest.model_validate(payload)
     try:
-        provider_result = await execute_with_budget(provider, bounded)
-        if provider_result.provider != provider.name:
+        provider_result = await execute_with_budget(provider, bounded, policy=policy)
+        allowed_provider_names = {provider.name}
+        if policy is not None and policy.fallback is not None:
+            allowed_provider_names.add(policy.fallback.name)
+        if provider_result.provider not in allowed_provider_names:
             completed_at = clock()
             if completed_at < started_at:
                 completed_at = started_at
@@ -617,6 +681,7 @@ async def execute_research_run(
     *,
     started_at: datetime | None = None,
     clock: Callable[[], datetime] | None = None,
+    policy: ProviderExecutionPolicy | None = None,
 ) -> ResearchRunExecutionResult:
     """Execute a bounded plan with fixture or live-provider injection.
 
@@ -651,6 +716,7 @@ async def execute_research_run(
                     request=requests_by_id[node.node_id].request,
                     provider=provider,
                     clock=clock_fn,
+                    policy=policy,
                 )
                 for node in active_nodes
             )

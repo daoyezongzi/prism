@@ -8,7 +8,12 @@ from app.contracts.evidence import (
     Evidence,
     EvidenceQualityStatus,
 )
-from app.providers.contracts import ProviderRecord, ProviderResult, ProviderStatus
+from app.providers.contracts import (
+    ProviderRecord,
+    ProviderResult,
+    ProviderServingMode,
+    ProviderStatus,
+)
 
 
 def _build_evidence_id(
@@ -50,6 +55,13 @@ def normalize_result_to_evidence(
         return ()
 
     evidence_items: list[Evidence] = []
+    stale = result.serving_mode == ProviderServingMode.CACHE_STALE_FALLBACK
+    evidence_quality = EvidenceQualityStatus.STALE if stale else None
+    stale_note = (
+        "Provider served a stale cache fallback; fresh data was unavailable."
+        if stale
+        else None
+    )
     seen_record_identities: set[tuple[str, str]] = set()
     effective_identities: dict[int, str] = {}
     for idx, record in enumerate(result.records):
@@ -87,8 +99,8 @@ def normalize_result_to_evidence(
                         period=record.period,
                         observed_at=record.observed_at,
                         retrieved_at=result.retrieved_at,
-                        quality_status=EvidenceQualityStatus.VERIFIED,
-                        quality_note=None,
+                        quality_status=evidence_quality or EvidenceQualityStatus.VERIFIED,
+                        quality_note=stale_note,
                         lineage_id=record.lineage_id,
                     )
                 )
@@ -122,8 +134,13 @@ def normalize_result_to_evidence(
                         period=record.period,
                         observed_at=record.observed_at,
                         retrieved_at=result.retrieved_at,
-                        quality_status=EvidenceQualityStatus.PARTIAL,
-                        quality_note=f"Partial observation from provider '{result.provider}'. Missing fields: {missing_desc}",
+                        quality_status=(
+                            evidence_quality or EvidenceQualityStatus.PARTIAL
+                        ),
+                        quality_note=(
+                            stale_note
+                            or f"Partial observation from provider '{result.provider}'. Missing fields: {missing_desc}"
+                        ),
                         lineage_id=record.lineage_id,
                     )
                 )

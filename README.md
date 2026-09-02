@@ -239,6 +239,8 @@ python -m pytest
 - [Phase 28 Portfolio Optimization 计划与验收](docs/plans/2026-09-02-mvp-phase-28-portfolio-optimization.md)
 - [Phase 29 Context Memory 契约](docs/context-memory.md)
 - [Phase 29 Context Memory 计划与验收](docs/plans/2026-09-02-mvp-phase-29-persistent-context-memory.md)
+- [Phase 30 Provider Cache/Fallback 契约](docs/provider-cache-fallback.md)
+- [Phase 30 Provider Cache/Fallback 计划与验收](docs/plans/2026-09-02-mvp-phase-30-provider-cache-fallback.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

@@ -30,6 +30,7 @@ from app.providers import (
     ProviderRecord,
     ProviderRequest,
     ProviderResult,
+    ProviderExecutionPolicy,
     ProviderStatus,
 )
 from app.research import (
@@ -289,9 +290,11 @@ class FixtureResearchSpecialistMatrixService:
         *,
         manifest_path: str | Path = _DEFAULT_MANIFEST,
         provider_dir: str | Path = _DEFAULT_PROVIDER_DIR,
+        provider_policy: ProviderExecutionPolicy | None = None,
     ) -> None:
         self._manifest_path = Path(manifest_path)
         self._provider_dir = Path(provider_dir)
+        self._provider_policy = provider_policy
         try:
             payload = json.loads(self._manifest_path.read_text(encoding="utf-8"))
             self._template = ResearchSpecialistMatrix.model_validate(payload)
@@ -509,6 +512,7 @@ class FixtureResearchSpecialistMatrixService:
                 self._requests(matrix),
                 started_at=request.generated_at,
                 clock=clock,
+                policy=self._provider_policy,
             )
             if execution.state.status.value == "COMPLETED":
                 self._check_evidence_integrity(matrix, execution)

@@ -112,6 +112,22 @@ class ProviderStatus(StrEnum):
     FAILED = "FAILED"
 
 
+class ProviderServingMode(StrEnum):
+    """How a provider result was served to the caller.
+
+    The four provider statuses describe the payload itself.  This orthogonal
+    mode records whether that payload came from the requested provider, a
+    fresh cache, a secondary provider, or a deliberately stale cache fallback.
+    Keeping the dimensions separate prevents availability handling from
+    silently changing the meaning of SUCCESS/PARTIAL/EMPTY/FAILED.
+    """
+
+    DIRECT = "DIRECT"
+    CACHE_FRESH = "CACHE_FRESH"
+    FALLBACK_PROVIDER = "FALLBACK_PROVIDER"
+    CACHE_STALE_FALLBACK = "CACHE_STALE_FALLBACK"
+
+
 class ProviderIssueCode(StrEnum):
     """Categorized provider issue code."""
 
@@ -260,6 +276,8 @@ class ProviderResult(ContractModel):
     issues: tuple[ProviderIssue, ...] = Field(default_factory=tuple)
     scope_description: str | None = None
     latency_ms: int | None = Field(default=None, ge=0)
+    serving_mode: ProviderServingMode = ProviderServingMode.DIRECT
+    cache_age_ms: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_status_invariants(self) -> Self:
@@ -297,6 +315,26 @@ class ProviderResult(ContractModel):
                 raise ValueError("FAILED result must not contain records")
             if not self.issues:
                 raise ValueError("FAILED result requires at least one issue")
+
+        cache_mode = self.serving_mode in (
+            ProviderServingMode.CACHE_FRESH,
+            ProviderServingMode.CACHE_STALE_FALLBACK,
+        )
+        if cache_mode and self.cache_age_ms is None:
+            raise ValueError(
+                f"{self.serving_mode.value} result requires cache_age_ms"
+            )
+        if not cache_mode and self.cache_age_ms is not None:
+            raise ValueError(
+                f"{self.serving_mode.value} result must not contain cache_age_ms"
+            )
+        if cache_mode and self.status not in (
+            ProviderStatus.SUCCESS,
+            ProviderStatus.PARTIAL,
+        ):
+            raise ValueError(
+                f"{self.serving_mode.value} result requires SUCCESS or PARTIAL status"
+            )
 
         return self
 

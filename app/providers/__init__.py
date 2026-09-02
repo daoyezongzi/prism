@@ -9,6 +9,7 @@ from app.providers.contracts import (
     ProviderRecord,
     ProviderRequest,
     ProviderResult,
+    ProviderServingMode,
     ProviderStatus,
     validate_result_for_request,
 )
@@ -18,7 +19,16 @@ from app.providers.fingerprint import (
 )
 from app.providers.fixture import FixtureFinancialProvider
 from app.providers.normalization import normalize_result_to_evidence
-from app.providers.runtime import execute_with_budget
+from app.providers.resilience import (
+    InMemoryProviderCache,
+    ProviderCacheHit,
+    ProviderCacheStats,
+    ProviderExecutionPolicy,
+    ProviderResilienceStats,
+    ProviderResilienceStatsSnapshot,
+    is_public_cache_request,
+)
+from app.providers.runtime import execute_with_budget, execute_with_resilience
 
 __all__ = [
     "FinancialProvider",
@@ -30,9 +40,18 @@ __all__ = [
     "ProviderRecord",
     "ProviderRequest",
     "ProviderResult",
+    "ProviderServingMode",
     "ProviderStatus",
+    "InMemoryProviderCache",
+    "ProviderCacheHit",
+    "ProviderCacheStats",
+    "ProviderExecutionPolicy",
+    "ProviderResilienceStats",
+    "ProviderResilienceStatsSnapshot",
+    "is_public_cache_request",
     "compute_request_fingerprint",
     "execute_with_budget",
+    "execute_with_resilience",
     "normalize_result_to_evidence",
     "redact_sensitive_data",
     "validate_result_for_request",

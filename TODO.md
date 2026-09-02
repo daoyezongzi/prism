@@ -6,9 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 29 structured Context Memory is accepted in the dedicated
-> `D:\Github_Storage\prism-phase-29` worktree. The next phase must start in a new worktree
-> with its plan committed before implementation.
+> Active phase: Phase 30 Provider Cache/Fallback is being implemented in the dedicated
+> `D:\Github_Storage\prism-phase-30` worktree. Its plan is committed before implementation;
+> the phase remains open until independent review and all acceptance gates pass.
 
 ## P0 — Foundation
 
@@ -88,6 +88,10 @@
   SQLite migration/restart reads, explicit browser recovery and stale/owner isolation; keep
   raw chat, semantic retrieval, automatic restore, cloud sync, authentication and delete/TTL
   deferred.
+- [ ] Add the Phase 30 bounded Provider Cache/Fallback boundary keyed by public request
+  fingerprint, with explicit fresh/secondary/stale serving modes, four-state preservation,
+  stale Evidence downgrade and no private/failed/empty cache pollution; keep live SkillHub,
+  production cache, circuit breaker and full Evidence drill-down deferred.
 
 ## External inputs / decisions
 
@@ -108,7 +112,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 29 is accepted in the dedicated `D:\Github_Storage\prism-phase-29` worktree; its final
-browser, concurrency, wheel and regression evidence is recorded in the Phase 29 plan. The next
-useful action is to select and plan Phase 30 in a brand-new worktree. Keep real authentication,
-live Provider access, cloud/production persistence and broad conversational memory deferred.
+Phase 30 is in the dedicated `D:\Github_Storage\prism-phase-30` worktree; its plan commit is
+`29c6982` and implementation/review evidence is still being collected. Keep real authentication,
+live Provider access, cloud/production persistence, cross-process cache and broad conversational
+memory deferred until a later accepted phase.

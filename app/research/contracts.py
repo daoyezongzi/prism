@@ -10,6 +10,7 @@ from typing import Literal, Self
 from pydantic import Field, model_validator
 
 from app.contracts.evidence import ContractModel, EvidenceQualityStatus, NonEmptyStr
+from app.providers.contracts import ProviderServingMode
 
 
 class ResearchNodeKind(StrEnum):
@@ -116,6 +117,9 @@ class ResearchNodeResult(ContractModel):
     missing_fields: tuple[NonEmptyStr, ...] = Field(default_factory=tuple)
     issues: tuple[ResearchNodeIssue, ...] = Field(default_factory=tuple)
     scope_description: NonEmptyStr | None = None
+    provider: NonEmptyStr | None = None
+    provider_serving_mode: ProviderServingMode = ProviderServingMode.DIRECT
+    provider_cache_age_ms: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_result(self) -> Self:
@@ -156,6 +160,23 @@ class ResearchNodeResult(ContractModel):
                 raise ValueError("FAILED research node must not carry observations")
             if not self.issues:
                 raise ValueError("FAILED research node requires at least one issue")
+
+        cache_mode = self.provider_serving_mode in (
+            ProviderServingMode.CACHE_FRESH,
+            ProviderServingMode.CACHE_STALE_FALLBACK,
+        )
+        if cache_mode and self.provider_cache_age_ms is None:
+            raise ValueError(
+                f"{self.provider_serving_mode.value} node requires provider_cache_age_ms"
+            )
+        if not cache_mode and self.provider_cache_age_ms is not None:
+            raise ValueError(
+                f"{self.provider_serving_mode.value} node must not contain provider_cache_age_ms"
+            )
+        if self.provider_serving_mode != ProviderServingMode.DIRECT and self.provider is None:
+            raise ValueError(
+                f"{self.provider_serving_mode.value} node requires provider identity"
+            )
         return self
 
 
