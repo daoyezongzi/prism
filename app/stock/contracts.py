@@ -19,7 +19,7 @@ from app.contracts.evidence import (
     NonEmptyStr,
 )
 from app.orchestration.contracts import ResearchNodeRunStatus, ResearchRunStatus
-from app.providers import FrozenDict
+from app.providers import FrozenDict, ProviderServingMode
 from app.research.contracts import CrossValidationResult
 from app.research.pipeline import ResearchPipelineStatus
 from app.research.specialists import ResearchIdentifier
@@ -306,6 +306,9 @@ class StockResearchNodeResponse(ContractModel):
     missing_fields: tuple[ResearchIdentifier, ...] = Field(default_factory=tuple)
     scope_description: NonEmptyStr | None = None
     issues: tuple[StockResearchIssue, ...] = Field(default_factory=tuple)
+    provider: ResearchIdentifier | None = None
+    provider_serving_mode: ProviderServingMode = ProviderServingMode.DIRECT
+    provider_cache_age_ms: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_node(self) -> Self:
@@ -325,6 +328,16 @@ class StockResearchNodeResponse(ContractModel):
             raise ValueError("stock node finished_at must not precede started_at")
         if self.status == ResearchNodeRunStatus.EMPTY and not self.scope_description:
             raise ValueError("EMPTY stock node requires scope_description")
+        cache_mode = self.provider_serving_mode in {
+            ProviderServingMode.CACHE_FRESH,
+            ProviderServingMode.CACHE_STALE_FALLBACK,
+        }
+        if cache_mode and self.provider_cache_age_ms is None:
+            raise ValueError("cached stock node requires provider_cache_age_ms")
+        if not cache_mode and self.provider_cache_age_ms is not None:
+            raise ValueError("direct/fallback stock node must not contain cache age")
+        if self.provider_serving_mode != ProviderServingMode.DIRECT and self.provider is None:
+            raise ValueError("non-direct stock node requires provider identity")
         return self
 
 

@@ -23,7 +23,7 @@ from app.research import (
 )
 from app.store import DecisionEvent, DecisionEventSummary
 from app.portfolio import PortfolioImportBundle
-from app.providers import FrozenDict
+from app.providers import FrozenDict, ProviderServingMode
 from app.stock import (
     StockResearchRequest,
     StockResearchResponse,
@@ -368,6 +368,9 @@ class ResearchMatrixNodeResponse(ContractModel):
     started_at: datetime | None = None
     finished_at: datetime | None = None
     issues: tuple[ResearchMatrixIssueResponse, ...] = Field(default_factory=tuple)
+    provider: NonEmptyStr | None = None
+    provider_serving_mode: ProviderServingMode = ProviderServingMode.DIRECT
+    provider_cache_age_ms: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_timestamps(self) -> Self:
@@ -382,6 +385,16 @@ class ResearchMatrixNodeResponse(ContractModel):
         if self.started_at is not None and self.finished_at is not None:
             if self.finished_at < self.started_at:
                 raise ValueError("research node finished_at must not precede started_at")
+        cache_mode = self.provider_serving_mode in {
+            ProviderServingMode.CACHE_FRESH,
+            ProviderServingMode.CACHE_STALE_FALLBACK,
+        }
+        if cache_mode and self.provider_cache_age_ms is None:
+            raise ValueError("cached research node requires provider_cache_age_ms")
+        if not cache_mode and self.provider_cache_age_ms is not None:
+            raise ValueError("direct/fallback research node must not contain cache age")
+        if self.provider_serving_mode != ProviderServingMode.DIRECT and self.provider is None:
+            raise ValueError("non-direct research node requires provider identity")
         return self
 
 

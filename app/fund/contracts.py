@@ -19,7 +19,7 @@ from app.contracts.evidence import (
     NonEmptyStr,
 )
 from app.orchestration.contracts import ResearchNodeRunStatus, ResearchRunStatus
-from app.providers import FrozenDict
+from app.providers import FrozenDict, ProviderServingMode
 from app.research.contracts import CrossValidationResult
 from app.research.pipeline import ResearchPipelineStatus
 from app.research.specialists import ResearchIdentifier
@@ -321,6 +321,9 @@ class FundResearchNodeResponse(ContractModel):
     missing_fields: tuple[ResearchIdentifier, ...] = Field(default_factory=tuple)
     scope_description: NonEmptyStr | None = None
     issues: tuple[FundResearchIssue, ...] = Field(default_factory=tuple)
+    provider: ResearchIdentifier | None = None
+    provider_serving_mode: ProviderServingMode = ProviderServingMode.DIRECT
+    provider_cache_age_ms: int | None = Field(default=None, ge=0)
 
     @model_validator(mode="after")
     def validate_node(self) -> Self:
@@ -398,6 +401,16 @@ class FundResearchNodeResponse(ContractModel):
                 raise ValueError("CANCELLED fund node must not carry missing_fields")
             if not self.issues:
                 raise ValueError("CANCELLED fund node requires an issue")
+        cache_mode = self.provider_serving_mode in {
+            ProviderServingMode.CACHE_FRESH,
+            ProviderServingMode.CACHE_STALE_FALLBACK,
+        }
+        if cache_mode and self.provider_cache_age_ms is None:
+            raise ValueError("cached fund node requires provider_cache_age_ms")
+        if not cache_mode and self.provider_cache_age_ms is not None:
+            raise ValueError("direct/fallback fund node must not contain cache age")
+        if self.provider_serving_mode != ProviderServingMode.DIRECT and self.provider is None:
+            raise ValueError("non-direct fund node requires provider identity")
         return self
 
 

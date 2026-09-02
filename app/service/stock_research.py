@@ -23,6 +23,7 @@ from app.providers import (
     ProviderRecord,
     ProviderRequest,
     ProviderResult,
+    ProviderServingMode,
     ProviderStatus,
 )
 from app.research import (
@@ -399,6 +400,17 @@ class FixtureStockResearchService:
                         code,
                         StockResearchIssue(code=code, safe_message=issue.safe_message),
                     )
+            provider = node.result.provider if node.result is not None else None
+            serving_mode = (
+                node.result.provider_serving_mode
+                if node.result is not None
+                else ProviderServingMode.DIRECT
+            )
+            cache_age_ms = (
+                node.result.provider_cache_age_ms
+                if node.result is not None
+                else None
+            )
             responses.append(
                 StockResearchNodeResponse(
                     node_id=node.node_id,
@@ -409,6 +421,9 @@ class FixtureStockResearchService:
                     missing_fields=missing_fields,
                     scope_description=scope_description,
                     issues=tuple(issue_by_code[key] for key in sorted(issue_by_code)),
+                    provider=provider,
+                    provider_serving_mode=serving_mode,
+                    provider_cache_age_ms=cache_age_ms,
                 )
             )
         return tuple(responses)

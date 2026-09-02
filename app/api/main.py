@@ -82,6 +82,7 @@ from app.service import (
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
+from app.providers import ProviderServingMode
 from app.store import (
     ContextMemoryListResponse,
     ContextMemoryWriteRequest,
@@ -146,6 +147,17 @@ def _research_matrix_response(output: SpecialistMatrixOutput) -> ResearchMatrixR
                 started_at=node.started_at,
                 finished_at=node.finished_at,
                 issues=tuple(issues),
+                provider=node.result.provider if node.result is not None else None,
+                provider_serving_mode=(
+                    node.result.provider_serving_mode
+                    if node.result is not None
+                    else ProviderServingMode.DIRECT
+                ),
+                provider_cache_age_ms=(
+                    node.result.provider_cache_age_ms
+                    if node.result is not None
+                    else None
+                ),
             )
         )
     return ResearchMatrixResponse(
