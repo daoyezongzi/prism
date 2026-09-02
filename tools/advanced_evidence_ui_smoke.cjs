@@ -122,6 +122,21 @@ try {
     throw new Error("advisor receipt evidence was not aggregated");
   }
 
+  const template = await page.evaluate(async () => {
+    const response = await fetch("/api/v1/advisor/query-template", { headers: { "X-Owner-ID": document.querySelector("#owner-id").value } });
+    return response.json();
+  });
+  await page.locator("#portfolio-json").fill(JSON.stringify(template.portfolio));
+  await page.locator("#confirm-portfolio").click();
+  await waitForText("#portfolio-context-status", "已确认");
+  await page.locator("#confirm-profile").click();
+  await waitForText("#profile-context-status", "已确认");
+  await page.locator("#save-context-memory").click();
+  await page.waitForSelector("#context-memory-content .context-memory-card");
+  await page.locator("#context-memory-content .context-memory-card button").click();
+  await waitForText("#detail-content", "上下文已恢复");
+  await waitForText("#advanced-evidence-summary", "0 Evidence");
+
   await page.locator("#owner-id").fill("phase31-other-owner");
   await page.locator("#load-events").click();
   await waitForText("#advanced-evidence-summary", "0 Evidence");
