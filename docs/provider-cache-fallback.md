@@ -38,8 +38,9 @@ lineage 保持原值。这样相同语义请求不会因为 request ID 不同而
 - key 是 `(provider.name, compute_request_fingerprint(request))`，不包含 request ID。
 - ProviderRequest 中含 owner/profile/portfolio/questionnaire/context-memory/account/
   holding/position 等私人语义的请求直接 bypass；它们仍可执行，但不进公共 cache。
-- ProviderResult 里含 credential/API key/authorization/password/secret/token/cookie
-  等关键字的 payload 不进入 cache；缓存不是秘密存储。
+- ProviderResult 里含 owner/profile/portfolio/account 等私人语义或
+  credential/API key/authorization/password/secret/token/cookie 等关键字的 payload
+  不进入 cache；缓存不是秘密存储。
 - 只有经过 `validate_result_for_request` 的 SUCCESS/PARTIAL 可写入；EMPTY/FAILED 永不
   写入。容量是线程安全 LRU，entry 到期后从内存删除，不持久化、不跨进程。
 - 失败顺序是：fresh cache → primary → 一次 fallback → stale cache → FAILED。primary

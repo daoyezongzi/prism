@@ -212,6 +212,40 @@ def test_empty_primary_is_not_replaced_by_fallback_or_cached() -> None:
     assert len(cache) == 0
 
 
+def test_failed_primary_and_failed_fallback_remain_failed_without_stale_entry() -> None:
+    primary = _StaticProvider("primary-provider", ProviderStatus.FAILED)
+    fallback = _StaticProvider("secondary-provider", ProviderStatus.FAILED)
+    policy = ProviderExecutionPolicy(
+        cache=InMemoryProviderCache(clock=lambda: NOW),
+        fallback=fallback,
+    )
+    result = asyncio.run(execute_with_budget(primary, _request(), policy=policy))
+    assert result.status == ProviderStatus.FAILED
+    assert result.serving_mode == ProviderServingMode.DIRECT
+    assert primary.calls == 1
+    assert fallback.calls == 1
+    assert policy.counters().snapshot().failed_results == 1
+
+
+def test_cache_key_includes_provider_identity_and_respects_stale_boundary() -> None:
+    current = [NOW]
+    cache = InMemoryProviderCache(
+        ttl_ms=1000,
+        stale_grace_ms=1000,
+        clock=lambda: current[0],
+    )
+    request = _request()
+    result = _success(request, "primary-provider")
+    cache.put("primary-provider", request, result)
+    assert cache.get("secondary-provider", request) is None
+    current[0] = NOW + timedelta(milliseconds=1000)
+    hit = cache.get("primary-provider", request)
+    assert hit is not None and hit.stale is False and hit.age_ms == 1000
+    current[0] = NOW + timedelta(milliseconds=2001)
+    assert cache.get("primary-provider", request) is None
+    assert len(cache) == 0
+
+
 def test_private_context_bypasses_public_cache_but_remains_executable() -> None:
     provider = _StaticProvider("primary-provider")
     cache = InMemoryProviderCache(clock=lambda: NOW)
