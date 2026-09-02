@@ -1199,7 +1199,6 @@
     const facts = Array.isArray(trace.facts) ? trace.facts : [];
     const findings = Array.isArray(trace.findings) ? trace.findings : [];
     const validations = Array.isArray(result.validations) ? result.validations : [];
-    const factsById = new Map(facts.map((fact) => [fact.fact_id, fact]));
     const findingsByFactId = new Map();
     findings.forEach((finding) => {
       (finding.fact_ids || []).forEach((factId) => {
@@ -1221,8 +1220,10 @@
         "unlinked_evidence_ids",
         "unresolved_evidence_ids",
       ].some((field) => (validation[field] || []).includes(evidence.evidence_id)));
-      const matchingNodes = nodes.filter((node) => node.provider && node.provider === evidence.provider);
-      const node = matchingNodes[0] || null;
+      const matchingNodes = nodes.filter((candidate) => candidate.provider && candidate.provider === evidence.provider);
+      const node = matchingNodes.find((candidate) => (
+        candidate.node_id && evidence.source && String(evidence.source).includes(String(candidate.node_id))
+      )) || matchingNodes[0] || null;
       const inferredMode = evidence.quality_status === "STALE"
         ? "CACHE_STALE_FALLBACK"
         : node?.provider_serving_mode || "UNAVAILABLE";
@@ -1339,7 +1340,10 @@
     badges.className = "advanced-evidence-badges";
     badges.append(
       chip(advancedEvidenceQualityLabel(entry.evidence.quality_status), advancedEvidenceQualityClass(entry.evidence.quality_status)),
-      chip(advancedEvidenceModeLabel(entry.mode), entry.mode === "CACHE_STALE_FALLBACK" ? "review" : entry.mode === "UNAVAILABLE" ? "" : "pass"),
+      chip(
+        advancedEvidenceModeLabel(entry.mode),
+        entry.mode === "CACHE_STALE_FALLBACK" || entry.mode === "FALLBACK_PROVIDER" ? "review" : entry.mode === "UNAVAILABLE" ? "" : "pass",
+      ),
       chip(advancedEvidencePromotionLabel(entry.promotion), entry.promotion === "FINDING" ? "pass" : "review"),
     );
     panel.append(header, badges);
