@@ -6,10 +6,10 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 32 Chinese UI and stable navigation selection is accepted in the dedicated
-> `D:\Github_Storage\prism-phase-32` worktree. Its plan, implementation, independent review and
-> browser acceptance are recorded; the next phase must start from this accepted commit in
-> another brand-new worktree.
+> Active phase: Phase 33 Scenario Simulation is planned in the dedicated
+> `D:\Github_Storage\prism-phase-33` worktree, based on accepted Phase 32 commit `134efe7`.
+> This tree currently contains the handoff plan only; implementation must stay within the
+> explicit scope and acceptance gates in that plan.
 
 ## P0 — Foundation
 
@@ -101,6 +101,9 @@
   enum values and audit labels; synchronize left navigation active/`aria-current` state on
   clicks, hash changes and direct hash loads; keep Scenario Simulation and other P2 work out
   of this phase.
+- [ ] Implement the bounded Phase 33 Scenario Simulation catalog and deterministic baseline →
+  hypothetical diff flow; keep simulated values separate from Fact/Finding/Recommendation,
+  preserve owner isolation and four-state degradation, and defer History/Rebalancing/Dashboard.
 
 ## External inputs / decisions
 
@@ -121,9 +124,9 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 32 is accepted in the dedicated `D:\Github_Storage\prism-phase-32` worktree; its plan,
-implementation, independent review, full regression and real-browser acceptance are recorded in
-`docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md`. The next useful action is to
-create a fresh Phase 33 worktree from that accepted commit and execute the handoff plan for
-Scenario Simulation, while keeping real authentication, live Provider access, cloud/production
-persistence, backend indexing and broad conversational memory deferred.
+Phase 33 is planned in the dedicated `D:\Github_Storage\prism-phase-33` worktree from accepted
+Phase 32 `134efe7`; read and execute
+`docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md`. The next useful action is contract-
+first implementation and independent review of the four bounded hypothetical scenarios, while
+keeping real authentication, live Provider access, cloud/production persistence, backend
+indexing, prediction, trading, Recommendation History, Rebalancing and Dashboard deferred.

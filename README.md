@@ -154,6 +154,11 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   浏览器验收通过，外部请求与 console error 均为 `[]`。详见
   [Phase 32 中文 UI 与导航计划](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
   与 [Phase 32 独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)。
+- Phase 33 Scenario Simulation 目前仅完成执行计划，尚未实现：计划从已确认画像/持仓
+  出发，提供四个固定的 fixture-first 假设覆盖（基线、科技上限收紧、头部资产减少
+  10 个百分点、基金穿透部分缺失），输出确定性基线→模拟差异，并严格不升级事实、
+  建议、回执或交易指令。计划、复用边界、API/UI 设计、独立审查清单与下一 agent 的
+  交接规则见 [Phase 33 Scenario Simulation 计划](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)。
 
 尚未实现：
 
@@ -267,6 +272,7 @@ python -m pytest
 - [Phase 31 Advanced Evidence UI 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)
 - [Phase 32 中文 UI 与导航计划与验收](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
 - [Phase 32 中文 UI 与导航独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)
+- [Phase 33 Scenario Simulation 执行计划（待实现）](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

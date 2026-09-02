@@ -1311,3 +1311,19 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
 - 本阶段不实现 Scenario Simulation、Recommendation History、Portfolio Rebalancing、
   Evaluation Dashboard、实时 SkillHub、认证、云持久化或后端索引；下一阶段必须从本
   阶段接受提交另建全新 Phase 33 worktree，并先阅读其 P2 计划。
+
+## 2026-09-02 — MVP Phase 33 Scenario Simulation（计划已提交，待实现）
+
+- 从 Phase 32 accepted `134efe7` 创建全新 worktree
+  `D:\Github_Storage\prism-phase-33`，分支为
+  `codex/mvp-phase-33-scenario-simulation`；当前只写入计划，不改动实现。
+- 计划 `docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md` 明确四个固定、
+  fixture-first 的假设场景：`BASELINE_READY`、`TIGHTER_TECH_CAP`、
+  `TOP_ASSET_TRIM_10PP`、`LOOKTHROUGH_PARTIAL`；输出基线→模拟的 Decimal 差异、
+  假设和失效条件，保持 `READY/REVIEW_REQUIRED/BLOCKED`，不产生 Fact/Finding/
+  Recommendation/DecisionEvent。
+- 计划固定复用 Phase 24 场景目录、Phase 28 暴露/风险/优化算术、Phase 31 Evidence
+  explorer 和 Phase 32 中文映射/导航，禁止实时 SkillHub、LLM/Gemini、预测、回测、
+  交易、持久化、Recommendation History、Portfolio Rebalancing 与 Dashboard。
+- 当前状态为 `PLANNED`；下一 agent 应先读计划并执行契约先行、独立审查和全量验收，不能
+  把本阶段计划或 Phase 32 的 `436 passed` 冒充为 Phase 33 实现证据。
