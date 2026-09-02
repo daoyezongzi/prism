@@ -5190,13 +5190,6 @@
     });
   }
 
-  // Event bindings for P2 panels
-  const refHistBtn = byId("refresh-history");
-  if (refHistBtn) refHistBtn.addEventListener("click", loadRecommendationHistory);
-  const runCompBtn = byId("run-compare");
-  if (runCompBtn) runCompBtn.addEventListener("click", runRecommendationCompare);
-  const runRebBtn = byId("run-rebalancing");
-  if (runRebBtn) runRebBtn.addEventListener("click", runPortfolioRebalancing);
   // =========================================================================
   // Copilot 任务中心与预设画像体系 (Optimization Direction 1)
   // =========================================================================
