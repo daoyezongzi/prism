@@ -25,6 +25,7 @@
           <a class="nav-item" href="#portfolio">持仓</a>
           <a class="nav-item" href="#context-memory">上下文记忆</a>
           <a class="nav-item" href="#portfolio-optimization">组合优化</a>
+          <a class="nav-item" href="#scenario-simulation">情景模拟</a>
           <a class="nav-item" href="#research-tracks">研究轨道</a>
           <a class="nav-item" href="#stock-research">个股研究</a>
           <a class="nav-item" href="#fund-research">ETF / 基金研究</a>
@@ -343,6 +344,33 @@
             <p class="research-boundary">目标权重只由已确认持仓、风险画像和风险预算确定性计算；不预测收益、不接入实时行情、不写入决策回执。</p>
             <div id="portfolio-optimization-content" class="portfolio-optimization-content" aria-live="polite">
               <div class="empty-state">生成提案后查看当前→目标权重、约束上限、算术解释与失效条件。</div>
+            </div>
+          </section>
+
+          <section class="panel scenario-simulation-panel" id="scenario-simulation" aria-labelledby="scenario-simulation-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">P2 · 场景分析</span>
+                <h2 id="scenario-simulation-title">情景模拟与压力分析</h2>
+              </div>
+              <span id="scenario-simulation-status" class="status-chip">待运行</span>
+            </div>
+            <div class="research-actions">
+              <div id="scenario-simulation-template-meta" class="query-meta">
+                基于已确认画像与持仓进行确定性假设对比；结果不作为买卖建议或交易指令。
+              </div>
+              <label class="research-scenario-picker" for="scenario-simulation-scenario">
+                <span>模拟场景</span>
+                <select id="scenario-simulation-scenario" disabled>
+                  <option value="">读取场景目录…</option>
+                </select>
+                <small>服务端固定场景覆盖层，不修改已观测事实。</small>
+              </label>
+              <button id="run-scenario-simulation" class="query-submit" type="button">运行情景模拟</button>
+            </div>
+            <p class="research-boundary">模拟是在同一观测快照上的确定性假设重算；所有模拟数据标记为 SIMULATED，绝不升级为 VERIFIED 事实或推荐决策。</p>
+            <div id="scenario-simulation-content" class="scenario-simulation-content" aria-live="polite">
+              <div class="empty-state">运行情景模拟后查看基线 vs 假设覆盖层的指标对比与目标权重变化。</div>
             </div>
           </section>
 

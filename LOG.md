@@ -1,5 +1,17 @@
 # LOG
 
+## 2026-09-02 — Phase 33 Scenario Simulation (P2) Accepted
+
+### Decisions & Accomplishments
+
+- Implemented the deterministic, owner-isolated Scenario Simulation engine in `app.simulation` and `app.service.scenario_simulation`.
+- Integrated 4 bounded overlay scenarios (`BASELINE_READY`, `TIGHTER_TECH_CAP`, `TOP_ASSET_TRIM_10PP`, `LOOKTHROUGH_PARTIAL`) without mutating real observed assets.
+- Enforced strict three-state degradation (`READY`, `REVIEW_REQUIRED`, `BLOCKED`) without fabricating missing values or zero diffs.
+- Exposed `GET /api/v1/advisor/scenario-simulation-template` and `POST /api/v1/advisor/scenario-simulation-runs` with defensive identity and contract validation.
+- Localized and wired the `#scenario-simulation` Chinese workbench panel with scenario selector, baseline vs simulated cards, metric diffs table, and deterministic invalidation lists.
+- Added browser end-to-end smoke test `tools/scenario_simulation_smoke.cjs` and passed all 450 automated tests.
+- Formally accepted Phase 33 (`docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md` marked ACCEPTED).
+
 ## 2026-09-01 — Independent repository foundation
 
 ### Decisions

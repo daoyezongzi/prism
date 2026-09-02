@@ -299,6 +299,24 @@ h2 { margin-bottom: 0; font: 700 21px/1.3 var(--serif); }
 .panel { min-width: 0; padding: 24px; background: var(--surface); border: 1px solid var(--outline); box-shadow: var(--shadow); }
 .research-panel { grid-column: 1 / -1; }
 .portfolio-panel { grid-column: 1 / -1; }
+.portfolio-optimization-panel { grid-column: 1 / -1; }
+.scenario-simulation-panel { grid-column: 1 / -1; }
+.scenario-diff-table {
+  width: 100%; border-collapse: collapse; margin: 12px 0 16px;
+  background: var(--surface); border: 1px solid var(--outline); border-radius: 7px;
+  overflow: hidden; font-size: 13px;
+}
+.scenario-diff-table th, .scenario-diff-table td {
+  padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--outline);
+}
+.scenario-diff-table th {
+  background: var(--surface-muted); color: var(--muted); font: 700 11px var(--mono);
+}
+.scenario-diff-table tr:last-child td { border-bottom: none; }
+.scenario-diff-table td strong { font-family: var(--sans); }
+.scenario-diff-table .positive-delta { color: var(--sage); font-weight: 600; }
+.scenario-diff-table .negative-delta { color: #8a2f1b; font-weight: 600; }
+.invalidation-list { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
 .panel-head { align-items: flex-start; margin-bottom: 20px; }
 .panel-head h2 { margin-top: 7px; }
 .muted { color: var(--muted); font-size: 12px; }

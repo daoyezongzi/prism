@@ -46,6 +46,10 @@ from app.service.portfolio_optimization import (
     FixturePortfolioOptimizationService,
     PortfolioOptimizationError,
 )
+from app.service.scenario_simulation import (
+    FixtureScenarioSimulationService,
+    ScenarioSimulationError,
+)
 
 __all__ = [
     "AdvisorQueryError",
@@ -74,4 +78,6 @@ __all__ = [
     "ConvertibleBondResearchError",
     "FixturePortfolioOptimizationService",
     "PortfolioOptimizationError",
+    "FixtureScenarioSimulationService",
+    "ScenarioSimulationError",
 ]

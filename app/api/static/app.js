@@ -32,6 +32,9 @@
     portfolioOptimizationTemplate: null,
     portfolioOptimizationRun: null,
     portfolioOptimizationSequence: 0,
+    scenarioSimulationTemplate: null,
+    scenarioSimulationRun: null,
+    scenarioSimulationSequence: 0,
     contextMemoryRecords: [],
     contextMemorySelected: null,
     contextMemorySequence: 0,
@@ -159,6 +162,9 @@
 
   const DISPLAY_SCENARIO_LABELS = Object.freeze({
     BASELINE_READY: "基线：完整多资产快照（BASELINE_READY）",
+    TIGHTER_TECH_CAP: "科技限额收紧 10%（TIGHTER_TECH_CAP）",
+    TOP_ASSET_TRIM_10PP: "第一大资产削减 10%（TOP_ASSET_TRIM_10PP）",
+    LOOKTHROUGH_PARTIAL: "基金穿透部分缺失（LOOKTHROUGH_PARTIAL）",
     SOURCE_PARTIAL: "来源部分缺失（SOURCE_PARTIAL）",
     SOURCE_DISAGREEMENT: "来源分歧（SOURCE_DISAGREEMENT）",
     SOURCE_EMPTY: "来源无结果（SOURCE_EMPTY）",
@@ -168,6 +174,9 @@
 
   const DISPLAY_DESCRIPTIONS = Object.freeze({
     "complete multi-asset snapshot": "完整多资产持仓快照",
+    "tighten technology budget cap by 10 percent": "将科技行业风险预算上限收紧 10%",
+    "reduce top asset weight by 10 percentage points and redistribute to remaining assets": "将第一大资产权重削减 10 个百分点并等比重分配至其余资产",
+    "degrade fund look-through coverage to 80 percent": "将基金/ETF穿透覆盖率下调至 80% 触发部分缺失",
     "fund look-through coverage is below 100 percent": "基金穿透覆盖率低于 100%",
     "one-asset concentration cannot satisfy every configured cap": "单一资产集中度无法同时满足全部配置上限",
     "provider returned no records for the requested scope": "数据提供方在请求范围内没有返回记录",
@@ -489,6 +498,13 @@
     node.textContent = message;
   }
 
+  function setScenarioSimulationStatus(message, className = "") {
+    const node = byId("scenario-simulation-status");
+    if (!node) return;
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
   function setContextMemoryStatus(message, className = "") {
     const node = byId("context-memory-status");
     node.className = `status-chip ${className}`.trim();
@@ -651,6 +667,43 @@
 
   function renderPortfolioOptimizationScenarioOptions(scenarios) {
     const select = byId("portfolio-optimization-scenario");
+    const previous = select.value;
+    clear(select);
+    const options = Array.isArray(scenarios) ? scenarios : [];
+    options.forEach((scenario) => {
+      const option = document.createElement("option");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
+      select.append(option);
+    });
+    if (!options.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "暂无可用场景";
+      select.append(option);
+      select.disabled = true;
+      return;
+    }
+    const known = options.some((scenario) => scenario.scenario_id === previous);
+    select.value = known ? previous : options[0].scenario_id;
+    select.disabled = false;
+  }
+
+  function clearScenarioSimulationScenarioOptions() {
+    const select = byId("scenario-simulation-scenario");
+    if (!select) return;
+    clear(select);
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "读取场景目录…";
+    select.append(option);
+    select.disabled = true;
+  }
+
+  function renderScenarioSimulationScenarioOptions(scenarios) {
+    const select = byId("scenario-simulation-scenario");
+    if (!select) return;
     const previous = select.value;
     clear(select);
     const options = Array.isArray(scenarios) ? scenarios : [];
@@ -2921,6 +2974,194 @@
     setPortfolioOptimizationStatus(status, className);
   }
 
+  function renderScenarioSimulation(result) {
+    const panel = byId("scenario-simulation-content");
+    if (!panel) return;
+    clear(panel);
+    if (!result) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "运行情景模拟后查看基线 vs 假设覆盖层的指标对比与目标权重变化。";
+      panel.append(empty);
+      return;
+    }
+
+    const summary = document.createElement("div");
+    summary.className = "portfolio-optimization-summary";
+    summary.append(
+      chip(optimizationStatusLabel(result.status), optimizationStatusClass(result.status)),
+      chip(text(result.risk_level), ""),
+      chip(text(result.scenario.scenario_id), "clay"),
+    );
+    const summaryText = document.createElement("p");
+    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)} · 隔离标识 ${text(result.owner_id)}`;
+    summary.append(summaryText);
+    panel.append(summary);
+
+    const assumptionBox = document.createElement("div");
+    assumptionBox.className = "sidebar-note";
+    const assumptionTitle = document.createElement("strong");
+    assumptionTitle.textContent = "假设覆盖层（SIMULATED 覆盖）";
+    const assumptionDesc = document.createElement("p");
+    assumptionDesc.textContent = `${displayDescription(result.assumption.description)} (参数: ${text(result.assumption.parameter_name)}, 变化量: ${text(result.assumption.delta)}${result.assumption.unit ? " " + result.assumption.unit : ""})`;
+    assumptionBox.append(assumptionTitle, assumptionDesc);
+    panel.append(assumptionBox);
+
+    const metadata = document.createElement("dl");
+    metadata.className = "metadata-grid";
+    addMetadata(metadata, "Method", result.methodology_version);
+    addMetadata(metadata, "Profile", `${text(result.profile_id)} · v${text(result.profile_version)}`);
+    addMetadata(metadata, "Simulation ID", result.simulation_id);
+    addMetadata(metadata, "Fingerprint", result.trace.input_fingerprint);
+    addMetadata(metadata, "Baseline Run", result.trace.baseline_run_id);
+    addMetadata(metadata, "Simulated Run", result.trace.simulated_run_id);
+    panel.append(metadata);
+
+    if (result.issues && result.issues.length) {
+      const notice = document.createElement("div");
+      notice.className = "notice error";
+      notice.textContent = result.status === "BLOCKED"
+        ? "情景模拟因数据或约束阻断；未能生成完整有效差分。"
+        : "情景模拟包含待复核项；数据不完整或需复核。";
+      panel.append(notice);
+      const issues = document.createElement("ul");
+      issues.className = "portfolio-optimization-issues";
+      result.issues.forEach((issue) => {
+        const item = document.createElement("li");
+        item.textContent = `[${text(issue.dimension)}] ${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
+        issues.append(item);
+      });
+      panel.append(issues);
+    }
+
+    if (result.metric_diffs && result.metric_diffs.length) {
+      const diffHeading = document.createElement("h3");
+      diffHeading.textContent = "基线 vs 模拟关键指标差分对比";
+      panel.append(diffHeading);
+
+      const table = document.createElement("table");
+      table.className = "scenario-diff-table";
+      const thead = document.createElement("thead");
+      const trHead = document.createElement("tr");
+      ["指标名称", "维度", "基线值 (BASELINE)", "模拟值 (SIMULATED)", "变化量 (Δ)", "单位"].forEach((hText) => {
+        const th = document.createElement("th");
+        th.textContent = hText;
+        trHead.append(th);
+      });
+      thead.append(trHead);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      result.metric_diffs.forEach((diff) => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td");
+        const nameStrong = document.createElement("strong");
+        nameStrong.textContent = diff.label;
+        tdName.append(nameStrong);
+
+        const tdDim = document.createElement("td");
+        tdDim.append(chip(text(diff.dimension), ""));
+
+        const tdBase = document.createElement("td");
+        tdBase.textContent = String(diff.baseline_value);
+
+        const tdSim = document.createElement("td");
+        tdSim.textContent = String(diff.scenario_value);
+
+        const tdDelta = document.createElement("td");
+        const deltaNum = parseFloat(diff.delta);
+        if (deltaNum > 0) {
+          tdDelta.className = "positive-delta";
+          tdDelta.textContent = `+${diff.delta}`;
+        } else if (deltaNum < 0) {
+          tdDelta.className = "negative-delta";
+          tdDelta.textContent = String(diff.delta);
+        } else {
+          tdDelta.textContent = String(diff.delta);
+        }
+
+        const tdUnit = document.createElement("td");
+        tdUnit.textContent = text(diff.unit);
+
+        tr.append(tdName, tdDim, tdBase, tdSim, tdDelta, tdUnit);
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      panel.append(table);
+    }
+
+    if (result.target_diffs && result.target_diffs.length) {
+      const targetHeading = document.createElement("h3");
+      targetHeading.textContent = "组合目标权重差分对比";
+      panel.append(targetHeading);
+
+      const table = document.createElement("table");
+      table.className = "scenario-diff-table";
+      const thead = document.createElement("thead");
+      const trHead = document.createElement("tr");
+      ["资产名称", "基线目标权重", "模拟目标权重", "变化量 (Δ)"].forEach((hText) => {
+        const th = document.createElement("th");
+        th.textContent = hText;
+        trHead.append(th);
+      });
+      thead.append(trHead);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      result.target_diffs.forEach((target) => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td");
+        const nameStrong = document.createElement("strong");
+        nameStrong.textContent = target.asset_name;
+        tdName.append(nameStrong);
+
+        const tdBase = document.createElement("td");
+        tdBase.textContent = `${target.baseline_value}%`;
+
+        const tdSim = document.createElement("td");
+        tdSim.textContent = `${target.scenario_value}%`;
+
+        const tdDelta = document.createElement("td");
+        const deltaNum = parseFloat(target.delta);
+        if (deltaNum > 0) {
+          tdDelta.className = "positive-delta";
+          tdDelta.textContent = `+${target.delta}%`;
+        } else if (deltaNum < 0) {
+          tdDelta.className = "negative-delta";
+          tdDelta.textContent = `${target.delta}%`;
+        } else {
+          tdDelta.textContent = `${target.delta}%`;
+        }
+
+        tr.append(tdName, tdBase, tdSim, tdDelta);
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      panel.append(table);
+    }
+
+    const invalidation = document.createElement("div");
+    invalidation.className = "invalidation";
+    const invalidationTitle = document.createElement("strong");
+    invalidationTitle.textContent = "情景模拟失效条件";
+    invalidation.append(invalidationTitle);
+    const list = document.createElement("ul");
+    (result.invalidation_conditions || []).forEach((condition) => {
+      const item = document.createElement("li");
+      item.textContent = displayDescription(condition);
+      list.append(item);
+    });
+    invalidation.append(list);
+    panel.append(invalidation);
+  }
+
+  function clearScenarioSimulationRun(status = "待运行", className = "") {
+    state.scenarioSimulationRun = null;
+    state.scenarioSimulationSequence += 1;
+    renderScenarioSimulation(null);
+    setScenarioSimulationStatus(status, className);
+  }
+
   async function loadEvent(eventId) {
     const requestOwner = state.ownerId;
     const templateSequence = state.templateSequence;
@@ -2969,6 +3210,7 @@
     const submit = byId("confirm-portfolio");
     clearAdvisorPlan();
     clearPortfolioOptimizationRun("需重新运行", "review");
+    clearScenarioSimulationRun("需重新运行", "review");
     if (!requestOwner) {
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
@@ -3044,6 +3286,7 @@
     clearAdvisorPlan();
     clearProfileProposal();
     clearPortfolioOptimizationRun("需重新运行", "review");
+    clearScenarioSimulationRun("需重新运行", "review");
     if (!requestOwner) {
       state.profileContext = null;
       renderConfirmedProfile(null);
@@ -3206,6 +3449,23 @@
     state.portfolioOptimizationTemplate = template;
     renderPortfolioOptimizationScenarioOptions(template.scenarios);
     byId("portfolio-optimization-template-meta").textContent = `方法 ${text(template.methodology_version)} · ${text((template.rules || []).length, "0")} 条规则 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
+    return template;
+  }
+
+  async function loadScenarioSimulationCatalog(ownerId) {
+    const sequence = ++state.scenarioSimulationSequence;
+    const response = await fetch("/api/v1/advisor/scenario-simulation-template", {
+      headers: { "X-Owner-ID": ownerId },
+    });
+    if (!response.ok) throw await apiError(response);
+    const template = await response.json();
+    if (state.ownerId !== ownerId || state.scenarioSimulationSequence !== sequence) return null;
+    state.scenarioSimulationTemplate = template;
+    renderScenarioSimulationScenarioOptions(template.scenarios);
+    const metaNode = byId("scenario-simulation-template-meta");
+    if (metaNode) {
+      metaNode.textContent = `方法 ${text(template.methodology_version)} · ${text((template.scenarios || []).length, "0")} 个模拟场景 · 生成时间 ${text(template.generated_at)}`;
+    }
     return template;
   }
 
@@ -3479,6 +3739,14 @@
     clearPortfolioOptimizationScenarioOptions();
     setPortfolioOptimizationStatus("待运行");
     renderPortfolioOptimization(null);
+    state.scenarioSimulationTemplate = null;
+    state.scenarioSimulationRun = null;
+    state.scenarioSimulationSequence += 1;
+    const simMeta = byId("scenario-simulation-template-meta");
+    if (simMeta) simMeta.textContent = "基于已确认画像与持仓进行确定性假设对比；结果不作为买卖建议或交易指令。";
+    clearScenarioSimulationScenarioOptions();
+    setScenarioSimulationStatus("待运行");
+    renderScenarioSimulation(null);
   }
 
   async function runAdvisorQuery(event) {
@@ -3878,6 +4146,85 @@
     }
   }
 
+  async function runScenarioSimulation() {
+    const requestOwner = byId("owner-id").value.trim();
+    const submit = byId("run-scenario-simulation");
+    const scenarioSelect = byId("scenario-simulation-scenario");
+    if (!requestOwner) {
+      setError("请输入隔离标识。");
+      return;
+    }
+    if (!state.scenarioSimulationTemplate) {
+      try {
+        await loadScenarioSimulationCatalog(requestOwner);
+      } catch (error) {
+        setError(error.message || "读取情景模拟模板失败");
+        return;
+      }
+    }
+    const template = state.scenarioSimulationTemplate;
+    if (!template || state.ownerId !== requestOwner) return;
+    if (!state.profileContext || !state.profileContext.profile) {
+      setScenarioSimulationStatus("需先确认画像", "review");
+      setError("请先确认风险画像，再运行情景模拟。");
+      return;
+    }
+    const requestSequence = ++state.scenarioSimulationSequence;
+    const scenarioId = scenarioSelect.value || "BASELINE_READY";
+    const baseTemplate = state.queryTemplate || state.portfolioOptimizationTemplate;
+    const questionnaire = state.profileContext && state.profileContext.questionnaire
+      ? state.profileContext.questionnaire
+      : (baseTemplate ? buildQuestionnaire(baseTemplate) : null);
+    const portfolio = state.portfolioContext || baseTemplate?.portfolio;
+    if (!questionnaire || !portfolio) {
+      setError("未找到有效持仓快照或问卷数据，请先加载工作台模板。");
+      return;
+    }
+    submit.disabled = true;
+    scenarioSelect.disabled = true;
+    state.scenarioSimulationRun = null;
+    renderScenarioSimulation(null);
+    setScenarioSimulationStatus("运行中…");
+    setError("");
+    try {
+      const response = await fetch("/api/v1/advisor/scenario-simulation-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "scenario-simulation-request.v1",
+          request_id: "ui-scenario-simulation-001",
+          owner_id: requestOwner,
+          generated_at: template.generated_at,
+          scenario_id: scenarioId,
+          questionnaire,
+          portfolio,
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.scenarioSimulationSequence !== requestSequence) return;
+      state.scenarioSimulationRun = await response.json();
+      setScenarioSimulationStatus(
+        optimizationStatusLabel(state.scenarioSimulationRun.status),
+        optimizationStatusClass(state.scenarioSimulationRun.status),
+      );
+      renderScenarioSimulation(state.scenarioSimulationRun);
+    } catch (error) {
+      if (state.ownerId !== requestOwner || state.scenarioSimulationSequence !== requestSequence) return;
+      state.scenarioSimulationRun = null;
+      renderScenarioSimulation(null);
+      setScenarioSimulationStatus("未运行", "blocked");
+      setError(error.message || "运行情景模拟失败");
+    } finally {
+      submit.disabled = false;
+      if (state.ownerId === requestOwner && state.scenarioSimulationSequence === requestSequence) {
+        scenarioSelect.disabled = !state.scenarioSimulationTemplate;
+      }
+    }
+  }
+
   async function loadEvents() {
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
@@ -3976,6 +4323,16 @@
           if (state.ownerId === requestOwner) {
             clearPortfolioOptimizationScenarioOptions();
             setError(error.message || "读取组合优化场景目录失败");
+          }
+        }
+      }
+      if (state.ownerId === requestOwner && !state.scenarioSimulationTemplate) {
+        try {
+          await loadScenarioSimulationCatalog(requestOwner);
+        } catch (error) {
+          if (state.ownerId === requestOwner) {
+            clearScenarioSimulationScenarioOptions();
+            setError(error.message || "读取情景模拟场景目录失败");
           }
         }
       }
@@ -4116,6 +4473,17 @@
     renderPortfolioOptimization(null);
     setPortfolioOptimizationStatus("待运行");
   });
+  const scenarioOptSelect = byId("scenario-simulation-scenario");
+  if (scenarioOptSelect) {
+    scenarioOptSelect.addEventListener("change", () => {
+      state.scenarioSimulationRun = null;
+      state.scenarioSimulationSequence += 1;
+      renderScenarioSimulation(null);
+      setScenarioSimulationStatus("待运行");
+    });
+  }
+  const runScenarioBtn = byId("run-scenario-simulation");
+  if (runScenarioBtn) runScenarioBtn.addEventListener("click", runScenarioSimulation);
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") loadEvents();
   });
@@ -4135,6 +4503,10 @@
       state.portfolioOptimizationSequence += 1;
       renderPortfolioOptimization(null);
       setPortfolioOptimizationStatus("需重新运行", "review");
+      state.scenarioSimulationRun = null;
+      state.scenarioSimulationSequence += 1;
+      renderScenarioSimulation(null);
+      setScenarioSimulationStatus("需重新运行", "review");
       if (!state.profileContext) return;
       state.profileContext = null;
       renderConfirmedProfile(null);

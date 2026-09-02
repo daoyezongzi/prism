@@ -1,6 +1,6 @@
 # Prism MVP Phase 33：Scenario Simulation（P2）执行计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 基线：Phase 32 已验收提交 `134efe7`（中文工作台与稳定左侧导航）；本阶段在全新
 worktree `D:\Github_Storage\prism-phase-33`、分支

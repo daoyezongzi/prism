@@ -33,7 +33,15 @@ from app.portfolio import (
     PortfolioImportBundle,
     calculate_exposure,
 )
-from app.profile import RiskLevel
+from app.profile import (
+    ExperienceLevel,
+    InvestmentHorizon,
+    LiquidityNeed,
+    ReturnExpectation,
+    RiskLevel,
+    RiskProfile,
+    RiskQuestionnaire,
+)
 from app.risk import (
     BudgetAssessmentStatus,
     ConcentrationResult,
@@ -746,6 +754,52 @@ class FixturePortfolioOptimizationService:
             constraints=tuple(constraints),
             invalidation_conditions=invalidation,
             trace=trace,
+        )
+
+    def propose(
+        self,
+        portfolio: PortfolioImportBundle,
+        profile: RiskProfile,
+        exposure: ExposureResult,
+        concentration: ConcentrationResult,
+        assessment: RiskBudgetAssessment,
+        *,
+        request_id: str | None = None,
+        generated_at: datetime | None = None,
+        scenario_id: OptimizationScenarioId = OptimizationScenarioId.BASELINE_READY,
+        technology_cap_override: Decimal | None = None,
+    ) -> PortfolioOptimizationResponse:
+        req_id = request_id or _stable_id("optimization-request", portfolio.bundle_id, profile.profile_id)
+        gen_at = generated_at or (portfolio.created_at if portfolio.created_at.tzinfo else datetime.now(timezone.utc if hasattr(datetime, "UTC") else None))
+        if gen_at is None or gen_at.tzinfo is None:
+            from datetime import UTC
+            gen_at = datetime.now(UTC)
+        scenario = _scenario_definition(scenario_id)
+        questionnaire = self._template.questionnaire.model_copy(
+            update={
+                "owner_id": portfolio.owner_id,
+                "answered_at": gen_at,
+            }
+        )
+        dummy_request = PortfolioOptimizationRequest(
+            request_id=req_id,
+            owner_id=portfolio.owner_id,
+            generated_at=gen_at,
+            questionnaire=questionnaire,
+            portfolio=portfolio,
+            scenario_id=scenario_id,
+        )
+        return self._calculate_targets(
+            dummy_request,
+            portfolio,
+            profile.profile_id,
+            profile.profile_version,
+            profile.risk_level,
+            scenario,
+            exposure,
+            concentration,
+            assessment,
+            technology_cap_override=technology_cap_override,
         )
 
     async def run(self, request: PortfolioOptimizationRequest) -> PortfolioOptimizationResponse:

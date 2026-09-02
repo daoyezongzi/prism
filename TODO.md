@@ -6,10 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 33 Scenario Simulation is planned in the dedicated
-> `D:\Github_Storage\prism-phase-33` worktree, based on accepted Phase 32 commit `134efe7`.
-> This tree currently contains the handoff plan only; implementation must stay within the
-> explicit scope and acceptance gates in that plan.
+> Active phase: Phase 33 Scenario Simulation has been implemented, verified and accepted.
+> Next P2 phase: Recommendation History / Portfolio Rebalancing.
 
 ## P0 — Foundation
 
@@ -101,7 +99,7 @@
   enum values and audit labels; synchronize left navigation active/`aria-current` state on
   clicks, hash changes and direct hash loads; keep Scenario Simulation and other P2 work out
   of this phase.
-- [ ] Implement the bounded Phase 33 Scenario Simulation catalog and deterministic baseline →
+- [x] Implement the bounded Phase 33 Scenario Simulation catalog and deterministic baseline →
   hypothetical diff flow; keep simulated values separate from Fact/Finding/Recommendation,
   preserve owner isolation and four-state degradation, and defer History/Rebalancing/Dashboard.
 
@@ -124,9 +122,6 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 33 is planned in the dedicated `D:\Github_Storage\prism-phase-33` worktree from accepted
-Phase 32 `134efe7`; read and execute
-`docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md`. The next useful action is contract-
-first implementation and independent review of the four bounded hypothetical scenarios, while
-keeping real authentication, live Provider access, cloud/production persistence, backend
-indexing, prediction, trading, Recommendation History, Rebalancing and Dashboard deferred.
+Phase 33 Scenario Simulation has been completed with clean verification gates and browser smoke tests.
+The next useful action is proceeding to the next P2 milestones: Recommendation History (Phase 34) and
+Portfolio Rebalancing (Phase 35).

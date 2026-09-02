@@ -55,6 +55,11 @@ from app.optimization import (
     PortfolioOptimizationResponse,
     PortfolioOptimizationTemplateResponse,
 )
+from app.simulation import (
+    ScenarioSimulationRequest,
+    ScenarioSimulationResponse,
+    ScenarioSimulationTemplateResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -79,6 +84,8 @@ from app.service import (
     ConvertibleBondResearchError,
     FixturePortfolioOptimizationService,
     PortfolioOptimizationError,
+    FixtureScenarioSimulationService,
+    ScenarioSimulationError,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -191,6 +198,7 @@ def create_app(
     fund_service: FixtureFundResearchService | None = None,
     convertible_bond_service: FixtureConvertibleBondResearchService | None = None,
     portfolio_optimization_service: FixturePortfolioOptimizationService | None = None,
+    scenario_simulation_service: FixtureScenarioSimulationService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -208,6 +216,12 @@ def create_app(
     active_convertible_bond = convertible_bond_service or FixtureConvertibleBondResearchService()
     active_portfolio_optimization = (
         portfolio_optimization_service or FixturePortfolioOptimizationService()
+    )
+    active_scenario_simulation = (
+        scenario_simulation_service
+        or FixtureScenarioSimulationService(
+            optimization_service=active_portfolio_optimization
+        )
     )
 
     @asynccontextmanager
@@ -315,6 +329,16 @@ def create_app(
             400,
             "PORTFOLIO_OPTIMIZATION_ERROR",
             "portfolio optimization was refused",
+        )
+
+    @api.exception_handler(ScenarioSimulationError)
+    async def scenario_simulation_error_handler(
+        _: Request, __: ScenarioSimulationError
+    ) -> JSONResponse:
+        return _error_response(
+            400,
+            "SCENARIO_SIMULATION_ERROR",
+            "scenario simulation was refused",
         )
 
     @api.exception_handler(ProfileConfirmationError)
@@ -822,6 +846,70 @@ def create_app(
         except (AttributeError, TypeError, ValueError, ValidationError) as exc:
             raise PortfolioOptimizationError(
                 "portfolio optimization execution was refused"
+            ) from exc
+        return output
+
+    @api.get(
+        "/api/v1/advisor/scenario-simulation-template",
+        response_model=ScenarioSimulationTemplateResponse,
+    )
+    def get_scenario_simulation_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> ScenarioSimulationTemplateResponse:
+        return active_scenario_simulation.template(owner_id)
+
+    @api.post(
+        "/api/v1/advisor/scenario-simulation-runs",
+        response_model=ScenarioSimulationResponse,
+    )
+    def create_scenario_simulation_run(
+        request: ScenarioSimulationRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> ScenarioSimulationResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError(
+                "scenario simulation request owner does not match owner scope"
+            )
+        try:
+            raw_output = active_scenario_simulation.execute(request)
+            if not isinstance(raw_output, ScenarioSimulationResponse):
+                raise ScenarioSimulationError(
+                    "scenario simulation output type was invalid"
+                )
+            output = ScenarioSimulationResponse.model_validate(
+                raw_output.model_dump(mode="python")
+            )
+            if output.owner_id != owner_id:
+                raise ScenarioSimulationError(
+                    "scenario simulation output owner drifted"
+                )
+            try:
+                expected_profile = confirm_questionnaire(request.questionnaire)
+            except ProfileConfirmationError as exc:
+                raise ScenarioSimulationError(
+                    "scenario simulation profile could not be confirmed"
+                ) from exc
+            if (
+                output.request_id != request.request_id
+                or output.generated_at != request.generated_at
+                or output.profile_id != expected_profile.profile_id
+                or output.profile_version != expected_profile.profile_version
+                or output.baseline.portfolio_bundle_id != request.portfolio.bundle_id
+                or output.baseline.position_snapshot_id
+                != request.portfolio.position_snapshot.snapshot_id
+            ):
+                raise ScenarioSimulationError(
+                    "scenario simulation output identity drifted"
+                )
+            if output.scenario.scenario_id != request.scenario_id:
+                raise ScenarioSimulationError(
+                    "scenario simulation output scenario drifted"
+                )
+        except ScenarioSimulationError:
+            raise
+        except (AttributeError, TypeError, ValueError, ValidationError) as exc:
+            raise ScenarioSimulationError(
+                "scenario simulation execution was refused"
             ) from exc
         return output
 
