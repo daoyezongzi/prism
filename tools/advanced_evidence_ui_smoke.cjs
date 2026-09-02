@@ -2,6 +2,7 @@ const { chromium } = require("C:\\Users\\Soyo\\.cache\\codex-runtimes\\codex-pri
 
 ;(async () => {
 const baseUrl = process.env.PRISM_UI_BASE_URL || "http://127.0.0.1:8777/";
+const testOwner = `phase31-ui-${Date.now()}`;
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
 const externalRequests = [];
@@ -24,7 +25,7 @@ const visibleRows = () => page.locator("#advanced-evidence-list .advanced-eviden
 try {
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await waitForText("#health-status", "API 已连接");
-  await page.locator("#owner-id").fill("phase31-ui-owner");
+  await page.locator("#owner-id").fill(testOwner);
   await page.locator("#load-events").click();
   await waitForText("#advanced-evidence-summary", "0 Evidence");
 
