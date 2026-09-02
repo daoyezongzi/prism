@@ -22,15 +22,19 @@
         <nav class="nav-list" aria-label="工作区分区">
           <a class="nav-item active" href="#overview" aria-current="location">总览</a>
           <a class="nav-item" href="#advisor">投顾查询</a>
+          <a class="nav-item" href="#recommendation-history">历史建议</a>
           <a class="nav-item" href="#portfolio">持仓</a>
           <a class="nav-item" href="#context-memory">上下文记忆</a>
           <a class="nav-item" href="#portfolio-optimization">组合优化</a>
+          <a class="nav-item" href="#portfolio-rebalancing">组合再平衡</a>
           <a class="nav-item" href="#scenario-simulation">情景模拟</a>
+          <a class="nav-item" href="#advanced-explainability">高级可解释性</a>
           <a class="nav-item" href="#research-tracks">研究轨道</a>
           <a class="nav-item" href="#stock-research">个股研究</a>
           <a class="nav-item" href="#fund-research">ETF / 基金研究</a>
           <a class="nav-item" href="#convertible-bond-research">可转债研究</a>
           <a class="nav-item" href="#evidence">证据链</a>
+          <a class="nav-item" href="#evaluation-dashboard">评测看板</a>
           <a class="nav-item" href="#profile">风险画像</a>
         </nav>
         <div class="sidebar-note">
@@ -502,6 +506,120 @@
             </div>
             <div id="profile-content" class="profile-content">
               <div class="empty-state">回执会绑定画像版本、持仓快照和风险预算。</div>
+            </div>
+          </section>
+
+          <section class="panel history-panel" id="recommendation-history" aria-labelledby="history-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">P2 · 审计回溯</span>
+                <h2 id="history-title">历史建议</h2>
+              </div>
+              <span class="count-pill" id="history-count">0 条建议</span>
+            </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>历史决策追溯与两两比对</strong>
+                <small>按 Owner 隔离查询已归档决策回执，支持画像与动作演化差分。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="refresh-history" class="query-submit" type="button">刷新历史</button>
+              </div>
+            </div>
+            <div id="history-list-content" class="history-list-content" aria-live="polite">
+              <div class="empty-state">读取隔离标识后查看已归档的不可变决策建议。</div>
+            </div>
+            <div class="history-compare-box">
+              <h3>决策差分比对</h3>
+              <div class="compare-inputs">
+                <input id="compare-receipt-a" placeholder="基准回执 ID (receipt_a)" autocomplete="off">
+                <input id="compare-receipt-b" placeholder="对比回执 ID (receipt_b)" autocomplete="off">
+                <button id="run-compare" class="query-submit" type="button">执行比对</button>
+              </div>
+              <div id="compare-result-content" class="compare-result-content" aria-live="polite">
+                <div class="empty-state">输入两个回执 ID 并点击执行比对以查看画像与建议演变。</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel rebalancing-panel" id="portfolio-rebalancing" aria-labelledby="rebalancing-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">P2 · 调仓执行</span>
+                <h2 id="rebalancing-title">组合再平衡</h2>
+              </div>
+              <span class="status-chip" id="rebalancing-status-chip">未执行</span>
+            </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>流动性优先调仓规划</strong>
+                <small>基于当前持仓与目标权重，计算最小交易偏差、执行步长与现金守恒。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="run-rebalancing" class="query-submit" type="button">生成再平衡方案</button>
+              </div>
+            </div>
+            <div id="rebalancing-metrics-content" class="rebalancing-metrics-content" aria-live="polite">
+              <div class="empty-state">点击上方按钮生成确定性再平衡行动清单。</div>
+            </div>
+            <div id="rebalancing-actions-content" class="rebalancing-actions-content" aria-live="polite">
+              <div class="empty-state">再平衡动作清单（BUY/SELL/REDUCE/HOLD）。</div>
+            </div>
+            <div id="rebalancing-steps-content" class="rebalancing-steps-content" aria-live="polite">
+              <div class="empty-state">先卖后买有序执行步长序列。</div>
+            </div>
+          </section>
+
+          <section class="panel explainability-panel" id="advanced-explainability" aria-labelledby="explainability-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">P2 · 因果归因</span>
+                <h2 id="explainability-title">高级可解释性</h2>
+              </div>
+              <span class="status-chip" id="explainability-status-chip">未分析</span>
+            </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>决策因果链路与反事实分析</strong>
+                <small>全链路追溯画像约束、行业暴露与投研事实，探索边界反事实条件。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="run-explainability" class="query-submit" type="button">分析决策原因</button>
+              </div>
+            </div>
+            <div id="explainability-drivers-content" class="explainability-drivers-content" aria-live="polite">
+              <div class="empty-state">点击生成核心驱动因素权重与贡献度。</div>
+            </div>
+            <div id="explainability-counterfactual-content" class="explainability-counterfactual-content" aria-live="polite">
+              <div class="empty-state">反事实条件推演（若画像/暴露改变，建议将如何调整）。</div>
+            </div>
+            <div id="explainability-triggers-content" class="explainability-triggers-content" aria-live="polite">
+              <div class="empty-state">显式失效条件清单（财报更新、异动等）。</div>
+            </div>
+          </section>
+
+          <section class="panel evaluation-panel" id="evaluation-dashboard" aria-labelledby="evaluation-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">P2 · 质量监控</span>
+                <h2 id="evaluation-title">评测看板</h2>
+              </div>
+              <span class="status-chip ready" id="evaluation-pass-chip">100.00% 通过</span>
+            </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>eval_cases/ 固定评测集综合表现</strong>
+                <small>聚合事实准确度、证据覆盖率、幻觉率（0.00%）与延迟指标。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="run-evaluation-suite" class="query-submit" type="button">运行全量评测</button>
+              </div>
+            </div>
+            <div id="evaluation-summary-content" class="evaluation-summary-content" aria-live="polite">
+              <div class="empty-state">点击运行评测集以获取最新指标看板。</div>
+            </div>
+            <div id="evaluation-cases-content" class="evaluation-cases-content" aria-live="polite">
+              <div class="empty-state">用例执行明细列表。</div>
             </div>
           </section>
         </div>

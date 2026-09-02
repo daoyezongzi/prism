@@ -4484,8 +4484,365 @@
   }
   const runScenarioBtn = byId("run-scenario-simulation");
   if (runScenarioBtn) runScenarioBtn.addEventListener("click", runScenarioSimulation);
+
+  // 1. Recommendation History
+  async function loadRecommendationHistory() {
+    const owner = state.ownerId;
+    if (!owner) return;
+    try {
+      const res = await fetch("/api/v1/advisor/recommendation-history?limit=20", {
+        headers: { "X-Owner-ID": owner },
+      });
+      if (!res.ok) throw new Error("历史读取失败");
+      const data = await res.json();
+      const countPill = byId("history-count");
+      if (countPill) countPill.textContent = `${data.total_count} 条建议`;
+      const panel = byId("history-list-content");
+      if (!panel) return;
+      panel.textContent = "";
+      if (!data.items || !data.items.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "暂无已归档的历史决策回执。";
+        panel.append(empty);
+        return;
+      }
+      data.items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "history-item-card";
+        const h = document.createElement("h4");
+        h.textContent = `建议动作: ${item.action_type || "无"} · 标的: ${item.asset || "N/A"}`;
+        const p1 = document.createElement("p");
+        p1.textContent = `回执 ID: ${item.receipt_id || "无"} · 状态: ${item.status} · 风险得分: ${item.risk_score || "N/A"}`;
+        const p2 = document.createElement("p");
+        p2.textContent = `生成时间: ${item.recorded_at} · 哈希: ${item.content_hash.slice(0, 16)}...`;
+        card.append(h, p1, p2);
+        panel.append(card);
+      });
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  async function runRecommendationCompare() {
+    const owner = state.ownerId;
+    const rA = byId("compare-receipt-a").value.trim();
+    const rB = byId("compare-receipt-b").value.trim();
+    if (!rA || !rB) {
+      showError("请输入两个待比对的回执 ID");
+      return;
+    }
+    try {
+      const res = await fetch("/api/v1/advisor/recommendation-history/compare", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": owner,
+        },
+        body: JSON.stringify({
+          schema_version: "recommendation-comparison-request.v1",
+          owner_id: owner,
+          receipt_a_id: rA,
+          receipt_b_id: rB,
+        }),
+      });
+      if (!res.ok) throw new Error("比对失败或回执未找到");
+      const data = await res.json();
+      const panel = byId("compare-result-content");
+      panel.textContent = "";
+      const card = document.createElement("div");
+      card.className = "history-item-card";
+      const h = document.createElement("h4");
+      h.textContent = `比对结果: ${data.action_transition}`;
+      const p = document.createElement("p");
+      p.textContent = data.summary;
+      card.append(h, p);
+      panel.append(card);
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // 2. Portfolio Rebalancing
+  async function runPortfolioRebalancing() {
+    const owner = state.ownerId;
+    try {
+      const tRes = await fetch("/api/v1/advisor/rebalancing-template", {
+        headers: { "X-Owner-ID": owner },
+      });
+      if (!tRes.ok) throw new Error("获取再平衡模板失败");
+      const tpl = await tRes.json();
+      const res = await fetch("/api/v1/advisor/rebalancing-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": owner,
+        },
+        body: JSON.stringify({
+          schema_version: "portfolio-rebalancing-request.v1",
+          request_id: `reb-${Date.now()}`,
+          owner_id: owner,
+          generated_at: new Date().toISOString(),
+          bundle: tpl.bundle,
+          target_weights: tpl.target_weights,
+          deadband_pct: "0.50",
+          max_turnover_pct: "50.00",
+        }),
+      });
+      if (!res.ok) throw new Error("生成再平衡方案失败");
+      const data = await res.json();
+      const chip = byId("rebalancing-status-chip");
+      if (chip) {
+        chip.textContent = data.status === "PASS" ? "已就绪（READY）" : data.status;
+        chip.className = `status-chip ${data.status.toLowerCase()}`;
+      }
+      const metricsPanel = byId("rebalancing-metrics-content");
+      metricsPanel.textContent = "";
+      const mCard = document.createElement("div");
+      mCard.className = "score-grid";
+      const addScore = (title, val) => {
+        const c = document.createElement("div");
+        c.className = "score-card";
+        const t = document.createElement("div");
+        t.textContent = title;
+        const v = document.createElement("div");
+        v.className = "score-value";
+        v.textContent = val;
+        c.append(t, v);
+        mCard.append(c);
+      };
+      addScore("总市值 (CNY)", data.metrics.total_portfolio_value_cny);
+      addScore("换手率 (%)", `${data.metrics.total_turnover_pct}%`);
+      addScore("买入金额 (CNY)", data.metrics.total_buy_cny);
+      addScore("卖出金额 (CNY)", data.metrics.total_sell_cny);
+      metricsPanel.append(mCard);
+
+      const actionsPanel = byId("rebalancing-actions-content");
+      actionsPanel.textContent = "";
+      const table = document.createElement("table");
+      table.className = "rebalancing-table";
+      const thead = document.createElement("thead");
+      const trh = document.createElement("tr");
+      ["资产代码", "资产名称", "当前权重", "目标权重", "变动权重", "变动金额 (CNY)", "动作"].forEach((tht) => {
+        const th = document.createElement("th");
+        th.textContent = tht;
+        trh.append(th);
+      });
+      thead.append(trh);
+      table.append(thead);
+      const tbody = document.createElement("tbody");
+      data.actions.forEach((act) => {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td"); td1.textContent = act.asset_id;
+        const td2 = document.createElement("td"); td2.textContent = act.asset_name;
+        const td3 = document.createElement("td"); td3.textContent = `${act.current_weight_pct}%`;
+        const td4 = document.createElement("td"); td4.textContent = `${act.target_weight_pct}%`;
+        const td5 = document.createElement("td"); td5.textContent = `${act.delta_weight_pct}%`;
+        const td6 = document.createElement("td"); td6.textContent = `${act.cash_delta_cny}`;
+        const td7 = document.createElement("td");
+        const b = document.createElement("span");
+        b.className = `action-badge ${act.action_type}`;
+        b.textContent = act.action_type;
+        td7.append(b);
+        tr.append(td1, td2, td3, td4, td5, td6, td7);
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      actionsPanel.append(table);
+
+      const stepsPanel = byId("rebalancing-steps-content");
+      stepsPanel.textContent = "";
+      data.execution_steps.forEach((step) => {
+        const sc = document.createElement("div");
+        sc.className = "rebalancing-action-card";
+        const h = document.createElement("h4");
+        h.textContent = `步骤 ${step.step_number}: [${step.action_type}] ${step.asset_name} · 金额: ${step.amount_cny} CNY`;
+        const p = document.createElement("p");
+        p.textContent = step.description;
+        sc.append(h, p);
+        stepsPanel.append(sc);
+      });
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // 3. Advanced Explainability
+  async function runAdvancedExplainability() {
+    const owner = state.ownerId;
+    try {
+      const res = await fetch("/api/v1/advisor/explainability-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": owner,
+        },
+        body: JSON.stringify({
+          schema_version: "advanced-explainability-request.v1",
+          request_id: `exp-${Date.now()}`,
+          owner_id: owner,
+          generated_at: new Date().toISOString(),
+          risk_score: "35.00",
+          risk_level: "BALANCED",
+          action_type: "HOLD",
+          asset: "ASSET-TECH-ETF-001",
+          tech_exposure_pct: "38.50",
+          tech_cap_pct: "40.00",
+          top_asset_weight_pct: "35.00",
+          finding_count: 6,
+        }),
+      });
+      if (!res.ok) throw new Error("高级可解释性分析失败");
+      const data = await res.json();
+      const chip = byId("explainability-status-chip");
+      if (chip) {
+        chip.textContent = "分析就绪";
+        chip.className = "status-chip ready";
+      }
+      const driversPanel = byId("explainability-drivers-content");
+      driversPanel.textContent = "";
+      data.key_drivers.forEach((d) => {
+        const div = document.createElement("div");
+        div.className = "driver-item";
+        const h = document.createElement("strong");
+        h.textContent = `[${d.category}] ${d.driver_name} (贡献度: ${d.contribution_pct}%)`;
+        const p = document.createElement("p");
+        p.textContent = d.explanation;
+        div.append(h, p);
+        driversPanel.append(div);
+      });
+
+      const cfPanel = byId("explainability-counterfactual-content");
+      cfPanel.textContent = "";
+      data.counterfactuals.forEach((cf) => {
+        const div = document.createElement("div");
+        div.className = "counterfactual-item";
+        const h = document.createElement("strong");
+        h.textContent = cf.scenario_name;
+        const p1 = document.createElement("p");
+        p1.textContent = `条件变化: ${cf.condition_change} -> 预期动作: ${cf.expected_action_change}`;
+        const p2 = document.createElement("p");
+        p2.textContent = `原因: ${cf.rationale}`;
+        div.append(h, p1, p2);
+        cfPanel.append(div);
+      });
+
+      const trgPanel = byId("explainability-triggers-content");
+      trgPanel.textContent = "";
+      data.invalidation_triggers.forEach((trg) => {
+        const div = document.createElement("div");
+        div.className = "trigger-item";
+        const h = document.createElement("strong");
+        h.textContent = `[${trg.trigger_type}] ${trg.description}`;
+        const p = document.createElement("p");
+        p.textContent = `触发阈值/事件: ${trg.threshold_or_event}`;
+        div.append(h, p);
+        trgPanel.append(div);
+      });
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // 4. Evaluation Dashboard
+  async function runEvaluationSuite() {
+    const owner = state.ownerId;
+    try {
+      const res = await fetch("/api/v1/advisor/evaluation-dashboard-runs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": owner,
+        },
+        body: JSON.stringify({
+          schema_version: "evaluation-dashboard-request.v1",
+          request_id: `eval-${Date.now()}`,
+          operator_id: owner,
+          generated_at: new Date().toISOString(),
+          repeat_count: 1,
+        }),
+      });
+      if (!res.ok) throw new Error("评测套件运行失败");
+      const data = await res.json();
+      const chip = byId("evaluation-pass-chip");
+      if (chip) {
+        chip.textContent = `${data.summary.case_pass_rate_pct}% 通过`;
+        chip.className = "status-chip ready";
+      }
+      const sumPanel = byId("evaluation-summary-content");
+      sumPanel.textContent = "";
+      const sGrid = document.createElement("div");
+      sGrid.className = "score-grid";
+      const addSum = (title, val) => {
+        const c = document.createElement("div");
+        c.className = "score-card";
+        const t = document.createElement("div");
+        t.textContent = title;
+        const v = document.createElement("div");
+        v.className = "score-value";
+        v.textContent = val;
+        c.append(t, v);
+        sGrid.append(c);
+      };
+      addSum("用例通过率", `${data.summary.case_pass_rate_pct}%`);
+      addSum("画像一致性", `${data.summary.profile_alignment_rate_pct}%`);
+      addSum("证据闭环率", `${data.summary.evidence_coverage_rate_pct}%`);
+      addSum("事实幻觉率", `${data.summary.hallucination_rate_pct}%`);
+      addSum("风险拦截率", `${data.summary.risk_detection_rate_pct}%`);
+      addSum("响应延迟 P50", `${data.latency.p50_ms} ms`);
+      sumPanel.append(sGrid);
+
+      const casesPanel = byId("evaluation-cases-content");
+      casesPanel.textContent = "";
+      const table = document.createElement("table");
+      table.className = "eval-table";
+      const thead = document.createElement("thead");
+      const trh = document.createElement("tr");
+      ["用例 ID", "用例描述", "预期状态", "实际状态", "耗时 (ms)", "结论"].forEach((tht) => {
+        const th = document.createElement("th");
+        th.textContent = tht;
+        trh.append(th);
+      });
+      thead.append(trh);
+      table.append(thead);
+      const tbody = document.createElement("tbody");
+      data.cases.forEach((c) => {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td"); td1.textContent = c.case_id;
+        const td2 = document.createElement("td"); td2.textContent = c.title;
+        const td3 = document.createElement("td"); td3.textContent = c.expected_status;
+        const td4 = document.createElement("td"); td4.textContent = c.actual_status;
+        const td5 = document.createElement("td"); td5.textContent = `${c.latency_ms}`;
+        const td6 = document.createElement("td");
+        td6.textContent = c.passed ? "✓ PASS" : "✗ FAIL";
+        td6.style.color = c.passed ? "var(--sage)" : "#8a2f1b";
+        tr.append(td1, td2, td3, td4, td5, td6);
+        tbody.append(tr);
+      });
+      table.append(tbody);
+      casesPanel.append(table);
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // Event bindings for P2 panels
+  const refHistBtn = byId("refresh-history");
+  if (refHistBtn) refHistBtn.addEventListener("click", loadRecommendationHistory);
+  const runCompBtn = byId("run-compare");
+  if (runCompBtn) runCompBtn.addEventListener("click", runRecommendationCompare);
+  const runRebBtn = byId("run-rebalancing");
+  if (runRebBtn) runRebBtn.addEventListener("click", runPortfolioRebalancing);
+  const runExpBtn = byId("run-explainability");
+  if (runExpBtn) runExpBtn.addEventListener("click", runAdvancedExplainability);
+  const runEvalBtn = byId("run-evaluation-suite");
+  if (runEvalBtn) runEvalBtn.addEventListener("click", runEvaluationSuite);
+
   byId("owner-id").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") loadEvents();
+    if (event.key === "Enter") {
+      loadEvents();
+      loadRecommendationHistory();
+    }
   });
   [
     "query-id",
@@ -4516,4 +4873,5 @@
   initializeNavigation();
   checkHealth();
   loadEvents();
+  loadRecommendationHistory();
 })();

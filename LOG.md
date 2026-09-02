@@ -1,5 +1,39 @@
 # LOG
 
+## 2026-09-02 — P2 Milestones (Phase 34, 35, 36, 37) Completed & Accepted
+
+### Decisions & Accomplishments
+
+- **Phase 34 Recommendation History**:
+  - Implemented immutable decision receipt query and comparison contracts in `app/history/contracts.py`.
+  - Created `RecommendationHistoryService` in `app/service/recommendation_history.py` providing owner-isolated receipt history and audit trail comparison.
+  - Exposed `GET /api/v1/advisor/recommendation-history` and `POST /api/v1/advisor/recommendation-history/compare`.
+  - Added unit and integration tests (`tests/unit/test_recommendation_history.py`, `tests/integration/test_phase34_recommendation_history.py`).
+
+- **Phase 35 Portfolio Rebalancing**:
+  - Implemented deterministic portfolio rebalancing contracts in `app/rebalancing/contracts.py`.
+  - Created `PortfolioRebalancingService` in `app/service/portfolio_rebalancing.py` implementing exact Decimal conservation, deadband threshold suppression (0.50%), turnover cap checks, and liquidity-ordered step execution (SELL before BUY).
+  - Exposed `GET /api/v1/advisor/rebalancing-template` and `POST /api/v1/advisor/rebalancing-runs`.
+  - Added unit and integration tests (`tests/unit/test_portfolio_rebalancing.py`, `tests/integration/test_phase35_portfolio_rebalancing.py`).
+
+- **Phase 36 Evaluation Dashboard**:
+  - Implemented evaluation scorecard and case report contracts in `app/evaluation/contracts.py`.
+  - Created `EvaluationDashboardService` in `app/service/evaluation_dashboard.py` running the versioned `eval_cases/` suite and tracking Pass Rate, Profile Alignment, Evidence Coverage, 0.00% Hallucination, and P50/P95 Latency.
+  - Exposed `GET /api/v1/advisor/evaluation-dashboard-summary` and `POST /api/v1/advisor/evaluation-dashboard-runs`.
+  - Added unit and integration tests (`tests/unit/test_evaluation_dashboard.py`, `tests/integration/test_phase36_evaluation_dashboard.py`).
+
+- **Phase 37 Advanced Explainability**:
+  - Implemented full-chain explainability contracts in `app/explainability/contracts.py` (Causal DAG, Key Decision Drivers, Counterfactuals, Invalidation Triggers).
+  - Created `AdvancedExplainabilityService` in `app/service/advanced_explainability.py` generating deterministic causal trees, quantified contribution percentages, counterfactual scenario rules, and invalidation thresholds.
+  - Exposed `GET /api/v1/advisor/explainability-template` and `POST /api/v1/advisor/explainability-runs`.
+  - Added unit and integration tests (`tests/unit/test_advanced_explainability.py`, `tests/integration/test_phase37_advanced_explainability.py`).
+
+- **Workbench UI & Integration**:
+  - Localized 4 dedicated interactive panels in `index.html` (`#recommendation-history`, `#portfolio-rebalancing`, `#advanced-explainability`, `#evaluation-dashboard`).
+  - Added CSS styling in `styles.css` for metric scorecards, rebalancing tables, action badges, and driver bars.
+  - Integrated safe DOM-based event handlers and async API callers in `app.js` with zero `innerHTML` and zero external CDN script dependencies.
+  - Passed all 463 automated unit & integration tests (`python -m pytest`) and verified 100% case pass rate in `python -m tools.evaluate_mvp --json`.
+
 ## 2026-09-02 — Phase 33 Scenario Simulation (P2) Accepted
 
 ### Decisions & Accomplishments

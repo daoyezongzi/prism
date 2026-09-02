@@ -6,8 +6,8 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 33 Scenario Simulation has been implemented, verified and accepted.
-> Next P2 phase: Recommendation History / Portfolio Rebalancing.
+> Active phase: P2 Milestones (Phase 34 Recommendation History, Phase 35 Portfolio Rebalancing, Phase 36 Evaluation Dashboard, Phase 37 Advanced Explainability) have been implemented, verified, and accepted.
+> Next phase: External integrations / evaluation hardening.
 
 ## P0 — Foundation
 
@@ -103,6 +103,13 @@
   hypothetical diff flow; keep simulated values separate from Fact/Finding/Recommendation,
   preserve owner isolation and four-state degradation, and defer History/Rebalancing/Dashboard.
 
+## P2 — Advanced Capabilities & Hardening
+
+- [x] Phase 34: Implement immutable Recommendation History retrieval, receipt comparison, owner-isolated queries, action transition diffs, and audit trail visualization.
+- [x] Phase 35: Implement deterministic Portfolio Rebalancing engine with decimal conservation, deadband threshold (0.50%), turnover cap checks, and liquidity-ordered step execution (SELL before BUY).
+- [x] Phase 36: Implement Evaluation Dashboard integrating versioned `eval_cases/`, tracking Pass Rate, Evidence Coverage, 0.00% Hallucination, and latency percentiles.
+- [x] Phase 37: Implement Advanced Explainability with deterministic causal DAG generation, key decision driver attributions, counterfactual conditions, and invalidation triggers.
+
 ## External inputs / decisions
 
 - [ ] Obtain competition-specific SkillHub development documentation and credentials.
@@ -122,6 +129,5 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 33 Scenario Simulation has been completed with clean verification gates and browser smoke tests.
-The next useful action is proceeding to the next P2 milestones: Recommendation History (Phase 34) and
-Portfolio Rebalancing (Phase 35).
+All 4 tasks in P2 (Phases 34 to 37) have been implemented and verified with 100% test pass rate across 463 automated tests.
+The system is ready for review and subsequent packaging.

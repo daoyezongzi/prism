@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from decimal import Decimal
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
@@ -60,6 +61,23 @@ from app.simulation import (
     ScenarioSimulationResponse,
     ScenarioSimulationTemplateResponse,
 )
+from app.history import (
+    RecommendationComparisonRequest,
+    RecommendationComparisonResponse,
+    RecommendationHistoryResponse,
+)
+from app.rebalancing import (
+    PortfolioRebalancingRequest,
+    PortfolioRebalancingResponse,
+)
+from app.evaluation import (
+    EvaluationDashboardRequest,
+    EvaluationDashboardResponse,
+)
+from app.explainability import (
+    AdvancedExplainabilityRequest,
+    AdvancedExplainabilityResponse,
+)
 from app.service import (
     AdvisorIntentRequest,
     AdvisorPlanResponse,
@@ -86,6 +104,10 @@ from app.service import (
     PortfolioOptimizationError,
     FixtureScenarioSimulationService,
     ScenarioSimulationError,
+    RecommendationHistoryService,
+    PortfolioRebalancingService,
+    EvaluationDashboardService,
+    AdvancedExplainabilityService,
 )
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
@@ -199,6 +221,10 @@ def create_app(
     convertible_bond_service: FixtureConvertibleBondResearchService | None = None,
     portfolio_optimization_service: FixturePortfolioOptimizationService | None = None,
     scenario_simulation_service: FixtureScenarioSimulationService | None = None,
+    recommendation_history_service: RecommendationHistoryService | None = None,
+    portfolio_rebalancing_service: PortfolioRebalancingService | None = None,
+    evaluation_dashboard_service: EvaluationDashboardService | None = None,
+    advanced_explainability_service: AdvancedExplainabilityService | None = None,
 ) -> FastAPI:
     """Create an API instance with an explicitly injectable store and clock.
 
@@ -222,6 +248,18 @@ def create_app(
         or FixtureScenarioSimulationService(
             optimization_service=active_portfolio_optimization
         )
+    )
+    active_recommendation_history = (
+        recommendation_history_service or RecommendationHistoryService(active_store)
+    )
+    active_portfolio_rebalancing = (
+        portfolio_rebalancing_service or PortfolioRebalancingService()
+    )
+    active_evaluation_dashboard = (
+        evaluation_dashboard_service or EvaluationDashboardService()
+    )
+    active_advanced_explainability = (
+        advanced_explainability_service or AdvancedExplainabilityService()
     )
 
     @asynccontextmanager
@@ -934,6 +972,128 @@ def create_app(
         if event is None:
             raise HTTPException(status_code=404, detail="not found")
         return event
+
+    @api.get(
+        "/api/v1/advisor/recommendation-history",
+        response_model=RecommendationHistoryResponse,
+    )
+    def get_recommendation_history(
+        limit: int = Query(default=20, ge=1, le=100),
+        action_filter: str | None = Query(default=None),
+        owner_id: str = Depends(owner_dependency),
+    ) -> RecommendationHistoryResponse:
+        return active_recommendation_history.get_history(
+            owner_id=owner_id,
+            limit=limit,
+            action_filter=action_filter,
+        )
+
+    @api.post(
+        "/api/v1/advisor/recommendation-history/compare",
+        response_model=RecommendationComparisonResponse,
+    )
+    def compare_recommendation_history(
+        request: RecommendationComparisonRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> RecommendationComparisonResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("comparison request owner does not match owner scope")
+        try:
+            return active_recommendation_history.compare_receipts(request)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc))
+
+    @api.get(
+        "/api/v1/advisor/rebalancing-template",
+    )
+    def get_rebalancing_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> dict[str, object]:
+        template = active_advisor.query_template(owner_id)
+        positions = template.portfolio.position_snapshot.positions
+        total_val = sum((p.market_value for p in positions), start=Decimal("0"))
+        target_weights = {
+            p.asset_id: str((p.market_value / total_val * Decimal("100")).quantize(Decimal("0.01")))
+            for p in positions
+        }
+        return {
+            "schema_version": "rebalancing-template.v1",
+            "owner_id": owner_id,
+            "bundle": template.portfolio.model_dump(mode="json"),
+            "target_weights": target_weights,
+            "deadband_pct": "0.50",
+            "max_turnover_pct": "50.00",
+        }
+
+    @api.post(
+        "/api/v1/advisor/rebalancing-runs",
+        response_model=PortfolioRebalancingResponse,
+    )
+    def create_rebalancing_run(
+        request: PortfolioRebalancingRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> PortfolioRebalancingResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("rebalancing request owner does not match owner scope")
+        return active_portfolio_rebalancing.plan_rebalancing(request)
+
+    @api.get(
+        "/api/v1/advisor/evaluation-dashboard-summary",
+        response_model=EvaluationDashboardResponse,
+    )
+    def get_evaluation_dashboard_summary(
+        owner_id: str = Depends(owner_dependency),
+    ) -> EvaluationDashboardResponse:
+        req = EvaluationDashboardRequest(
+            request_id=f"eval-dash-{int(active_clock().timestamp())}",
+            operator_id=owner_id,
+            generated_at=active_clock(),
+            repeat_count=1,
+        )
+        return active_evaluation_dashboard.run_dashboard(req)
+
+    @api.post(
+        "/api/v1/advisor/evaluation-dashboard-runs",
+        response_model=EvaluationDashboardResponse,
+    )
+    def create_evaluation_dashboard_run(
+        request: EvaluationDashboardRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> EvaluationDashboardResponse:
+        if request.operator_id != owner_id:
+            raise StoreOwnerError("dashboard request operator does not match owner scope")
+        return active_evaluation_dashboard.run_dashboard(request)
+
+    @api.get(
+        "/api/v1/advisor/explainability-template",
+    )
+    def get_explainability_template(
+        owner_id: str = Depends(owner_dependency),
+    ) -> dict[str, object]:
+        return {
+            "schema_version": "explainability-template.v1",
+            "owner_id": owner_id,
+            "risk_score": "35.00",
+            "risk_level": "BALANCED",
+            "action_type": "HOLD",
+            "asset": "ASSET-TECH-ETF-001",
+            "tech_exposure_pct": "38.50",
+            "tech_cap_pct": "40.00",
+            "top_asset_weight_pct": "35.00",
+            "finding_count": 6,
+        }
+
+    @api.post(
+        "/api/v1/advisor/explainability-runs",
+        response_model=AdvancedExplainabilityResponse,
+    )
+    def create_explainability_run(
+        request: AdvancedExplainabilityRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> AdvancedExplainabilityResponse:
+        if request.owner_id != owner_id:
+            raise StoreOwnerError("explainability request owner does not match owner scope")
+        return active_advanced_explainability.explain_decision(request)
 
     return api
 

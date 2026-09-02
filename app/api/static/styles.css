@@ -411,6 +411,87 @@ dd { margin: 1px 0 0; overflow-wrap: anywhere; font: 12px var(--mono); }
 .metadata-grid { margin-top: 0; }
 .metadata-grid > div { padding-bottom: 8px; border-bottom: 1px solid var(--outline); }
 
+/* P2 Styles: History, Rebalancing, Explainability, Evaluation */
+.history-item-card, .rebalancing-action-card, .explainability-card, .eval-case-card {
+  padding: 14px 16px;
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  background: var(--surface);
+  margin-bottom: 12px;
+}
+.history-compare-box {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--outline);
+}
+.compare-inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.compare-inputs input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--outline);
+  border-radius: 6px;
+  font: 12px var(--mono);
+}
+.rebalancing-table, .eval-table, .diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.rebalancing-table th, .rebalancing-table td,
+.eval-table th, .eval-table td,
+.diff-table th, .diff-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--outline);
+  text-align: left;
+}
+.rebalancing-table th, .eval-table th, .diff-table th {
+  background: var(--surface-subtle);
+  font-weight: 600;
+}
+.action-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font: 700 11px var(--mono);
+}
+.action-badge.BUY { background: var(--sage-soft); color: var(--sage); }
+.action-badge.SELL { background: var(--clay-soft); color: #8a2f1b; }
+.action-badge.REDUCE { background: var(--yellow-soft); color: var(--yellow); }
+.action-badge.HOLD { background: var(--surface-subtle); color: var(--ink); }
+
+.driver-item, .counterfactual-item, .trigger-item {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--sage);
+  background: var(--surface-subtle);
+  border-radius: 0 6px 6px 0;
+}
+.driver-item.high { border-left-color: var(--clay); }
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.score-card {
+  padding: 12px;
+  border: 1px solid var(--outline);
+  border-radius: 8px;
+  text-align: center;
+  background: var(--surface);
+}
+.score-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 4px;
+}
+
 @media (max-width: 900px) {
   .app-shell { display: block; }
   .sidebar { position: static; width: 100%; height: auto; padding: 16px; }

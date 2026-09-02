@@ -50,6 +50,10 @@ from app.service.scenario_simulation import (
     FixtureScenarioSimulationService,
     ScenarioSimulationError,
 )
+from app.service.recommendation_history import RecommendationHistoryService
+from app.service.portfolio_rebalancing import PortfolioRebalancingService
+from app.service.evaluation_dashboard import EvaluationDashboardService
+from app.service.advanced_explainability import AdvancedExplainabilityService
 
 __all__ = [
     "AdvisorQueryError",
@@ -80,4 +84,8 @@ __all__ = [
     "PortfolioOptimizationError",
     "FixtureScenarioSimulationService",
     "ScenarioSimulationError",
+    "RecommendationHistoryService",
+    "PortfolioRebalancingService",
+    "EvaluationDashboardService",
+    "AdvancedExplainabilityService",
 ]
