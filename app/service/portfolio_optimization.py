@@ -359,6 +359,8 @@ class FixturePortfolioOptimizationService:
         exposure: ExposureResult,
         concentration: ConcentrationResult,
         assessment: RiskBudgetAssessment,
+        *,
+        technology_cap_override: Decimal | None = None,
     ) -> PortfolioOptimizationResponse:
         invalidation = (
             "Risk Profile version or risk budget rule changes",
@@ -476,11 +478,18 @@ class FixturePortfolioOptimizationService:
             for sector, values in sectors.items()
         }
         budget = assessment.budget
+        technology_cap = (
+            budget.max_technology_weight_pct
+            if technology_cap_override is None
+            else technology_cap_override
+        )
+        if technology_cap < Decimal("0") or technology_cap > Decimal("100"):
+            raise PortfolioOptimizationError("technology cap override is outside the valid range")
         sector_caps: dict[str, int] = {}
         for sector, values in sectors.items():
             cap = budget.max_sector_weight_pct
             if sector in _TECHNOLOGY_SECTORS:
-                cap = min(cap, budget.max_technology_weight_pct)
+                cap = min(cap, technology_cap)
             if sector == _UNCLASSIFIED_SECTOR:
                 cap = budget.max_unclassified_weight_pct
             cap_cents = min(_cents(cap), len(values) * _cents(budget.max_single_asset_weight_pct))
@@ -490,7 +499,7 @@ class FixturePortfolioOptimizationService:
         technology_sectors = sorted(
             sector for sector in sectors if sector in _TECHNOLOGY_SECTORS
         )
-        technology_cap_cents = _cents(budget.max_technology_weight_pct)
+        technology_cap_cents = _cents(technology_cap)
         technology_initial = sum(
             (initial_sector[sector] for sector in technology_sectors),
             0,
@@ -672,7 +681,7 @@ class FixturePortfolioOptimizationService:
             0,
         )
         for dimension, current_cents_value, target_cents_value, cap in (
-            (OptimizationDimension.TECHNOLOGY, technology_current, technology_target, budget.max_technology_weight_pct),
+            (OptimizationDimension.TECHNOLOGY, technology_current, technology_target, technology_cap),
             (OptimizationDimension.UNCLASSIFIED, unclassified_current, unclassified_target, budget.max_unclassified_weight_pct),
         ):
             cid = _stable_id("optimization-constraint", dimension.value)
