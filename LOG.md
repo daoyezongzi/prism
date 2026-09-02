@@ -1237,7 +1237,7 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
 - 产品差异：缓存/备用/陈旧不是静默答案变体，而是可审计 mode；stale 自动失去
   VERIFIED 资格，用户可以知道何时需要复核。Phase 30 已在独立 worktree 接受，未 push。
 
-## 2026-09-02 — MVP Phase 31 Advanced Evidence UI（进行中）
+## 2026-09-02 — MVP Phase 31 Advanced Evidence UI（已验收）
 
 ### 计划与 worktree
 
@@ -1263,7 +1263,7 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
   `tools/advanced_evidence_ui_smoke.cjs`；实测浏览器路由注入 stale/fallback，仅用于
   本地 UI 语义验证，不改变服务端契约。
 
-### 当前验证（等待最终验收记录）
+### 验证与验收
 
 - 阶段静态测试 `3 passed`；全量回归 `434 passed`，仅已知 Starlette/httpx
   deprecation warning。
@@ -1271,5 +1271,11 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
   覆盖 Research Matrix、Stock、Fund、Convertible Bond、Advisor、Evidence ID 搜索、
   VERIFIED/stale/fallback mode、cache age、owner 切换清理、窄屏键盘 focus；外部请求
   `[]`、console errors `[]`。
-- 独立复审和最终 `evaluate_mvp`、resilience load、wheel/安全扫描仍待完成，计划状态仍为
-  `PLANNED`，尚未进入下一阶段。
+- 独立复审记录见 `docs/reviews/2026-09-02-phase-31-advanced-evidence-ui-review.md`；发现的
+  provenance、Context Memory restore 和 event reload 残留均已修复，计划状态改为
+  `ACCEPTED`。
+- 最终 `evaluate_mvp --repeat 100` 为 `9/9`、所有指标 `1.0`；resilience load 为 fresh /
+  stale 各 `100/100`、错误 `0`；wheel `115` entries 的静态资源与隔离 import 通过；
+  真实浏览器 smoke 覆盖五轨道、Advisor、stale/fallback、context restore、owner 清理、
+  窄屏键盘和无外部请求。
+- Phase 31 已在独立 worktree 接受，未 push；下一阶段必须从该接受提交创建全新 worktree。

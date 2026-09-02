@@ -1,6 +1,6 @@
 # Prism MVP Phase 31：Advanced Evidence UI 计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 日期：2026-09-02
 
@@ -167,4 +167,36 @@ worktree。实时 SkillHub/生产证据服务、持久化索引、认证与更�
 
 ## 7. 验收记录
 
-- 待实施、复审和验收后补齐；本节只记录实际提交、测试输出和浏览器证据，不预填结果。
+- 计划提交：`7826035 docs: plan phase 31 advanced evidence ui`，先于业务代码。
+- 初版实现：`fd56d19 feat: add advanced evidence explorer`；新增 Evidence chain explorer、
+  owner-bound 聚合、质量/serving mode/轨道/promotion 筛选、详情链和 DOM/textContent
+  安全边界；契约说明见 `docs/advanced-evidence-ui.md`。
+- 复审修复：`fba69ec` 修正同 Provider 多节点的 source-to-node provenance 映射并将
+  fallback 设为 review；`467bfb5` 清除 Context Memory 恢复后的旧 selected receipt；
+  `29e1d23` 在决策列表刷新开始时清除旧回执，避免刷新失败残留。完整记录见
+  `docs/reviews/2026-09-02-phase-31-advanced-evidence-ui-review.md`。
+- 阶段测试：`tests/unit/test_advanced_evidence_ui.py` 通过（3 项）；全量回归 `434 passed`，
+  仅已知 Starlette/httpx deprecation warning，Phase 30 的 `431` 项基线保持绿色。
+- 代码门：`python -m compileall -q app tools tests`、公开 API/包内 import、
+  `node --check app/api/static/app.js`、`node --check tools/advanced_evidence_ui_smoke.cjs`、
+  `git diff --check` 全部通过。静态扫描未发现 innerHTML/outerHTML/HTML sink、外部网络、
+  LLM/Gemini、凭据或 raw exception 输出。
+- 固定评测：`python -m tools.evaluate_mvp --repeat 100 --json`，9/9 cases，所有语义指标
+  `1.0`（本次本地 fixture P50/P95=`12.413/16.542 ms`）。
+- resilience 回归：`python -m tools.provider_resilience_load_test --requests 100`，fresh
+  `100/100 CACHE_FRESH`、stale `100/100 CACHE_STALE_FALLBACK`、错误 `0`、request IDs
+  唯一，healthy provider 回源 `1` 次，cache entries `1`；UI 未改变服务端 mode/age 语义。
+- wheel：`python -m pip wheel . --no-deps` 成功，`115` entries；包含更新后的
+  `app/api/static/index.html`、`app/api/static/app.js`、`app/api/static/styles.css` 和
+  `app/providers/resilience.py`；解压隔离后 `InMemoryProviderCache`、`ProviderServingMode`
+  与 `create_app()` 公开导入成功。
+- 真实浏览器：本地 Uvicorn + headless Chromium 运行
+  `tools/advanced_evidence_ui_smoke.cjs` 通过，覆盖 Research Matrix、Stock、Fund、
+  Convertible Bond、Advisor、Evidence ID 搜索、VERIFIED/stale/fallback、cache age、
+  Context Memory 显式恢复清理、owner 切换清理、窄屏键盘 focus；外部请求 `[]`、
+  console errors `[]`。这是本地 fixture/ASGI 验证，不代表实时市场数据或生产 SLA。
+- 产品差异：普通聊天往往隐藏数据是直连、缓存、备用源还是陈旧；Prism 将 provider/source/
+  lineage、取得时间、serving mode、闭合路径和需复核原因置于可筛选详情中，且 stale /
+  fallback 不会被包装成 VERIFIED 或建议。
+- 最终状态：`ACCEPTED`；实时 SkillHub、后端证据索引、认证、云/生产持久化、自动刷新、
+  复杂图视图和 Recommendation 旁路仍按本计划明确未实现。

@@ -139,12 +139,14 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   公共缓存。阶段 `14` 项、全量 `431` 项回归、100 次固定评测、resilience 并发、wheel、
   静态边界与真实浏览器回归通过；仍不宣称实时 SkillHub 或生产缓存/SLA。详见
   [Provider Cache/Fallback 契约](docs/provider-cache-fallback.md)。
-- Phase 31 已加入 Advanced Evidence UI（当前 worktree 实施中）：只聚合当前 owner 已
+- Phase 31 已加入并验收 Advanced Evidence UI：只聚合当前 owner 已
   加载的 Advisor、Research Matrix、Stock、Fund 和 Convertible Bond trace，支持按
   Evidence/source/field、质量、serving mode、轨道与闭合状态筛选，并在详情展示
   provider、source、lineage、observed/retrieved、cache age 与 Finding → Fact → Evidence
   路径。stale/fallback/未闭合结果显式保持需复核，不改后端契约、不新增网络或推荐旁路；
-  完整验收记录待本阶段审查后补齐。详见 [Advanced Evidence UI 契约](docs/advanced-evidence-ui.md)。
+  `434` 项回归、固定评测、resilience 回归、wheel、静态边界与真实本地浏览器验收通过。
+  详见 [Advanced Evidence UI 契约](docs/advanced-evidence-ui.md) 与
+  [Phase 31 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)。
 
 尚未实现：
 

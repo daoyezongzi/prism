@@ -6,10 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 31 Advanced Evidence UI is being implemented in the dedicated
-> `D:\Github_Storage\prism-phase-31` worktree. Its plan was committed before business code;
-> independent review and browser acceptance are still required before the phase can be marked
-> accepted. The next phase must start in another brand-new worktree.
+> Active phase: Phase 31 Advanced Evidence UI is accepted in the dedicated
+> `D:\Github_Storage\prism-phase-31` worktree. Its plan, implementation, independent review and
+> browser acceptance are recorded; the next phase must start in another brand-new worktree.
 
 ## P0 — Foundation
 
@@ -93,7 +92,7 @@
   fingerprint, with explicit fresh/secondary/stale serving modes, four-state preservation,
   stale Evidence downgrade and no private/failed/empty cache pollution; keep live SkillHub,
   production cache, circuit breaker and full Evidence drill-down deferred.
-- [ ] Add the Phase 31 Advanced Evidence UI explorer with owner-bound Evidence aggregation,
+- [x] Add the Phase 31 Advanced Evidence UI explorer with owner-bound Evidence aggregation,
   quality/serving-mode/source/promotion filters, provenance/freshness details, explicit stale /
   fallback review notices and no recommendation/API side effects; keep backend indexing,
   real SkillHub, authentication, cloud persistence and automatic refresh deferred.
@@ -117,8 +116,9 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 31 is active in the dedicated `D:\Github_Storage\prism-phase-31` worktree; its plan and
-initial implementation are recorded in
-`docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md`. The next useful action is to finish
-independent review and real-browser acceptance, while keeping real authentication, live Provider
-access, cloud/production persistence, backend indexing and broad conversational memory deferred.
+Phase 31 is accepted in the dedicated `D:\Github_Storage\prism-phase-31` worktree; its plan,
+implementation, review fixes and final verification are recorded in
+`docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md`. The next useful action is to start
+the next clearly scoped phase in a new worktree (Scenario Simulation), while keeping real
+authentication, live Provider access, cloud/production persistence, backend indexing and broad
+conversational memory deferred.
