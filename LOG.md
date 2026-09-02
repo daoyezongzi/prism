@@ -1194,3 +1194,45 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
   身份、保存时间和“本地记忆非认证”边界，控制台错误 `[]`。
 - Phase 29 已在独立 worktree 接受，未 push；下一阶段必须从该接受提交创建新的 worktree
   并先提交计划书。
+
+## 2026-09-02 — MVP Phase 30 Provider Cache/Fallback
+
+### 计划与 worktree
+
+- 从 Phase 29 接受提交 `fcf35ba` 创建全新 worktree
+  `D:\Github_Storage\prism-phase-30`，分支为
+  `codex/mvp-phase-30-provider-cache-fallback`。
+- 先提交 `docs/plans/2026-09-02-mvp-phase-30-provider-cache-fallback.md`
+  （`29c6982`），明确只做进程内、有界、fixture-first 的 Provider cache、一次备用
+  provider 和 stale 语义；实时 SkillHub、生产缓存/断路器、动态限流、完整 Evidence UI
+  和私人上下文公共缓存均排除。
+
+### 本地实现
+
+- 新增 `ProviderServingMode` 与 `ProviderResult` mode/age 契约；新增
+  `InMemoryProviderCache`（provider+fingerprint key、fresh TTL/stale grace、LRU、
+  RLock、不可变校验 payload、private/secret bypass）和 `ProviderExecutionPolicy`。
+- 扩展 `execute_with_budget`/`execute_research_run`：fresh cache → primary → 一次
+  fallback → stale cache → FAILED，EMPTY 不触发 fallback；fallback 与 stale 保留
+  provider/source/lineage，stale normalization 变为 `STALE` Evidence 和 PARTIAL 节点。
+- 将 provider、serving mode、cache age 贯穿研究节点、矩阵/个股/基金/可转债 API
+  projection；Specialist Matrix service 支持显式注入共享 policy，默认 direct 行为
+  不变。
+- 新增 Phase 30 resilience 单测与 `tools/provider_resilience_load_test.py`，补充
+  `docs/provider-cache-fallback.md` 和复审记录。
+
+### 独立复审与验收
+
+- 初版 `a2df871` 经第二轮复审发现两个 P1：result 侧 private payload 可能入 cache，
+  以及 public node response 丢失 provenance；分别由 `3972f40`、`1541fce` 修复，
+  复审结论见 `docs/reviews/2026-09-02-phase-30-provider-cache-fallback-review.md`。
+- Phase 30 tests `14 passed`；全量回归 `431 passed`（Phase 29 的 `417` 项基线保持
+  绿色），仅已知 Starlette/httpx deprecation warning。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：9/9，所有指标 `1.0`；
+  `python -m tools.provider_resilience_load_test --requests 100`：fresh/stale 各
+  100/100，错误 `0`，request IDs 唯一，healthy 回源 `1` 次。
+- compileall、公开 import、前端 `node --check`、`git diff --check`、wheel `115`
+  entries/隔离安装和静态边界扫描通过。真实本地浏览器运行四轨道矩阵为 READY、8 cards、
+  外部请求 `[]`、console errors `[]`。
+- 产品差异：缓存/备用/陈旧不是静默答案变体，而是可审计 mode；stale 自动失去
+  VERIFIED 资格，用户可以知道何时需要复核。Phase 30 已在独立 worktree 接受，未 push。

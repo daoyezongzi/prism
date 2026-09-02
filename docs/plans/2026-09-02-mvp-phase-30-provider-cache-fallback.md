@@ -1,6 +1,6 @@
 # Prism MVP Phase 30：Provider Cache 与显式降级计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 日期：2026-09-02
 
@@ -152,10 +152,34 @@ SkillHub/Tushare 的稳定边界。它不宣称已获得同花顺接口或生产
 `ACCEPTED`，再从该接受提交创建新的独立 worktree。实时 SkillHub、生产缓存/断路器、
 Advanced Evidence UI、云持久化与认证继续作为后续阶段，不在本阶段顺手实现。
 
-## 7. 验收记录（实现后填写）
+## 7. 验收记录
 
-- 计划提交：待填写（必须早于业务代码）。
-- 实现提交：待填写。
-- 复审修复：待填写。
-- 测试/评测/负载/浏览器/wheel/静态扫描：待填写。
-- 最终状态：`PLANNED`，直至所有验收门完成。
+- 计划提交：`29c6982 docs: plan phase 30 provider cache fallback`，先于业务代码。
+- 实现提交：`a2df871 feat: add explicit provider cache and fallback`。
+- provenance 投影：`29d47d8 feat: expose provider serving provenance`；把 mode/age 贯穿
+  到矩阵、个股、基金和可转债 public node response。
+- 复审修复：`3972f40 fix: bypass cache for private provider payloads`；复审记录见
+  `docs/reviews/2026-09-02-phase-30-provider-cache-fallback-review.md`，修复 result
+  侧 owner/profile/private payload 进入公共 cache 的缺口。
+- 阶段测试：`14 passed`（`tests/unit/test_provider_resilience.py`）；覆盖 mode/age、
+  fingerprint/request_id、TTL/grace/LRU、EMPTY/FAILED、fallback/stale、私有/敏感
+  payload、执行器、service 与 API 投影。
+- 全量回归：`431 passed`，仅已知 Starlette/httpx deprecation warning；Phase 29 的
+  `417` 项基线保持绿色。
+- 代码门：`python -m compileall -q app tools tests`、公开 import、
+  `node --check app/api/static/app.js`、`git diff --check` 通过。
+- 固定评测：`python -m tools.evaluate_mvp --repeat 100 --json`，9/9 cases，所有
+  指标 `1.0`；延迟 P50/P95=`10.336/12.724ms`（本地 fixture 评测）。
+- 并发/降级：`python -m tools.provider_resilience_load_test --requests 100`，fresh
+  100/100 `CACHE_FRESH`、stale 100/100 `CACHE_STALE_FALLBACK`，错误 `0`，request
+  IDs 唯一；healthy provider 只回源 `1` 次，failing provider `100` 次，cache entries
+  `1`。这是本地进程内 fixture 基线，不是生产 SLA。
+- wheel：构建成功，`115` entries；包含 `app/providers/resilience.py`、runtime、静态
+  资源和 `002_context_memory.sql`；隔离安装后公开 import 成功。
+- 浏览器：真实本地 headless 浏览器访问 `127.0.0.1:8776`，运行四轨道矩阵；状态
+  `READY`、8 个 research cards、`SUPPORTED` 可见、外部请求 `[]`、console errors `[]`。
+  本阶段不改 UI，mode/age 已在 API 节点响应契约中保留，完整 drill-down 留后续阶段。
+- 静态边界：新增代码未发现外网、LLM/Gemini、凭据读取、raw chat、HTML sink、订单或
+  Recommendation 旁路；EMPTY/FAILED 未写 cache，stale 未升级为 VERIFIED。
+- 最终状态：`ACCEPTED`；实时 SkillHub、生产 cache/断路器/动态限流、完整 Evidence
+  UI、云持久化与认证继续按计划保持未实现。

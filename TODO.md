@@ -6,9 +6,10 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 30 Provider Cache/Fallback is being implemented in the dedicated
-> `D:\Github_Storage\prism-phase-30` worktree. Its plan is committed before implementation;
-> the phase remains open until independent review and all acceptance gates pass.
+> Active phase: Phase 30 Provider Cache/Fallback is accepted in the dedicated
+> `D:\Github_Storage\prism-phase-30` worktree. Its plan, independent review and all acceptance
+> evidence are recorded; the next phase must start in a brand-new worktree with its plan
+> committed before implementation.
 
 ## P0 — Foundation
 
@@ -88,7 +89,7 @@
   SQLite migration/restart reads, explicit browser recovery and stale/owner isolation; keep
   raw chat, semantic retrieval, automatic restore, cloud sync, authentication and delete/TTL
   deferred.
-- [ ] Add the Phase 30 bounded Provider Cache/Fallback boundary keyed by public request
+- [x] Add the Phase 30 bounded Provider Cache/Fallback boundary keyed by public request
   fingerprint, with explicit fresh/secondary/stale serving modes, four-state preservation,
   stale Evidence downgrade and no private/failed/empty cache pollution; keep live SkillHub,
   production cache, circuit breaker and full Evidence drill-down deferred.
@@ -112,7 +113,9 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 30 is in the dedicated `D:\Github_Storage\prism-phase-30` worktree; its plan commit is
-`29c6982` and implementation/review evidence is still being collected. Keep real authentication,
+Phase 30 is accepted in the dedicated `D:\Github_Storage\prism-phase-30` worktree; its plan,
+implementation, review fixes and final verification are recorded in
+`docs/plans/2026-09-02-mvp-phase-30-provider-cache-fallback.md`. The next useful action is to
+start Phase 31 in a new worktree for the Advanced Evidence UI, while keeping real authentication,
 live Provider access, cloud/production persistence, cross-process cache and broad conversational
-memory deferred until a later accepted phase.
+memory deferred.
