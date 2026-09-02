@@ -6,10 +6,10 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 30 Provider Cache/Fallback is accepted in the dedicated
-> `D:\Github_Storage\prism-phase-30` worktree. Its plan, independent review and all acceptance
-> evidence are recorded; the next phase must start in a brand-new worktree with its plan
-> committed before implementation.
+> Active phase: Phase 31 Advanced Evidence UI is being implemented in the dedicated
+> `D:\Github_Storage\prism-phase-31` worktree. Its plan was committed before business code;
+> independent review and browser acceptance are still required before the phase can be marked
+> accepted. The next phase must start in another brand-new worktree.
 
 ## P0 — Foundation
 
@@ -93,6 +93,10 @@
   fingerprint, with explicit fresh/secondary/stale serving modes, four-state preservation,
   stale Evidence downgrade and no private/failed/empty cache pollution; keep live SkillHub,
   production cache, circuit breaker and full Evidence drill-down deferred.
+- [ ] Add the Phase 31 Advanced Evidence UI explorer with owner-bound Evidence aggregation,
+  quality/serving-mode/source/promotion filters, provenance/freshness details, explicit stale /
+  fallback review notices and no recommendation/API side effects; keep backend indexing,
+  real SkillHub, authentication, cloud persistence and automatic refresh deferred.
 
 ## External inputs / decisions
 
@@ -113,9 +117,8 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 30 is accepted in the dedicated `D:\Github_Storage\prism-phase-30` worktree; its plan,
-implementation, review fixes and final verification are recorded in
-`docs/plans/2026-09-02-mvp-phase-30-provider-cache-fallback.md`. The next useful action is to
-start Phase 31 in a new worktree for the Advanced Evidence UI, while keeping real authentication,
-live Provider access, cloud/production persistence, cross-process cache and broad conversational
-memory deferred.
+Phase 31 is active in the dedicated `D:\Github_Storage\prism-phase-31` worktree; its plan and
+initial implementation are recorded in
+`docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md`. The next useful action is to finish
+independent review and real-browser acceptance, while keeping real authentication, live Provider
+access, cloud/production persistence, backend indexing and broad conversational memory deferred.

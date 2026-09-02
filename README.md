@@ -133,6 +133,18 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   Provider/LLM 输出或凭据。阶段 `19` 项、全量 `417` 项回归、100 owner 并发/重启、wheel
   和真实浏览器验收通过；本地 fixture/ASGI 数字不代表生产认证、云同步或外部 SLA。详见
   [Context Memory 契约](docs/context-memory.md)。
+- Phase 30 已加入显式 Provider Cache/Fallback 边界：按公开 request fingerprint 做有界
+  fresh cache、一次备用 Provider 与 stale grace，保留四态结果、provider/source/lineage
+  身份并将 stale Evidence 降级为不可 VERIFIED；私人、敏感、EMPTY、FAILED 结果不进入
+  公共缓存。阶段 `14` 项、全量 `431` 项回归、100 次固定评测、resilience 并发、wheel、
+  静态边界与真实浏览器回归通过；仍不宣称实时 SkillHub 或生产缓存/SLA。详见
+  [Provider Cache/Fallback 契约](docs/provider-cache-fallback.md)。
+- Phase 31 已加入 Advanced Evidence UI（当前 worktree 实施中）：只聚合当前 owner 已
+  加载的 Advisor、Research Matrix、Stock、Fund 和 Convertible Bond trace，支持按
+  Evidence/source/field、质量、serving mode、轨道与闭合状态筛选，并在详情展示
+  provider、source、lineage、observed/retrieved、cache age 与 Finding → Fact → Evidence
+  路径。stale/fallback/未闭合结果显式保持需复核，不改后端契约、不新增网络或推荐旁路；
+  完整验收记录待本阶段审查后补齐。详见 [Advanced Evidence UI 契约](docs/advanced-evidence-ui.md)。
 
 尚未实现：
 
@@ -242,6 +254,8 @@ python -m pytest
 - [Phase 30 Provider Cache/Fallback 契约](docs/provider-cache-fallback.md)
 - [Phase 30 Provider Cache/Fallback 计划与验收](docs/plans/2026-09-02-mvp-phase-30-provider-cache-fallback.md)
 - [Phase 30 Provider Cache/Fallback 复审](docs/reviews/2026-09-02-phase-30-provider-cache-fallback-review.md)
+- [Phase 31 Advanced Evidence UI 契约](docs/advanced-evidence-ui.md)
+- [Phase 31 Advanced Evidence UI 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

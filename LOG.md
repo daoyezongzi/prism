@@ -1236,3 +1236,40 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
   外部请求 `[]`、console errors `[]`。
 - 产品差异：缓存/备用/陈旧不是静默答案变体，而是可审计 mode；stale 自动失去
   VERIFIED 资格，用户可以知道何时需要复核。Phase 30 已在独立 worktree 接受，未 push。
+
+## 2026-09-02 — MVP Phase 31 Advanced Evidence UI（进行中）
+
+### 计划与 worktree
+
+- 从 Phase 30 接受提交 `63f6a4e` 创建全新 worktree
+  `D:\Github_Storage\prism-phase-31`，分支为
+  `codex/mvp-phase-31-evidence-ui`。
+- 先提交 `docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md`（`7826035`），
+  明确只做当前会话 Evidence explorer、来源/新鲜度/降级可视化与 owner/run 清理；不做
+  后端索引、实时 SkillHub、认证、云持久化、LLM/Gemini 或 Recommendation 旁路。
+
+### 初版实现与复审修复
+
+- `fd56d19` 增加 Evidence chain explorer：聚合 Advisor、Research Matrix、Stock、
+  Fund 和 Convertible Bond 的 owner-bound trace，提供搜索、质量/serving mode/轨道/
+  promotion 筛选、键盘可达 rows、详情 metadata 和实际 Finding → Fact → Evidence /
+  Validation 路径；所有动态内容使用 DOM API/textContent。
+- `fba69ec` 修正多节点同 Provider 时的 provenance 选择，并将 fallback 明确显示为需
+  复核而非绿色通过。
+- `467bfb5` 修正复审发现的 Context Memory 恢复残留：清空旧 selected receipt、详情与
+  explorer selection，要求恢复后重新运行 Advisor；同时保留既有 Evidence chain 文案
+  兼容性。
+- 新增 `docs/advanced-evidence-ui.md`、静态契约测试和
+  `tools/advanced_evidence_ui_smoke.cjs`；实测浏览器路由注入 stale/fallback，仅用于
+  本地 UI 语义验证，不改变服务端契约。
+
+### 当前验证（等待最终验收记录）
+
+- 阶段静态测试 `3 passed`；全量回归 `434 passed`，仅已知 Starlette/httpx
+  deprecation warning。
+- `compileall`、`node --check`、`git diff --check` 通过；真实本地 headless 浏览器已
+  覆盖 Research Matrix、Stock、Fund、Convertible Bond、Advisor、Evidence ID 搜索、
+  VERIFIED/stale/fallback mode、cache age、owner 切换清理、窄屏键盘 focus；外部请求
+  `[]`、console errors `[]`。
+- 独立复审和最终 `evaluate_mvp`、resilience load、wheel/安全扫描仍待完成，计划状态仍为
+  `PLANNED`，尚未进入下一阶段。
