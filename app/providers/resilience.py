@@ -38,6 +38,12 @@ _PRIVATE_CACHE_MARKERS = (
     "holding",
     "position",
     "user_id",
+    "user",
+    "personal",
+    "private",
+    "risk_profile",
+    "allocation",
+    "preference",
 )
 
 _SENSITIVE_CACHE_MARKERS = (

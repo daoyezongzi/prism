@@ -15,6 +15,8 @@ from app.orchestration import (
     execute_research_run,
 )
 from app.research import ResearchNodeKind
+from app.research import ResearchScenarioId, ResearchSpecialistMatrixRequest
+from app.service import FixtureResearchSpecialistMatrixService
 from app.providers import (
     InMemoryProviderCache,
     ProviderExecutionPolicy,
@@ -311,3 +313,34 @@ def test_research_executor_propagates_fallback_provider_metadata() -> None:
     assert node_result.provider == "secondary-provider"
     assert node_result.provider_serving_mode == ProviderServingMode.FALLBACK_PROVIDER
     assert node_result.provider_cache_age_ms is None
+
+
+def test_specialist_fixture_path_can_opt_into_shared_public_cache() -> None:
+    current = [NOW]
+    cache = InMemoryProviderCache(ttl_ms=10_000, clock=lambda: current[0])
+    policy = ProviderExecutionPolicy(cache=cache)
+    service = FixtureResearchSpecialistMatrixService(provider_policy=policy)
+    template = service.matrix_template("public-research-owner")
+
+    def request(request_id: str) -> ResearchSpecialistMatrixRequest:
+        return ResearchSpecialistMatrixRequest(
+            matrix_id=template.matrix_id,
+            request_id=request_id,
+            owner_id=template.owner_id,
+            generated_at=NOW,
+            scenario_id=ResearchScenarioId.BASELINE_READY,
+        )
+
+    first = asyncio.run(service.run(request("matrix-run-a")))
+    second = asyncio.run(service.run(request("matrix-run-b")))
+    assert all(
+        node.result is not None
+        and node.result.provider_serving_mode == ProviderServingMode.DIRECT
+        for node in first.execution.state.nodes
+    )
+    assert all(
+        node.result is not None
+        and node.result.provider_serving_mode == ProviderServingMode.CACHE_FRESH
+        for node in second.execution.state.nodes
+    )
+    assert cache.stats().entries == len(template.nodes)
