@@ -2,7 +2,7 @@
 
 > 同一市场，不同约束；每个调整，都能追到底层证据。
 
-Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作台。它不把大语言模型当作金融事实来源，而是把用户画像、可信数据、确定性计算、风险合规和结构化研究组合成一条可审计的决策链。
+Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作台。它不把大语言模型当作金融事实来源，而是把用户画像、可信数据、确定性计算、风险合规和结构化研究组合成一条可审计的决策链。当前默认入口已收敛为任务优先的 Copilot 工作台，详细研究与审计工具按需展开。
 
 ## 项目真源
 
@@ -10,16 +10,18 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 
 ## 产品切入点
 
-第一条完整纵切固定为“科技基金集中持仓体检”：
+当前默认首页围绕三个用户任务组织：组合健康体检、标的深度研究、组合再平衡方案。首次使用时先确认画像和持仓，再运行分析，最后查看依据、风险和下一步行动。工作台提供张先生（R3 平衡）、李阿姨（R2 稳健）、王同学（R4 进取）三个脱敏示例画像，也支持编辑本地自定义画像和持仓。
+
+核心决策链仍以“科技基金集中持仓体检”为第一条完整纵切：
 
 1. 用户导入持仓并确认风险、期限、流动性和禁投约束；
-2. 系统穿透基金/ETF 暴露，识别行业、风格和相关性集中；
+2. 系统穿透基金/ETF 暴露，识别行业、风格和资产集中；
 3. 宏观、行业、个股和基金研究节点并行取得结构化证据；
 4. 确定性组合与风险引擎计算调整前后的影响；
-5. 系统给出守稳、均衡、进取三种调整区间；
+5. 系统给出守稳、均衡、进取三种调整区间，并可生成确定性再平衡行动计划；
 6. 任意建议都可追溯到 `Recommendation -> Finding -> Fact -> Evidence`，并显示冲突、缺失和失效条件。
 
-用户选择 Prism 的理由不是“Agent 更多”，而是能看见：哪一条个人约束改变了结果、最小需要调整什么、风险改善了多少，以及这项判断何时不再成立。
+用户选择 Prism 的理由不是“Agent 更多”，而是能看见：哪一条个人约束改变了结果、最小需要调整什么、风险改善了多少，以及这项判断何时不再成立。Copilot 的自然语言交互只是入口和解释层，核心金融算术、证据闭环和风险闸门仍由确定性服务执行。
 
 ## 当前状态
 
@@ -154,22 +156,46 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   浏览器验收通过，外部请求与 console error 均为 `[]`。详见
   [Phase 32 中文 UI 与导航计划](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
   与 [Phase 32 独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)。
-- Phase 33 Scenario Simulation 目前仅完成执行计划，尚未实现：计划从已确认画像/持仓
-  出发，提供四个固定的 fixture-first 假设覆盖（基线、科技上限收紧、头部资产减少
-  10 个百分点、基金穿透部分缺失），输出确定性基线→模拟差异，并严格不升级事实、
-  建议、回执或交易指令。计划、复用边界、API/UI 设计、独立审查清单与下一 agent 的
-  交接规则见 [Phase 33 Scenario Simulation 计划](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)。
+- Phase 33 Scenario Simulation 已实现并验收：从已确认画像/持仓出发，提供四个固定的
+  fixture-first 假设场景（基线、科技上限收紧、头部资产减少 10 个百分点、基金穿透
+  部分缺失），输出确定性基线→模拟差异；模拟值与 Fact/Finding/Recommendation/
+  DecisionEvent 分离，并保持 `READY/REVIEW_REQUIRED/BLOCKED` 降级语义。详见
+  [情景模拟契约](docs/scenario-simulation.md) 与
+  [Phase 33 计划与验收](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)。
+- Phase 34–37 P2 能力已实现并验收：历史建议支持不可变回溯、同 owner 回执对比和审计
+  差分；组合再平衡支持 Decimal 守恒、0.50% deadband、换手上限和先卖后买的流动性
+  排序；评测看板执行版本化 `eval_cases/` 并汇总通过率、证据覆盖、幻觉率和延迟分位数；
+  高级可解释性生成确定性因果 DAG、关键驱动归因、反事实条件和失效触发器。详见
+  [P2 四项里程碑计划](docs/plans/2026-09-02-mvp-phase-34-to-37-p2-milestones.md)。
+- Phase 38 已将默认首页收敛为 Copilot 任务中心：支持三层信息架构、三个示例画像、
+  组合体检/标的研究/智能调仓三个核心任务、自然语言问题路由、L2 决策卡和一键跳转的
+  L3 专家审计；自定义画像、持仓输入、浏览器端会话记录和响应式布局也已接入。
+- Phase 39 已加入可选的 OpenAI-compatible 流式 LLM 客户端（可配置 DeepSeek、OpenAI、
+  Qwen-compatible endpoint）、ReAct 工具调用、个股/ETF 查询、问财语义 Provider
+  适配器和自然语言持仓解析。未配置 API key 时使用本地确定性模拟；当前自动化验证主要
+  使用内置数据集和离线回退，不等于实时行情或真实 SkillHub 网络验收。
+- 当前主分支已完成 P2 Phase 34–39 与默认工作台 UX 收敛；下一步是外部数据/凭据接入、
+  性能压测和竞赛交付物整理。
 
-尚未实现：
+## 当前限制与待补齐
 
-- 真实同花顺问财 SkillHub Provider 网络接入；
-- 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
-- Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
-- 结构化 Context Memory 之外的长期对话记忆、语义检索、自动恢复与跨设备同步；
-- 完整 Portfolio/Risk Profile CRUD、真实持仓导入和真实端到端场景；
-- 组合相关性/协方差、流动性压力、交易成本、资产类别上限、历史回测和全局最优求解；
-- 宏观、行业、个股、ETF/Fund、可转债的真实 SkillHub Provider、实时数据和完整工作台消费；
-- 真实外部 100 并发、3 秒响应和长期可用性验证。
+- 真实同花顺问财 SkillHub 网络调用、竞赛凭据、配额、留存和输出展示权仍未接入或验证。
+  当前 `LiveWencaiProvider` 是本地 Provider 适配器，不应视为已连通的远程 SkillHub。
+- `LiveMarketProvider` 与 `/api/v1/copilot/live-*` 当前读取仓库内置的 A 股/ETF 数据字典，
+  未命中时使用安全占位回退；这些值不代表实时行情、实时估值或投资级数据源。
+- 远程 LLM 只在配置 API key 后通过 OpenAI-compatible `/chat/completions` 流式调用；无 key
+  时走本地模拟。当前 API key 配置会保存在浏览器 `localStorage`，服务端仅保存在进程内，
+  不具备生产级密钥管理能力。
+- 生产认证、多租户身份、PostgreSQL/云端持久化和生产级 Recommendation/Decision Receipt
+  审计 API 尚未完成；当前 owner 隔离是本地协议级边界。
+- 通用自然语言画像抽取、完整 Portfolio/Risk Profile CRUD、真实账户导入和真实端到端场景
+  尚未完成；结构化 Context Memory 之外的语义检索、跨设备同步和长期对话记忆也未完成。
+- 组合相关性/协方差、流动性压力、交易成本、资产类别上限、历史回测和全局最优求解仍未
+  完成；现有优化、模拟和再平衡输出均为 `ADVISORY_ONLY`，不执行真实交易或下单。
+- 真实外部 100 并发、3 秒响应、长期可用性以及接近生产环境的数据质量尚未验证；固定评测
+  和 ASGI/fixture 负载结果不能外推为市场准确率或生产 SLA。
+- 复用/开源许可、竞赛评分附录和上游数据使用条款仍待确认，当前仓库不宣称已达到竞赛
+  提交或生产部署条件。
 
 ## 核心不变量
 
@@ -182,21 +208,38 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
 - Provider 失败必须显式降级；
 - 每项能力必须有新鲜测试证据。
 
-## 本地开发
+## 本地运行
 
-要求 Python 3.11 或更高版本。
+要求 Python 3.11 或更高版本。Windows 下可使用脚本启动本地工作台：
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\python -m pip install -e ".[dev]"
+.venv\Scripts\python -m pip install -e ".[dev,web]"
+.\start.bat
+```
+
+服务默认监听 `http://127.0.0.1:8000`，浏览器入口为 `/`，OpenAPI 文档为
+`/api/docs`，健康检查为 `/api/health`。不使用启动脚本时，可以直接运行：
+
+```powershell
+.venv\Scripts\python -m uvicorn app.api.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+仅运行测试时：
+
+```powershell
 .venv\Scripts\python -m pytest
 ```
 
-当前环境若已安装兼容版本的 Pydantic 与 pytest，也可直接运行：
+## 当前验证基线
 
-```powershell
-python -m pytest
-```
+在当前工作区已验证：
+
+- `python -m pytest`：`472 passed`，另有 1 条已知的 Starlette/httpx 弃用警告；
+- `python -m tools.evaluate_mvp --json`：9/9 固定评测用例通过，核心质量指标为 `1.0`；
+- `node --check app/api/static/app.js` 与 `python -m compileall -q app tools` 通过。
+
+上述数字来自 fixture、ASGI 和本地静态检查，不代表实时市场准确率、外部并发能力或生产 SLA。
 
 ## 仓库索引
 
@@ -272,7 +315,19 @@ python -m pytest
 - [Phase 31 Advanced Evidence UI 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)
 - [Phase 32 中文 UI 与导航计划与验收](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
 - [Phase 32 中文 UI 与导航独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)
-- [Phase 33 Scenario Simulation 执行计划（待实现）](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)
+- [Phase 33 Scenario Simulation 契约](docs/scenario-simulation.md)
+- [Phase 33 Scenario Simulation 计划与验收](docs/plans/2026-09-02-mvp-phase-33-scenario-simulation.md)
+- [Phase 33 Scenario Simulation 独立审查](docs/reviews/2026-09-02-phase-33-scenario-simulation-review.md)
+- [Phase 34–37 P2 四项里程碑计划](docs/plans/2026-09-02-mvp-phase-34-to-37-p2-milestones.md)
+- [Phase 34 Recommendation History](docs/recommendation-history.md)
+- [Phase 35 Portfolio Rebalancing](docs/portfolio-rebalancing.md)
+- [Phase 36 Evaluation Dashboard](docs/evaluation-dashboard.md)
+- [Phase 37 Advanced Explainability](docs/advanced-explainability.md)
+- [Phase 38 Copilot 任务中心](app/api/static/index.html)
+- [Phase 39 Copilot Agent](app/llm/agent.py)
+- [Phase 39 OpenAI-compatible LLM 客户端](app/llm/client.py)
+- [Phase 39 市场/ETF Provider](app/providers/live_market.py)
+- [Phase 39 问财 Provider 适配器](app/providers/live_wencai.py)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 
