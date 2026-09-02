@@ -1,9 +1,9 @@
 # Prism MVP Phase 32：中文 UI 与导航选中态计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`（实现、独立审查、全量回归与真实浏览器验收完成）
 
 基线：Phase 31 已验收提交 `d6fccd7`；本阶段在全新 worktree
-`D:\Github_Storage\prism-phase-32`、分支 `codex/mvp-phase-32-scenario-simulation` 中执行。
+`D:\Github_Storage\prism-phase-32`、分支 `codex/mvp-phase-32-ui-localization-navigation` 中执行。
 
 ## 1. 阶段目标
 
@@ -114,3 +114,26 @@
 - 机器枚举若完全翻译会削弱日志对照，故采用“中文说明 + 稳定代码标识”的明确规则。
 - 导航只做 hash 同步，不做滚动侦测；避免滚动过程覆盖用户刚点击的选中态，后续如需
   滚动跟随必须另立 UX 计划。
+
+## 9. 最终验收记录
+
+日期：2026-09-02。独立审查已记录于
+`docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md`，其中的 P1
+场景值边界、降级文案和 P2 标题问题均已修复。
+
+- `python -m pytest`：`436 passed`，仅已知 Starlette/httpx deprecation warning；
+  新增中文 UI/导航契约和浏览器 smoke 断言均通过。
+- `python -m compileall -q app tools tests`、`node --check app/api/static/app.js`、
+  `git diff --check`：通过。
+- `python -m tools.evaluate_mvp --repeat 100 --json`：`9/9`，case pass、profile
+  alignment、risk/compliance/evidence coverage、semantic replay equality 均为 `1.0`。
+- `python -m tools.provider_resilience_load_test --requests 100`：fresh/stale 各
+  `100/100`，错误 `0`，request IDs 唯一。
+- `python -m pip wheel . --no-deps`：`115` entries，包含
+  `app/api/main.py`、`app/api/static/index.html` 与 `app/api/static/app.js`，隔离检查通过。
+- 本地 headless browser smoke：导航点击与直接 hash、中文关键文案、场景原始 ID、
+  PARTIAL/stale/fallback、Evidence 详情、owner 切换/恢复和窄屏键盘焦点均通过；
+  `external_requests=[]`、`console_errors=[]`。
+
+结论：Phase 32 达到接受条件；工作树提交后保持干净。P2 Scenario Simulation 不在本
+阶段实现，下一 agent 必须从接受提交创建全新 Phase 33 worktree 并遵循独立计划。

@@ -45,9 +45,384 @@
   };
   const byId = (id) => document.getElementById(id);
 
+  const DISPLAY_VALUE_LABELS = Object.freeze({
+    READY: "就绪（READY）",
+    PASS: "通过（PASS）",
+    VERIFIED: "已验证（VERIFIED）",
+    STALE: "陈旧/需复核（STALE）",
+    CONFLICTING: "来源冲突（CONFLICTING）",
+    INVALID: "无效（INVALID）",
+    REVIEW_REQUIRED: "待复核（REVIEW_REQUIRED）",
+    BLOCKED: "已阻断（BLOCKED）",
+    COMPLETED: "已完成（COMPLETED）",
+    COMPLETE: "已完成（COMPLETE）",
+    PARTIAL: "部分完成（PARTIAL）",
+    FAILED: "失败（FAILED）",
+    EMPTY: "无结果（EMPTY）",
+    SUPPORTED: "已支持（SUPPORTED）",
+    CONTRADICTED: "来源冲突（CONTRADICTED）",
+    UNRESOLVED: "未解决（UNRESOLVED）",
+    INSUFFICIENT: "数据不足（INSUFFICIENT）",
+    CLEAR: "规则未触发（CLEAR）",
+    WATCH: "需关注（WATCH）",
+    HIGH_RISK: "高风险（HIGH_RISK）",
+    GROWTH: "成长（GROWTH）",
+    ETF_FUND: "ETF / 基金（ETF_FUND）",
+    MACRO: "宏观（MACRO）",
+    INDUSTRY: "行业（INDUSTRY）",
+    STOCK: "个股（STOCK）",
+    TECHNOLOGY: "科技（Technology）",
+    HEALTHCARE: "医疗健康（Healthcare）",
+    FINANCE: "金融（Finance）",
+    INDUSTRIALS: "工业（Industrials）",
+    UTILITIES: "公用事业（Utilities）",
+    UNCLASSIFIED: "未分类（UNCLASSIFIED）",
+    EXPLICIT_SAVE: "显式保存（EXPLICIT_SAVE）",
+    HOLD: "持有（HOLD）",
+    REDUCE: "降低（REDUCE）",
+    BUY: "买入（BUY）",
+    SELL: "卖出（SELL）",
+    WATCHLIST: "观察（WATCHLIST）",
+    BALANCED: "平衡（BALANCED）",
+    CONSERVATIVE: "保守（CONSERVATIVE）",
+    AGGRESSIVE: "进取（AGGRESSIVE）",
+    LOW: "低（LOW）",
+    MEDIUM: "中（MEDIUM）",
+    HIGH: "高（HIGH）",
+    SHORT: "短期（SHORT）",
+    LONG: "长期（LONG）",
+    NOVICE: "新手（NOVICE）",
+    INTERMEDIATE: "中等（INTERMEDIATE）",
+    EXPERIENCED: "丰富（EXPERIENCED）",
+    MODERATE: "中等（MODERATE）",
+    CNY: "人民币元（CNY）",
+    PCT: "百分比（PCT）",
+    USD: "美元（USD）",
+    RATING_RANK: "评级序数（rating_rank）",
+    SCORE: "分数（score）",
+    REPAIRED: "已修复（REPAIRED）",
+    WITHIN_LIMIT: "未超过上限（WITHIN_LIMIT）",
+    USE_QUESTIONNAIRE: "使用问卷值（USE_QUESTIONNAIRE）",
+    USE_EXTRACTION: "使用提取值（USE_EXTRACTION）",
+    DIRECT: "主数据提供方直连（DIRECT）",
+    CACHE_FRESH: "新鲜缓存（CACHE_FRESH）",
+    FALLBACK_PROVIDER: "备用数据提供方（FALLBACK_PROVIDER）",
+    CACHE_STALE_FALLBACK: "陈旧缓存回退（CACHE_STALE_FALLBACK）",
+    UNAVAILABLE: "未提供（UNAVAILABLE）",
+    ACCOUNTS_RECEIVABLE_CNY: "应收账款（accounts_receivable_cny）",
+    DEBT_RATIO_PCT: "资产负债率（debt_ratio_pct）",
+    GROSS_MARGIN_PCT: "毛利率（gross_margin_pct）",
+    NET_PROFIT_CNY: "净利润（net_profit_cny）",
+    OPERATING_CASH_FLOW_CNY: "经营活动现金流（operating_cash_flow_cny）",
+    REVENUE_CNY: "营业收入（revenue_cny）",
+    REVENUE: "营业收入（revenue）",
+    TECHNOLOGY_WEIGHT_PCT: "科技行业权重（technology_weight_pct）",
+    GROWTH_PCT: "增长率（growth_pct）",
+    POLICY_RATE_PCT: "政策利率（policy_rate_pct）",
+    ANNUALIZED_VOLATILITY_PCT: "年化波动率（annualized_volatility_pct）",
+    EXPENSE_RATIO_PCT: "费率（expense_ratio_pct）",
+    MAX_DRAWDOWN_PCT: "最大回撤（max_drawdown_pct）",
+    TOP10_WEIGHT_PCT: "前十大持仓权重（top10_weight_pct）",
+    TRACKING_ERROR_PCT: "跟踪误差（tracking_error_pct）",
+    BOND_FLOOR: "债底（bond_floor）",
+    BOND_PRICE: "转债价格（bond_price）",
+    CONVERSION_PREMIUM_PCT: "转股溢价率（conversion_premium_pct）",
+    CONVERSION_PRICE: "转股价（conversion_price）",
+    CONVERSION_VALUE: "转股价值（conversion_value）",
+    CREDIT_RATING_RANK: "信用评级序数（credit_rating_rank）",
+    LIQUIDITY_SCORE: "流动性等级序数（liquidity_score）",
+    UNDERLYING_STOCK_PRICE: "正股价格（underlying_stock_price）",
+    YIELD_TO_MATURITY_PCT: "到期收益率（yield_to_maturity_pct）",
+    CAP_AND_REDISTRIBUTE_V1: "上限重分配（CAP_AND_REDISTRIBUTE_V1）",
+    LTE: "不高于（LTE）",
+    GTE: "不低于（GTE）",
+    GT: "高于（GT）",
+    LT: "低于（LT）",
+    EQ: "等于（EQ）",
+    INFO: "提示（INFO）",
+    WARN: "警告（WARN）",
+    WARNING: "警告（WARNING）",
+    CRITICAL: "严重（CRITICAL）",
+    ERROR: "错误（ERROR）",
+    SOURCE_PARTIAL: "来源部分缺失（SOURCE_PARTIAL）",
+    SOURCE_DISAGREEMENT: "来源分歧（SOURCE_DISAGREEMENT）",
+    SOURCE_EMPTY: "来源无结果（SOURCE_EMPTY）",
+    SOURCE_FAILED: "来源失败（SOURCE_FAILED）",
+    INFEASIBLE: "不可行（INFEASIBLE）",
+    "Synthetic Balanced ETF": "合成平衡 ETF（Synthetic Balanced ETF）",
+    "Synthetic Technology Basket": "合成科技资产篮子（Synthetic Technology Basket）",
+    "Synthetic Healthcare Basket": "合成医疗健康资产篮子（Synthetic Healthcare Basket）",
+    "Synthetic Finance Basket": "合成金融资产篮子（Synthetic Finance Basket）",
+    "Synthetic Industrials Basket": "合成工业资产篮子（Synthetic Industrials Basket）",
+    "Synthetic Utilities Basket": "合成公用事业资产篮子（Synthetic Utilities Basket）",
+  });
+
+  const DISPLAY_SCENARIO_LABELS = Object.freeze({
+    BASELINE_READY: "基线：完整多资产快照（BASELINE_READY）",
+    SOURCE_PARTIAL: "来源部分缺失（SOURCE_PARTIAL）",
+    SOURCE_DISAGREEMENT: "来源分歧（SOURCE_DISAGREEMENT）",
+    SOURCE_EMPTY: "来源无结果（SOURCE_EMPTY）",
+    SOURCE_FAILED: "来源失败（SOURCE_FAILED）",
+    INFEASIBLE: "不可行：配置上限无法同时满足（INFEASIBLE）",
+  });
+
+  const DISPLAY_DESCRIPTIONS = Object.freeze({
+    "complete multi-asset snapshot": "完整多资产持仓快照",
+    "fund look-through coverage is below 100 percent": "基金穿透覆盖率低于 100%",
+    "one-asset concentration cannot satisfy every configured cap": "单一资产集中度无法同时满足全部配置上限",
+    "provider returned no records for the requested scope": "数据提供方在请求范围内没有返回记录",
+    "synthetic fixture returned no records for the requested scope": "合成样例在请求范围内没有返回记录",
+    "synthetic fixture omitted a required field": "合成样例缺少必需字段",
+    "synthetic fixture source was unavailable": "合成样例来源不可用",
+    "source B was unavailable in this offline replay": "来源 B 在离线回放中不可用",
+    "research run was not fully completed; findings require human review": "研究运行未完整完成；发现需要人工复核",
+    "research run was partial; supported claim requires human review": "研究运行部分完成；已支持结论需要人工复核",
+    "research run was not completed; supported claim requires human review": "研究运行未完成；已支持结论需要人工复核",
+    "claim requires review before it can be consumed downstream": "结论在下游使用前需要人工复核",
+    "provider returned a partial payload with declared missing fields": "数据提供方返回了已声明缺失字段的部分结果",
+    "provider returned a partial payload requiring review": "数据提供方返回部分结果，需要人工复核",
+    "provider output could not be normalized safely": "数据提供方结果无法安全规范化",
+    "provider served stale cached data because fresh data was unavailable": "新鲜数据不可用，已提供陈旧缓存",
+    "one or more stale provider fields were not usable as scalar observations": "一个或多个陈旧来源字段不能作为标量观测使用",
+    "stale provider output contained no usable scalar observation": "陈旧来源结果没有可用的标量观测",
+    "provider returned no usable scalar observation": "数据提供方没有返回可用的标量观测",
+    "one or more provider fields were not usable as scalar observations": "一个或多个来源字段不能作为标量观测使用",
+    "partial provider output contained no usable scalar observation": "部分来源结果没有可用的标量观测",
+    "provider did not return usable data within the node boundary": "数据提供方未在节点边界内返回可用数据",
+    "research run budget was exhausted before provider execution": "研究运行预算在数据提供方执行前已耗尽",
+    "provider identity did not match the requested boundary": "数据提供方身份与请求边界不匹配",
+    "provider execution failed safely": "数据提供方执行已安全失败",
+    "node was not started because a dependency did not complete": "依赖项未完成，因此节点未启动",
+    "one or more required research nodes are incomplete": "一个或多个必需研究节点未完成",
+    "optional research nodes were incomplete; run is partial": "可选研究节点未完成；本次运行为部分完成",
+    "research run deadline exceeded before node completion": "研究运行在节点完成前超过截止时间",
+    "research run deadline exceeded; incomplete nodes were failed safely": "研究运行超过截止时间；未完成节点已安全标记失败",
+    "required research node did not complete; run was failed safely": "必需研究节点未完成；本次运行已安全失败",
+    "research run stopped after a required node was incomplete": "必需研究节点未完成，研究运行已停止",
+    "exposure or concentration input is not complete": "暴露或集中度输入不完整",
+    "unclassified exposure requires review": "未分类暴露需要复核",
+    "unlooked-through exposure requires review": "未完成基金穿透的暴露需要复核",
+    "asset sector classification is ambiguous": "资产行业分类不明确",
+    "configured asset and sector caps cannot close to 100 percent": "配置的资产与行业上限无法闭合至 100%",
+    "partial replay requires a fund look-through snapshot": "部分回放需要基金穿透快照",
+    "exposure or concentration calculation failed": "暴露或集中度计算失败",
+    "risk-budget assessment is blocked; no allocation envelope was produced": "风险预算评估已阻断；未生成配置约束包",
+    "budget limits or input coverage require human review; no executable instruction was produced": "预算上限或输入覆盖需要人工复核；未生成可执行指令",
+    "exposure report is unavailable; concentration was blocked": "暴露报告不可用；集中度评估已阻断",
+    "exposure data is partial; concentration requires review": "暴露数据不完整；集中度评估需要复核",
+    "concentration report is unavailable; budget assessment was blocked": "集中度报告不可用；风险预算评估已阻断",
+    "concentration data is partial; assessment requires review": "集中度数据不完整；风险预算评估需要复核",
+    "recommendation input failed contract validation": "建议输入未通过契约校验",
+    "recommendation identity contains a sensitive field": "建议身份包含敏感字段",
+    "recommendation inputs do not share one owner": "建议输入不属于同一隔离标识",
+    "recommendation inputs do not share one profile version": "建议输入不属于同一画像版本",
+    "portfolio and exposure inputs do not close one snapshot": "持仓与暴露输入未闭合到同一快照",
+    "risk assessment does not close the portfolio reports": "风险评估未闭合持仓报告",
+    "allocation envelope does not close the risk assessment": "配置约束包未闭合风险评估",
+    "decision gate does not match the current inputs": "决策闸门与当前输入不匹配",
+    "PASS recommendation requires complete portfolio risk inputs": "通过状态的建议需要完整持仓风险输入",
+    "recommendation generated_at must be timezone-aware": "建议生成时间必须带时区",
+    "aggregate risk breach has no executable asset mapping": "汇总风险超限没有可执行的资产映射",
+    "allocation envelope has no deterministic actionable bands": "配置约束包没有确定性可执行区间",
+    "actionable bands do not close remediation breaches": "可执行区间未闭合风险修复超限",
+    "gate input failed contract validation": "闸门输入未通过契约校验",
+    "gate identity contains a disallowed sensitive field": "闸门身份包含不允许的敏感字段",
+    "risk inputs do not share one owner": "风险输入不属于同一隔离标识",
+    "risk inputs do not share one profile": "风险输入不属于同一风险画像",
+    "risk budget is not bound to the active profile": "风险预算未绑定当前画像",
+    "allocation envelope is not bound to the risk assessment": "配置约束包未绑定风险评估",
+    "allocation constraints do not match the active risk budget": "配置约束与当前风险预算不匹配",
+    "allocation breach references do not match the risk assessment": "配置超限引用与风险评估不匹配",
+    "risk assessment contains duplicate constraint breaches": "风险评估包含重复约束超限",
+    "allocation breach is attached to the wrong constraint": "配置超限绑定了错误约束",
+    "allocation reduction does not match its risk breach": "配置缩减与风险超限不匹配",
+    "allocation status does not match the risk assessment": "配置状态与风险评估不匹配",
+    "research evidence pipeline is blocked": "研究证据流程已阻断",
+    "research evidence requires human review": "研究证据需要人工复核",
+    "ready research trace is incomplete": "就绪研究证据链不完整",
+    "research trace contains non-verified evidence": "研究证据链包含未验证证据",
+    "research trace contains a non-verified fact": "研究证据链包含未验证事实",
+    "research trace has an unknown evidence reference": "研究证据链引用了未知证据",
+    "research trace has an unknown fact reference": "研究证据链引用了未知事实",
+    "ready research bridge is incomplete": "就绪研究桥接不完整",
+    "research bridge does not match the registered trace": "研究桥接与已登记证据链不匹配",
+    "research trace must not contain recommendations": "研究证据链不得包含建议",
+    "risk budget assessment is blocked": "风险预算评估已阻断",
+    "risk budget assessment requires human review": "风险预算评估需要人工复核",
+    "allocation constraint envelope is blocked": "配置约束包已阻断",
+    "allocation constraint envelope requires human review": "配置约束包需要人工复核",
+    "ready allocation has no envelope": "就绪配置没有约束包",
+    "Provider execution was cancelled": "数据提供方执行已取消",
+    "Internal provider execution error": "数据提供方内部执行错误",
+    "Provider response identity did not match the requested boundary": "数据提供方响应身份与请求边界不匹配",
+    "source B returned no stock record for the requested period": "来源 B 在请求报告期内没有返回个股记录",
+    "source B returned no fund record for the requested period": "来源 B 在请求报告期内没有返回基金记录",
+    "source B returned no convertible bond record for the requested period": "来源 B 在请求报告期内没有返回可转债记录",
+    "offline synthetic four-track research matrix": "离线合成四轨道研究矩阵",
+    "offline synthetic stock research Demo F": "离线合成个股研究（演示 F）",
+    "offline synthetic ETF fund asset research replay": "离线合成 ETF / 基金资产研究回放",
+    "offline synthetic convertible bond asset research replay": "离线合成可转债资产研究回放",
+    "offline synthetic five-asset target-structure replay": "离线合成五资产目标结构回放",
+    "single-asset cap applied; released weight is redistributed by stable headroom order": "已应用单资产上限；释放的权重按稳定的剩余容量顺序重分配",
+    "target is deterministic and profile-conditioned; it is not a trade instruction": "目标由确定性规则和风险画像共同决定；不是交易指令",
+    "sector cap is applied before deterministic redistribution": "先应用行业上限，再执行确定性重分配",
+    "aggregate budget dimension is checked independently of sector labels": "独立检查汇总预算维度，不受行业标签影响",
+    "aggregate exposure contributions into asset and sector buckets": "将暴露贡献汇总到资产和行业桶",
+    "cap sector, technology and unclassified buckets using the confirmed risk budget": "使用已确认风险预算限制行业、科技和未分类桶",
+    "redistribute released weight by largest headroom then stable ID": "按剩余容量从大到小、再按稳定 ID 重分配释放权重",
+    "allocate each bucket proportionally with a single-asset cap and cent-level closure": "在单资产上限和分厘闭合约束下按比例分配各桶",
+    "synthetic two-source revenue cross-check": "合成双来源收入交叉核验",
+    "Review technology exposure through Macro, Industry, Stock and ETF/Fund tracks.": "通过宏观、行业、个股和 ETF / 基金轨道复核科技暴露",
+    "Review portfolio risk constraints through Macro, Industry, Stock and ETF/Fund tracks.": "通过宏观、行业、个股和 ETF / 基金轨道复核组合风险约束",
+    "Risk Profile version or risk budget rule changes": "风险画像版本或风险预算规则发生变化",
+    "portfolio bundle or position snapshot changes": "持仓包或持仓快照发生变化",
+    "fund look-through coverage or base currency changes": "基金穿透覆盖率或基准货币发生变化",
+    "CAP_AND_REDISTRIBUTE_V1 methodology changes": "上限重分配（CAP_AND_REDISTRIBUTE_V1）方法发生变化",
+    "validate owner, profile and portfolio input": "校验隔离标识、风险画像和持仓输入",
+    "calculate exposure, concentration and profile-conditioned risk budget": "计算暴露、集中度和画像约束风险预算",
+    "preserve review or blocked state when inputs are incomplete or infeasible": "输入不完整或不可行时保留待复核/阻断状态",
+    "fixture stale replay": "样例陈旧回放",
+    "technology weight threshold": "科技行业权重阈值",
+    "top10 concentration threshold": "前十大持仓集中度阈值",
+    "annualized volatility threshold": "年化波动率阈值",
+    "maximum drawdown threshold": "最大回撤阈值",
+    "expense ratio threshold": "费率阈值",
+    "conversion premium threshold": "转股溢价率阈值",
+    "bond floor threshold": "债底阈值",
+    "negative yield threshold": "负收益率阈值",
+    "credit rating rank threshold": "信用评级序数阈值",
+    "liquidity score threshold": "流动性等级序数阈值",
+  });
+
+  const DISPLAY_LABELS = Object.freeze({
+    Owner: "隔离标识",
+    Bundle: "持仓包",
+    "Position snapshot": "持仓快照",
+    "Base currency": "基准货币",
+    "As of": "截止时间",
+    Asset: "资产",
+    Position: "持仓明细",
+    Quantity: "数量",
+    "Market value": "市值",
+    Underlying: "底层资产",
+    Holding: "穿透持仓",
+    Weight: "权重",
+    "Saved at": "保存时间",
+    Profile: "风险画像",
+    Questionnaire: "风险问卷",
+    "Portfolio bundle": "持仓包",
+    "Content hash": "内容哈希",
+    "Answered at": "回答时间",
+    "Loss tolerance": "损失承受度",
+    Horizon: "投资期限",
+    Liquidity: "流动性需求",
+    Experience: "投资经验",
+    "Return expectation": "收益预期",
+    "Max drawdown": "最大回撤容忍度",
+    "Expected range": "预期收益区间",
+    "Confirmed profile": "已确认画像",
+    "Risk score": "风险评分",
+    "Risk level": "风险等级",
+    "Profile version": "画像版本",
+    "Confirmed at": "确认时间",
+    Draft: "提案草稿",
+    Status: "状态",
+    Extraction: "提取结果",
+    Confidence: "置信度",
+    "Input digest": "输入摘要",
+    Plan: "计划",
+    Intent: "意图",
+    Scope: "范围",
+    Nodes: "节点数",
+    Node: "节点",
+    Kind: "类型",
+    Missing: "缺失字段",
+    "Risk assessment": "风险评估",
+    "Allocation envelope": "配置约束",
+    "Research run": "研究运行",
+    "Finding IDs": "发现 ID",
+    "Recommendation ID": "建议 ID",
+    Run: "运行",
+    Provider: "数据提供方",
+    Source: "来源",
+    Field: "字段",
+    Value: "数值",
+    Period: "期间",
+    "Observed at": "观测时间",
+    "Retrieved at": "获取时间",
+    Lineage: "来源链",
+    "Cache age": "缓存时长",
+    Pipeline: "流程",
+    Method: "方法",
+    "Exposure report": "暴露报告",
+    Current: "当前",
+    Target: "目标",
+    Delta: "变化",
+    "Asset cap": "资产上限",
+    "Allocation range": "配置区间",
+  });
+
+  function displayLabel(value, fallback = "—") {
+    if (value === null || value === undefined || value === "") return fallback;
+    const rendered = String(value);
+    return DISPLAY_LABELS[rendered] || rendered;
+  }
+
+  function displayDescription(value, fallback = "—") {
+    if (value === null || value === undefined || value === "") return fallback;
+    const rendered = String(value);
+    if (DISPLAY_DESCRIPTIONS[rendered]) return DISPLAY_DESCRIPTIONS[rendered];
+    const replay = rendered.match(/^(.+?) · replay ([A-Z0-9_]+)$/);
+    if (replay && DISPLAY_DESCRIPTIONS[replay[1]]) {
+      return `${DISPLAY_DESCRIPTIONS[replay[1]]} · 回放 ${replay[2]}`;
+    }
+    const timeout = rendered.match(/^Request timed out after (\d+)ms$/i);
+    if (timeout) return `请求超过 ${timeout[1]} 毫秒后超时`;
+    const fixtureMiss = rendered.match(/^No matching fixture found for fingerprint (.+)$/i);
+    if (fixtureMiss) return `没有找到匹配请求指纹的合成样例：${fixtureMiss[1]}`;
+    return rendered;
+  }
+
+  function displayScenarioLabel(scenario) {
+    const value = scenario && typeof scenario === "object" ? scenario.label || scenario.scenario_id : scenario;
+    if (value === null || value === undefined || value === "") return "未命名场景";
+    return DISPLAY_SCENARIO_LABELS[String(value)] || text(value, "未命名场景");
+  }
+
+  function displayScenarioDescription(scenario) {
+    const value = scenario && typeof scenario === "object" ? scenario.description : scenario;
+    return displayDescription(value, "无场景说明");
+  }
+
+  function displayMethodology(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    const rendered = String(value);
+    return displayDescription(rendered)
+      .replace(/^deterministic Decimal ratio:/, "确定性 Decimal 比率：")
+      .replace(/^deterministic Decimal threshold:/, "确定性 Decimal 阈值：")
+      .replace(/^deterministic Decimal convertible-bond-formula\.v1;/, "确定性 Decimal 可转债公式（convertible-bond-formula.v1）；")
+      .replace(/^input_fact_ids=/, "输入事实 ID=")
+      .replace(/configured (stock-risk|fund-risk|convertible-bond-risk)\.v1 limit/, "配置的 $1.v1 限值")
+      .replace(/configured (stock-risk|fund-risk|convertible-bond-risk)\.v1/, "配置的 $1.v1")
+      .replace(/technology weight threshold/g, "科技行业权重阈值")
+      .replace(/top10 concentration threshold/g, "前十大持仓集中度阈值")
+      .replace(/annualized volatility threshold/g, "年化波动率阈值")
+      .replace(/maximum drawdown threshold/g, "最大回撤阈值")
+      .replace(/expense ratio threshold/g, "费率阈值")
+      .replace(/conversion premium threshold/g, "转股溢价率阈值")
+      .replace(/bond floor threshold/g, "债底阈值")
+      .replace(/negative yield threshold/g, "负收益率阈值")
+      .replace(/credit rating rank threshold/g, "信用评级序数阈值")
+      .replace(/liquidity score threshold/g, "流动性等级序数阈值")
+      .replace(/; stock-risk\.v1$/, "；stock-risk.v1")
+      .replace(/; fund-risk\.v1$/, "；fund-risk.v1")
+      .replace(/; convertible-bond-risk\.v1$/, "；convertible-bond-risk.v1");
+  }
+
   function text(value, fallback = "—") {
     if (value === null || value === undefined || value === "") return fallback;
-    return String(value);
+    const rendered = String(value);
+    return DISPLAY_VALUE_LABELS[rendered] || DISPLAY_VALUE_LABELS[rendered.toUpperCase()] || rendered;
   }
 
   function clear(node) {
@@ -56,8 +431,14 @@
 
   function setError(message = "") {
     const node = byId("global-error");
-    node.textContent = message;
-    node.hidden = !message;
+    const rendered = message ? String(message) : "";
+    const safeMessage = !rendered
+      ? ""
+      : /[\u3400-\u9fff]/.test(rendered)
+        ? rendered
+        : "操作未完成，请检查输入或稍后重试。";
+    node.textContent = safeMessage;
+    node.hidden = !safeMessage;
   }
 
   function setQueryStatus(message, className = "") {
@@ -75,13 +456,7 @@
   }
 
   function researchStatusLabel(status) {
-    return status === "READY" ? "READY"
-      : status === "REVIEW_REQUIRED" ? "待复核"
-        : status === "BLOCKED" ? "已阻断"
-          : status === "COMPLETED" || status === "COMPLETE" ? "完成"
-            : status === "PARTIAL" ? "部分完成"
-              : status === "FAILED" ? "失败"
-                : status === "EMPTY" ? "无结果" : text(status, "待运行");
+    return DISPLAY_VALUE_LABELS[status] || text(status, "待运行");
   }
 
   function setResearchStatus(message, className = "") {
@@ -121,7 +496,7 @@
   }
 
   function researchRoleLabel(role) {
-    return role === "ETF_FUND" ? "ETF / Fund" : text(role);
+    return DISPLAY_VALUE_LABELS[role] || text(role);
   }
 
   function clearResearchScenarioOptions() {
@@ -141,9 +516,9 @@
     const options = Array.isArray(scenarios) ? scenarios : [];
     options.forEach((scenario) => {
       const option = document.createElement("option");
-      option.value = text(scenario.scenario_id, "");
-      option.textContent = text(scenario.label, option.value);
-      option.title = text(scenario.description, "");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
       select.append(option);
     });
     if (!options.length) {
@@ -155,7 +530,7 @@
       return;
     }
     const known = options.some((scenario) => scenario.scenario_id === previous);
-    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.value = known ? previous : options[0].scenario_id;
     select.disabled = false;
   }
 
@@ -176,9 +551,9 @@
     const options = Array.isArray(scenarios) ? scenarios : [];
     options.forEach((scenario) => {
       const option = document.createElement("option");
-      option.value = text(scenario.scenario_id, "");
-      option.textContent = text(scenario.label, option.value);
-      option.title = text(scenario.description, "");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
       select.append(option);
     });
     if (!options.length) {
@@ -190,7 +565,7 @@
       return;
     }
     const known = options.some((scenario) => scenario.scenario_id === previous);
-    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.value = known ? previous : options[0].scenario_id;
     select.disabled = false;
   }
 
@@ -211,9 +586,9 @@
     const options = Array.isArray(scenarios) ? scenarios : [];
     options.forEach((scenario) => {
       const option = document.createElement("option");
-      option.value = text(scenario.scenario_id, "");
-      option.textContent = text(scenario.label, option.value);
-      option.title = text(scenario.description, "");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
       select.append(option);
     });
     if (!options.length) {
@@ -225,7 +600,7 @@
       return;
     }
     const known = options.some((scenario) => scenario.scenario_id === previous);
-    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.value = known ? previous : options[0].scenario_id;
     select.disabled = false;
   }
 
@@ -246,9 +621,9 @@
     const options = Array.isArray(scenarios) ? scenarios : [];
     options.forEach((scenario) => {
       const option = document.createElement("option");
-      option.value = text(scenario.scenario_id, "");
-      option.textContent = text(scenario.label, option.value);
-      option.title = text(scenario.description, "");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
       select.append(option);
     });
     if (!options.length) {
@@ -260,7 +635,7 @@
       return;
     }
     const known = options.some((scenario) => scenario.scenario_id === previous);
-    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.value = known ? previous : options[0].scenario_id;
     select.disabled = false;
   }
 
@@ -281,9 +656,9 @@
     const options = Array.isArray(scenarios) ? scenarios : [];
     options.forEach((scenario) => {
       const option = document.createElement("option");
-      option.value = text(scenario.scenario_id, "");
-      option.textContent = text(scenario.label, option.value);
-      option.title = text(scenario.description, "");
+      option.value = scenario.scenario_id || "";
+      option.textContent = displayScenarioLabel(scenario);
+      option.title = displayScenarioDescription(scenario);
       select.append(option);
     });
     if (!options.length) {
@@ -295,7 +670,7 @@
       return;
     }
     const known = options.some((scenario) => scenario.scenario_id === previous);
-    select.value = known ? previous : text(options[0].scenario_id, "");
+    select.value = known ? previous : options[0].scenario_id;
     select.disabled = false;
   }
 
@@ -304,7 +679,7 @@
   }
 
   function stockRiskStatusLabel(status) {
-    return status === "HIGH_RISK" ? "高风险" : status === "WATCH" ? "需关注" : status === "CLEAR" ? "规则未触发" : "未评估";
+    return DISPLAY_VALUE_LABELS[status] || "未评估";
   }
 
   function fundRiskStatusClass(status) {
@@ -324,9 +699,7 @@
   }
 
   function optimizationStatusLabel(status) {
-    return status === "READY" ? "READY"
-      : status === "REVIEW_REQUIRED" ? "待复核"
-        : status === "BLOCKED" ? "已阻断" : text(status, "待运行");
+    return DISPLAY_VALUE_LABELS[status] || text(status, "待运行");
   }
 
   function optimizationStatusClass(status) {
@@ -338,24 +711,24 @@
   }
 
   function statusLabel(status) {
-    return status === "PASS" ? "PASS" : status === "REVIEW_REQUIRED" ? "待复核" : "已阻断";
+    return DISPLAY_VALUE_LABELS[status] || text(status, "未知状态");
   }
 
   function chip(label, className) {
     const node = document.createElement("span");
     node.className = `status-chip ${className || ""}`.trim();
-    node.textContent = label;
+    node.textContent = text(label, "");
     return node;
   }
 
   function renderEvents() {
     const list = byId("event-list");
     clear(list);
-    byId("event-count").textContent = `${state.events.length} events`;
+    byId("event-count").textContent = `${state.events.length} 条事件`;
     if (!state.events.length) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "这个 owner 还没有保存的决策事件。";
+      empty.textContent = "当前隔离标识还没有保存的决策事件。";
       list.append(empty);
       return;
     }
@@ -386,7 +759,7 @@
   function addMetadata(container, label, value) {
     const item = document.createElement("div");
     const dt = document.createElement("dt");
-    dt.textContent = label;
+    dt.textContent = displayLabel(label);
     const dd = document.createElement("dd");
     dd.textContent = text(value);
     item.append(dt, dd);
@@ -400,7 +773,7 @@
     if (!portfolio) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "读取 owner 模板后查看持仓快照与基金穿透范围。";
+      empty.textContent = "读取隔离标识模板后查看持仓快照与基金穿透范围。";
       panel.append(empty);
       return;
     }
@@ -416,7 +789,7 @@
 
     const positionsHeading = document.createElement("h3");
     positionsHeading.className = "context-heading";
-    positionsHeading.textContent = "Positions";
+    positionsHeading.textContent = "持仓明细";
     panel.append(positionsHeading);
     const positions = document.createElement("div");
     positions.className = "position-grid";
@@ -440,7 +813,7 @@
 
     const holdingHeading = document.createElement("h3");
     holdingHeading.className = "context-heading";
-    holdingHeading.textContent = "Look-through holdings";
+    holdingHeading.textContent = "基金穿透持仓";
     panel.append(holdingHeading);
     if (!(portfolio.fund_holdings || []).length) {
       const empty = document.createElement("div");
@@ -454,7 +827,7 @@
       section.className = "holding-section";
       const meta = document.createElement("div");
       meta.className = "holding-meta";
-      meta.textContent = `${text(fund.parent_asset_id)} · snapshot ${text(fund.snapshot_id)} · coverage ${text(fund.coverage_pct)}% · as of ${text(fund.as_of)}`;
+      meta.textContent = `${text(fund.parent_asset_id)} · 快照 ${text(fund.snapshot_id)} · 覆盖率 ${text(fund.coverage_pct)}% · 截止 ${text(fund.as_of)}`;
       section.append(meta);
       const holdings = document.createElement("div");
       holdings.className = "holding-grid";
@@ -486,7 +859,7 @@
     if (!items.length) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "暂无已保存上下文；保存前必须先确认 Profile 与 Portfolio。";
+      empty.textContent = "暂无已保存上下文；保存前必须先确认风险画像与持仓。";
       panel.append(empty);
       return;
     }
@@ -509,11 +882,11 @@
       card.append(metadata);
       const references = record.references || {};
       const referenceValues = [
-        references.research_run_id && `Research ${references.research_run_id}`,
-        references.stock_research_run_id && `Stock ${references.stock_research_run_id}`,
-        references.fund_research_run_id && `Fund ${references.fund_research_run_id}`,
-        references.convertible_bond_research_run_id && `CB ${references.convertible_bond_research_run_id}`,
-        references.optimization_request_id && `Optimization ${references.optimization_request_id}`,
+        references.research_run_id && `研究 ${references.research_run_id}`,
+        references.stock_research_run_id && `个股 ${references.stock_research_run_id}`,
+        references.fund_research_run_id && `基金 ${references.fund_research_run_id}`,
+        references.convertible_bond_research_run_id && `可转债 ${references.convertible_bond_research_run_id}`,
+        references.optimization_request_id && `组合优化 ${references.optimization_request_id}`,
       ].filter(Boolean);
       const note = document.createElement("p");
       note.className = "context-memory-references";
@@ -554,7 +927,7 @@
     clear(byId("detail-content"));
     const detailEmpty = document.createElement("div");
     detailEmpty.className = "empty-state";
-    detailEmpty.textContent = "上下文已恢复；请重新运行 Advisor 后查看新的决策回执。";
+      detailEmpty.textContent = "上下文已恢复；请重新运行投顾查询后查看新的决策回执。";
     byId("detail-content").append(detailEmpty);
     clearAdvisorPlan();
     clearProfileProposal();
@@ -581,7 +954,7 @@
     if (!record || record.owner_id !== state.ownerId) {
       state.contextMemorySelected = null;
       setContextMemoryStatus("恢复被拒绝", "blocked");
-      setError("上下文记忆不属于当前 owner，未恢复。");
+      setError("上下文记忆不属于当前隔离标识，未恢复。");
       renderContextMemory();
       clearDerivedResultsForContextRestore();
       return;
@@ -642,25 +1015,25 @@
   async function saveContextMemory() {
     const requestOwner = byId("owner-id").value.trim();
     if (!requestOwner) {
-      setContextMemoryStatus("需要 owner", "blocked");
-      setError("请输入 owner 标识。");
+      setContextMemoryStatus("需要隔离标识", "blocked");
+      setError("请输入隔离标识。");
       return;
     }
     if (requestOwner !== state.ownerId) {
       state.ownerId = requestOwner;
       resetOwnerScopedViews();
-      setContextMemoryStatus("需先读取 owner", "review");
-      setError("请先读取该 owner，再确认 Profile 与 Portfolio。");
+      setContextMemoryStatus("需先读取隔离标识", "review");
+      setError("请先读取该隔离标识，再确认风险画像与持仓。");
       return;
     }
     if (!state.profileContext?.profile || !state.profileContext?.questionnaire) {
       setContextMemoryStatus("需先确认画像", "review");
-      setError("请先确认 Risk Profile，再保存上下文记忆。");
+      setError("请先确认风险画像，再保存上下文记忆。");
       return;
     }
     if (!state.portfolioContext) {
       setContextMemoryStatus("需先确认持仓", "review");
-      setError("请先验证并加载 Portfolio，再保存上下文记忆。");
+      setError("请先验证并加载持仓，再保存上下文记忆。");
       return;
     }
     const sequence = ++state.contextMemorySequence;
@@ -741,7 +1114,7 @@
     if (!questionnaire) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "读取 owner 模板后查看风险问卷约束。";
+      empty.textContent = "读取隔离标识模板后查看风险问卷约束。";
       panel.append(empty);
       return;
     }
@@ -750,7 +1123,7 @@
     addMetadata(metadata, "Owner", questionnaire.owner_id);
     addMetadata(metadata, "Answered at", questionnaire.answered_at);
     addMetadata(metadata, "Loss tolerance", questionnaire.loss_tolerance_score);
-    addMetadata(metadata, "Horizon", questionnaire.investment_horizon);
+      addMetadata(metadata, "Horizon", questionnaire.investment_horizon);
     addMetadata(metadata, "Liquidity", questionnaire.liquidity_need);
     addMetadata(metadata, "Experience", questionnaire.experience_level);
     addMetadata(metadata, "Return expectation", questionnaire.return_expectation);
@@ -811,12 +1184,12 @@
 
   function profileDimensionLabel(dimension) {
     return {
-      investment_horizon: "Investment horizon",
-      liquidity_need: "Liquidity need",
-      experience_level: "Experience level",
-      return_expectation: "Return expectation",
-      max_drawdown_tolerance_pct: "Max drawdown tolerance",
-      expected_return_range: "Expected return range",
+      investment_horizon: "投资期限",
+      liquidity_need: "流动性需求",
+      experience_level: "投资经验",
+      return_expectation: "收益预期",
+      max_drawdown_tolerance_pct: "最大回撤容忍度",
+      expected_return_range: "预期收益区间",
     }[dimension] || text(dimension);
   }
 
@@ -826,7 +1199,7 @@
     if (!profile) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "确认提案后查看保留冲突选择的 Risk Profile。";
+      empty.textContent = "确认提案后查看保留冲突选择的风险画像。";
       panel.append(empty);
       return;
     }
@@ -844,7 +1217,7 @@
     if (conflicts.length) {
       const heading = document.createElement("h4");
       heading.className = "context-heading";
-      heading.textContent = "Resolved conflicts";
+      heading.textContent = "已解决的冲突";
       panel.append(heading);
       const list = document.createElement("div");
       list.className = "profile-proposal-resolved";
@@ -882,7 +1255,7 @@
     meta.append(metadata);
     if (!(draft.conflicts || []).length) {
       const ready = document.createElement("p");
-      ready.textContent = "没有维度冲突；仍需显式确认后生成 Profile。";
+      ready.textContent = "没有维度冲突；仍需显式确认后生成风险画像。";
       meta.append(ready);
     }
     panel.append(meta);
@@ -971,13 +1344,13 @@
     addMetadata(metadata, "Portfolio bundle", plan.portfolio_bundle_id);
     addMetadata(metadata, "Position snapshot", plan.position_snapshot_id);
     addMetadata(metadata, "Questionnaire", plan.questionnaire_id);
-    addMetadata(metadata, "Scope", plan.scope_description);
+    addMetadata(metadata, "Scope", displayDescription(plan.scope_description));
     addMetadata(metadata, "Nodes", plan.node_count);
     panel.append(metadata);
 
     const heading = document.createElement("h4");
     heading.className = "context-heading";
-    heading.textContent = "Specialist tracks";
+    heading.textContent = "专业研究轨道";
     panel.append(heading);
     const roles = document.createElement("div");
     roles.className = "intent-plan-roles";
@@ -997,7 +1370,7 @@
     if (!receipt) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "该事件没有可展示的 Receipt。";
+      empty.textContent = "该事件没有可展示的决策回执。";
       panel.append(empty);
       return;
     }
@@ -1033,7 +1406,7 @@
       const issueList = document.createElement("ul");
       (result.issues || []).forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${issue.code}: ${issue.safe_message}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issueList.append(item);
       });
       if (issueList.childElementCount) detail.append(issueList);
@@ -1046,7 +1419,7 @@
     summary.className = "decision-summary";
     const summaryLabel = document.createElement("span");
     summaryLabel.className = "eyebrow clay";
-    summaryLabel.textContent = "WHY THIS DECISION";
+    summaryLabel.textContent = "为什么得到这个结果";
     const summaryText = document.createElement("p");
     summaryText.textContent = text(result.summary);
     summary.append(summaryLabel, summaryText);
@@ -1062,7 +1435,7 @@
       title.textContent = recommendation.asset_id;
       const action = document.createElement("span");
       action.className = `action-chip ${recommendation.action_type.toLowerCase()}`;
-      action.textContent = recommendation.action_type;
+      action.textContent = text(recommendation.action_type);
       header.append(title, action);
       const grid = document.createElement("dl");
       grid.className = "metadata-grid";
@@ -1083,7 +1456,7 @@
     });
     [...allConditions].forEach((condition) => {
       const item = document.createElement("li");
-      item.textContent = condition;
+      item.textContent = displayDescription(condition);
       conditions.append(item);
     });
     invalidation.append(conditions);
@@ -1098,7 +1471,7 @@
     if (!result || !result.trace) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "选择 PASS 回执后展开证据。";
+      empty.textContent = "选择通过（PASS）回执后展开证据。";
       panel.append(empty);
       renderAdvancedEvidence();
       return;
@@ -1109,7 +1482,7 @@
       const details = document.createElement("details");
       details.className = "evidence-item";
       const summary = document.createElement("summary");
-      summary.textContent = `${finding.kind} · ${finding.statement}`;
+      summary.textContent = `${text(finding.kind)} · ${text(finding.statement)}`;
       details.append(summary);
       const meta = document.createElement("div");
       meta.className = "evidence-meta";
@@ -1118,15 +1491,15 @@
         line.textContent = value;
         meta.append(line);
       };
-      addMetaLine(`Finding: ${finding.finding_id}`);
+      addMetaLine(`发现（FINDING）：${text(finding.finding_id)}`);
       finding.fact_ids.forEach((factId) => {
         const fact = factsById.get(factId);
         if (!fact) return;
-        addMetaLine(`Fact: ${fact.fact_id} · ${fact.metric} = ${text(fact.value)}`);
+        addMetaLine(`事实（FACT）：${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)}`);
         fact.evidence_ids.forEach((evidenceId) => {
           const evidence = evidenceById.get(evidenceId);
           if (!evidence) return;
-          addMetaLine(`Evidence: ${evidence.evidence_id} · ${evidence.source} · ${text(evidence.period)}`);
+          addMetaLine(`证据（EVIDENCE）：${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)}`);
         });
       });
       details.append(meta);
@@ -1135,37 +1508,37 @@
     if (!panel.childElementCount) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "该回执没有可展示的 Finding。";
+      empty.textContent = "该回执没有可展示的发现（FINDING）。";
       panel.append(empty);
     }
     renderAdvancedEvidence();
   }
 
   const ADVANCED_EVIDENCE_QUALITY_LABELS = Object.freeze({
-    VERIFIED: "VERIFIED · 已验证",
-    STALE: "STALE · 陈旧/需复核",
-    PARTIAL: "PARTIAL · 部分可用",
-    CONFLICTING: "CONFLICTING · 来源冲突",
-    INVALID: "INVALID · 无效",
+    VERIFIED: "已验证（VERIFIED）",
+    STALE: "陈旧/需复核（STALE）",
+    PARTIAL: "部分可用（PARTIAL）",
+    CONFLICTING: "来源冲突（CONFLICTING）",
+    INVALID: "无效（INVALID）",
   });
   const ADVANCED_EVIDENCE_MODE_LABELS = Object.freeze({
-    DIRECT: "DIRECT · 主 Provider 直连",
-    CACHE_FRESH: "CACHE_FRESH · 新鲜缓存",
-    FALLBACK_PROVIDER: "FALLBACK_PROVIDER · 备用 Provider",
-    CACHE_STALE_FALLBACK: "CACHE_STALE_FALLBACK · 陈旧缓存 fallback",
-    UNAVAILABLE: "未提供 serving metadata",
+    DIRECT: "主数据提供方直连（DIRECT）",
+    CACHE_FRESH: "新鲜缓存（CACHE_FRESH）",
+    FALLBACK_PROVIDER: "备用数据提供方（FALLBACK_PROVIDER）",
+    CACHE_STALE_FALLBACK: "陈旧缓存回退（CACHE_STALE_FALLBACK）",
+    UNAVAILABLE: "未提供送达元数据（UNAVAILABLE）",
   });
   const ADVANCED_EVIDENCE_SOURCE_LABELS = Object.freeze({
-    ADVISOR: "Advisor receipt",
-    RESEARCH_MATRIX: "Research Matrix",
-    STOCK: "Stock Research",
-    FUND: "ETF / Fund Research",
-    CONVERTIBLE_BOND: "Convertible Bond Research",
+    ADVISOR: "投顾回执（ADVISOR）",
+    RESEARCH_MATRIX: "研究矩阵（RESEARCH_MATRIX）",
+    STOCK: "个股研究（STOCK）",
+    FUND: "ETF / 基金研究（FUND）",
+    CONVERTIBLE_BOND: "可转债研究（CONVERTIBLE_BOND）",
   });
   const ADVANCED_EVIDENCE_PROMOTION_LABELS = Object.freeze({
-    FINDING: "已闭合 Finding",
-    FACT: "已进入 Fact",
-    AVAILABLE: "Available · 未升级",
+    FINDING: "已闭合发现（FINDING）",
+    FACT: "已进入事实（FACT）",
+    AVAILABLE: "可用 · 未升级（AVAILABLE）",
   });
 
   function advancedEvidenceModeLabel(mode) {
@@ -1196,9 +1569,9 @@
     if (age === null || age === undefined || age === "") return "未提供";
     const numericAge = Number(age);
     if (!Number.isFinite(numericAge) || numericAge < 0) return "未提供";
-    if (numericAge < 1000) return `${Math.round(numericAge)} ms`;
-    if (numericAge < 60000) return `${(numericAge / 1000).toFixed(1)} s · ${Math.round(numericAge)} ms`;
-    return `${(numericAge / 60000).toFixed(1)} min · ${Math.round(numericAge)} ms`;
+    if (numericAge < 1000) return `${Math.round(numericAge)} 毫秒`;
+    if (numericAge < 60000) return `${(numericAge / 1000).toFixed(1)} 秒 · ${Math.round(numericAge)} 毫秒`;
+    return `${(numericAge / 60000).toFixed(1)} 分钟 · ${Math.round(numericAge)} 毫秒`;
   }
 
   function advancedEvidenceRunId(result, fallback) {
@@ -1245,13 +1618,13 @@
       const issueLines = [];
       relatedValidations.forEach((validation) => {
         (validation.issues || []).forEach((issue) => {
-          const line = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          const line = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
           if (!issueLines.includes(line)) issueLines.push(line);
         });
       });
       if (!relatedValidations.length && resultIssues.length && promotion === "AVAILABLE") {
         resultIssues.forEach((issue) => {
-          const line = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          const line = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
           if (!issueLines.includes(line)) issueLines.push(line);
         });
       }
@@ -1302,10 +1675,10 @@
       ));
     }
     [
-      ["RESEARCH_MATRIX", state.researchRun, "Research Matrix"],
-      ["STOCK", state.stockResearchRun, "Stock Research"],
-      ["FUND", state.fundResearchRun, "ETF / Fund Research"],
-      ["CONVERTIBLE_BOND", state.convertibleBondResearchRun, "Convertible Bond Research"],
+      ["RESEARCH_MATRIX", state.researchRun, ADVANCED_EVIDENCE_SOURCE_LABELS.RESEARCH_MATRIX],
+      ["STOCK", state.stockResearchRun, ADVANCED_EVIDENCE_SOURCE_LABELS.STOCK],
+      ["FUND", state.fundResearchRun, ADVANCED_EVIDENCE_SOURCE_LABELS.FUND],
+      ["CONVERTIBLE_BOND", state.convertibleBondResearchRun, ADVANCED_EVIDENCE_SOURCE_LABELS.CONVERTIBLE_BOND],
     ].forEach(([sourceKey, result, sourceLabel]) => {
       if (!result || result.owner_id !== state.ownerId) return;
       entries.push(...advancedEvidenceTraceEntries(sourceKey, sourceLabel, result, result.owner_id, null));
@@ -1341,7 +1714,7 @@
     if (!entry) {
       const empty = document.createElement("div");
       empty.className = "advanced-evidence-empty";
-      empty.textContent = "当前筛选没有匹配的 Evidence。";
+      empty.textContent = "当前筛选没有匹配的证据。";
       panel.append(empty);
       return;
     }
@@ -1381,49 +1754,49 @@
     if (entry.evidence.quality_note) {
       const note = document.createElement("div");
       note.className = "advanced-evidence-notice";
-      note.textContent = `质量说明：${entry.evidence.quality_note}`;
+      note.textContent = `质量说明：${displayDescription(entry.evidence.quality_note)}`;
       panel.append(note);
     }
     if (entry.mode === "CACHE_STALE_FALLBACK" || entry.evidence.quality_status === "STALE") {
       const notice = document.createElement("div");
       notice.className = "advanced-evidence-notice blocked";
-      notice.textContent = "陈旧缓存 fallback：需要人工复核，不能作为 VERIFIED Fact 或可执行建议。";
+      notice.textContent = "陈旧缓存回退：需要人工复核，不能作为已验证事实（VERIFIED）或可执行建议。";
       panel.append(notice);
     } else if (entry.mode === "FALLBACK_PROVIDER") {
       const notice = document.createElement("div");
       notice.className = "advanced-evidence-notice";
-      notice.textContent = "备用 Provider 已送达：保留备用来源与 lineage，使用前仍应检查独立验证状态。";
+      notice.textContent = "备用数据提供方已送达：保留备用来源与来源链，使用前仍应检查独立验证状态。";
       panel.append(notice);
     }
 
     const pathHeading = document.createElement("h4");
     pathHeading.className = "context-heading";
-    pathHeading.textContent = "审计路径 · Finding → Fact → Evidence";
+    pathHeading.textContent = "审计路径 · 发现（FINDING）→事实（FACT）→证据（EVIDENCE）";
     panel.append(pathHeading);
     const path = document.createElement("ul");
     path.className = "advanced-evidence-path";
     const evidencePath = document.createElement("li");
     evidencePath.className = "path-primary";
-    evidencePath.textContent = `Evidence · ${entry.evidence.evidence_id} · ${text(entry.evidence.field)} · ${advancedEvidenceQualityLabel(entry.evidence.quality_status)}`;
+    evidencePath.textContent = `证据（EVIDENCE）· ${entry.evidence.evidence_id} · ${text(entry.evidence.field)} · ${advancedEvidenceQualityLabel(entry.evidence.quality_status)}`;
     path.append(evidencePath);
     entry.facts.forEach((fact) => {
       const item = document.createElement("li");
-      item.textContent = `Fact · ${text(fact.fact_id)} · ${text(fact.metric)} = ${advancedEvidenceValue(fact.value)} ${text(fact.unit, "")} · ${text(fact.status)}`.trim();
+      item.textContent = `事实（FACT）· ${text(fact.fact_id)} · ${text(fact.metric)} = ${advancedEvidenceValue(fact.value)} ${text(fact.unit, "")} · ${text(fact.status)}`.trim();
       path.append(item);
     });
     entry.findings.forEach((finding) => {
       const item = document.createElement("li");
-      item.textContent = `Finding · ${text(finding.finding_id)} · ${text(finding.kind)} · ${text(finding.severity)} · ${text(finding.statement)}`;
+      item.textContent = `发现（FINDING）· ${text(finding.finding_id)} · ${text(finding.kind)} · ${text(finding.severity)} · ${text(finding.statement)}`;
       path.append(item);
     });
     entry.validations.forEach((validation) => {
       const item = document.createElement("li");
-      item.textContent = `Validation · ${text(validation.metric)} · ${text(validation.status)} · ${text(validation.independent_lineage_count, "0")} independent lineages`;
+      item.textContent = `验证（VALIDATION）· ${text(validation.metric)} · ${text(validation.status)} · ${text(validation.independent_lineage_count, "0")} 条独立来源链`;
       path.append(item);
     });
     if (!entry.facts.length && !entry.findings.length) {
       const item = document.createElement("li");
-      item.textContent = "当前 Evidence 尚未进入 Fact/Finding；它仍可审计，但不构成结论。";
+      item.textContent = "当前证据尚未进入事实（FACT）/发现（FINDING）；它仍可审计，但不构成结论。";
       path.append(item);
     }
     panel.append(path);
@@ -1431,7 +1804,7 @@
     if (entry.issues.length) {
       const issueHeading = document.createElement("h4");
       issueHeading.className = "context-heading";
-      issueHeading.textContent = "需复核的安全 issue";
+      issueHeading.textContent = "需复核的安全问题（ISSUE）";
       panel.append(issueHeading);
       const issues = document.createElement("ul");
       issues.className = "advanced-evidence-issues";
@@ -1497,21 +1870,21 @@
     const closedCount = entries.filter((entry) => entry.promotion === "FINDING").length;
     const reviewCount = entries.filter((entry) => entry.evidence.quality_status !== "VERIFIED" || entry.promotion !== "FINDING").length;
     summary.append(
-      chip(`${entries.length} Evidence`, entries.length ? "" : "review"),
-      chip(`${filtered.length} shown`, filtered.length === entries.length ? "" : "review"),
-      chip(`${closedCount} closed`, closedCount ? "pass" : ""),
-      chip(`${reviewCount} review`, reviewCount ? "review" : "pass"),
+      chip(`${entries.length} 条证据`, entries.length ? "" : "review"),
+      chip(`${filtered.length} 条显示`, filtered.length === entries.length ? "" : "review"),
+      chip(`${closedCount} 条已闭合`, closedCount ? "pass" : ""),
+      chip(`${reviewCount} 条需复核`, reviewCount ? "review" : "pass"),
     );
     const summaryText = document.createElement("span");
     summaryText.textContent = entries.length
-      ? "只聚合当前 owner 的内存结果；切换 owner 或重新运行会清空旧选择。"
-      : "先运行研究轨道或选择 PASS 回执，才能建立当前会话的 Evidence 索引。";
+      ? "只聚合当前隔离标识的内存结果；切换隔离标识或重新运行会清空旧选择。"
+      : "先运行研究轨道或选择通过（PASS）回执，才能建立当前会话的证据索引。";
     summary.append(summaryText);
 
     if (!entries.length) {
       const empty = document.createElement("div");
       empty.className = "advanced-evidence-empty";
-      empty.textContent = "暂无当前 owner 的 Evidence。运行研究或选择 PASS 回执后再查看。";
+      empty.textContent = "暂无当前隔离标识的证据。运行研究或选择通过（PASS）回执后再查看。";
       list.append(empty);
       renderAdvancedEvidenceDetail(detail, null);
       return;
@@ -1519,7 +1892,7 @@
     if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "advanced-evidence-empty";
-      empty.textContent = "当前筛选没有匹配的 Evidence；清除筛选后查看全部记录。";
+      empty.textContent = "当前筛选没有匹配的证据；清除筛选后查看全部记录。";
       list.append(empty);
       renderAdvancedEvidenceDetail(detail, null);
       return;
@@ -1546,7 +1919,7 @@
       rowSource.textContent = `${entry.sourceLabel} · ${text(entry.evidence.field)} · ${text(entry.evidence.period)}`;
       const rowMeta = document.createElement("div");
       rowMeta.className = "advanced-evidence-row-meta";
-      rowMeta.textContent = `${advancedEvidenceModeLabel(entry.mode)} · ${advancedEvidencePromotionLabel(entry.promotion)} · ${text(entry.evidence.lineage_id, "no lineage")}`;
+      rowMeta.textContent = `${advancedEvidenceModeLabel(entry.mode)} · ${advancedEvidencePromotionLabel(entry.promotion)} · ${text(entry.evidence.lineage_id, "无来源链")}`;
       row.append(rowHeader, rowSource, rowMeta);
       list.append(row);
     });
@@ -1560,7 +1933,7 @@
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "运行矩阵后查看四类节点、独立来源验证与 Finding → Fact → Evidence。";
+      empty.textContent = "运行矩阵后查看四类节点、独立来源验证与发现（FINDING）→事实（FACT）→证据（EVIDENCE）。";
       panel.append(empty);
       return;
     }
@@ -1569,14 +1942,14 @@
     summary.className = "research-summary";
     summary.append(
       chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
-      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+      chip(`运行：${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.matrix_id)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.matrix_id)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
-      scenarioText.textContent = `${text(result.scenario.label)} · ${text(result.scenario.description)}`;
+      scenarioText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)}`;
       summary.append(scenarioText);
     }
     panel.append(summary);
@@ -1605,7 +1978,7 @@
         issues.className = "research-issues";
         node.issues.forEach((issue) => {
           const item = document.createElement("li");
-          item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
           issues.append(item);
         });
         card.append(issues);
@@ -1617,20 +1990,20 @@
     if (result.pipeline_status !== "READY") {
       const notice = document.createElement("div");
       notice.className = "notice error";
-      notice.textContent = "研究结果仍需复核，Prism 不展示未验证的 Fact/Finding，也不会生成可执行建议。";
+      notice.textContent = "研究结果仍需复核，Prism 不展示未验证的事实（FACT）/发现（FINDING），也不会生成可执行建议。";
       panel.append(notice);
       const issues = document.createElement("ul");
       issues.className = "research-issues";
       (result.issues || []).forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issues.append(item);
       });
       if (issues.childElementCount) panel.append(issues);
     }
 
     const validationHeading = document.createElement("h3");
-    validationHeading.textContent = "Independent lineage validation";
+    validationHeading.textContent = "独立来源链验证";
     panel.append(validationHeading);
     const validations = document.createElement("div");
     validations.className = "research-validations";
@@ -1642,14 +2015,14 @@
       row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
       const meta = document.createElement("div");
       meta.className = "validation-meta";
-      meta.textContent = `expected ${text(validation.expected_value)} ${text(validation.unit)} · ${text(validation.period)} · ${text(validation.independent_lineage_count)} independent lineages · support ${text((validation.supporting_evidence_ids || []).length, "0")} · contradict ${text((validation.contradicting_evidence_ids || []).length, "0")} · unresolved ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
+      meta.textContent = `预期 ${text(validation.expected_value)} ${text(validation.unit)} · ${text(validation.period)} · ${text(validation.independent_lineage_count)} 条独立来源链 · 支持 ${text((validation.supporting_evidence_ids || []).length, "0")} · 冲突 ${text((validation.contradicting_evidence_ids || []).length, "0")} · 未解决 ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
       row.append(meta);
       if (validation.issues && validation.issues.length) {
         const issues = document.createElement("ul");
         issues.className = "validation-issues";
         validation.issues.forEach((issue) => {
           const item = document.createElement("li");
-          item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+          item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
           issues.append(item);
         });
         row.append(issues);
@@ -1660,7 +2033,7 @@
 
     if (result.pipeline_status !== "READY") {
       const availableHeading = document.createElement("h3");
-      availableHeading.textContent = "Available Evidence · not promoted to Fact";
+      availableHeading.textContent = "可用证据 · 未升级为事实（FACT）";
       panel.append(availableHeading);
       const available = document.createElement("div");
       available.className = "research-available-evidence";
@@ -1672,10 +2045,10 @@
         const metadata = document.createElement("div");
         metadata.className = "research-evidence-meta";
         [
-          `Evidence: ${text(evidence.evidence_id)}`,
-          `Value: ${text(evidence.value)} ${text(evidence.unit, "")}`,
-          `Period: ${text(evidence.period)}`,
-          `Lineage: ${text(evidence.lineage_id)}`,
+          `证据（EVIDENCE）：${text(evidence.evidence_id)}`,
+          `数值：${text(evidence.value)} ${text(evidence.unit, "")}`,
+          `期间：${text(evidence.period)}`,
+          `来源链：${text(evidence.lineage_id)}`,
         ].forEach((line) => {
           const item = document.createElement("div");
           item.textContent = line;
@@ -1689,7 +2062,7 @@
     }
 
     const evidenceHeading = document.createElement("h3");
-    evidenceHeading.textContent = "Finding → Fact → Evidence";
+    evidenceHeading.textContent = "发现（FINDING）→事实（FACT）→证据（EVIDENCE）";
     panel.append(evidenceHeading);
     const evidencePanel = document.createElement("div");
     evidencePanel.className = "research-evidence";
@@ -1704,19 +2077,19 @@
       const metadata = document.createElement("div");
       metadata.className = "research-evidence-meta";
       const findingLine = document.createElement("div");
-      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      findingLine.textContent = `发现（FINDING）：${text(finding.finding_id)} · ${text(finding.severity)}`;
       metadata.append(findingLine);
       (finding.fact_ids || []).forEach((factId) => {
         const fact = factsById.get(factId);
         if (!fact) return;
         const factLine = document.createElement("div");
-        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        factLine.textContent = `事实（FACT）：${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
         metadata.append(factLine);
         (fact.evidence_ids || []).forEach((evidenceId) => {
           const evidence = evidenceById.get(evidenceId);
           if (!evidence) return;
           const evidenceLine = document.createElement("div");
-          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          evidenceLine.textContent = `证据（EVIDENCE）：${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · 来源链 ${text(evidence.lineage_id)}`;
           metadata.append(evidenceLine);
         });
       });
@@ -1733,7 +2106,7 @@
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "运行个股研究后查看财务事实、异常、风险与 Evidence 闭合。";
+      empty.textContent = "运行个股研究后查看财务事实、异常、风险与证据闭合。";
       panel.append(empty);
       return;
     }
@@ -1742,21 +2115,21 @@
     summary.className = "stock-research-summary";
     summary.append(
       chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
-      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+      chip(`运行：${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
       chip(stockRiskStatusLabel(result.risk && result.risk.status), stockRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
-      scenarioText.textContent = `${text(result.scenario.label)} · ${text(result.scenario.description)}`;
+      scenarioText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)}`;
       summary.append(scenarioText);
     }
     panel.append(summary);
 
     const nodeHeading = document.createElement("h3");
-    nodeHeading.textContent = "Source nodes";
+    nodeHeading.textContent = "来源节点";
     panel.append(nodeHeading);
     const nodeGrid = document.createElement("div");
     nodeGrid.className = "research-grid";
@@ -1777,13 +2150,13 @@
       if (node.scope_description) {
         const scope = document.createElement("div");
         scope.className = "muted";
-        scope.textContent = node.scope_description;
+        scope.textContent = displayDescription(node.scope_description);
         card.append(scope);
       }
       (node.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         card.append(issueLine);
       });
       nodeGrid.append(card);
@@ -1791,7 +2164,7 @@
     if (nodeGrid.childElementCount) panel.append(nodeGrid);
 
     const validationsHeading = document.createElement("h3");
-    validationsHeading.textContent = "Source validation";
+    validationsHeading.textContent = "来源验证";
     panel.append(validationsHeading);
     const validations = document.createElement("div");
     validations.className = "research-validations";
@@ -1803,12 +2176,12 @@
       row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
       const meta = document.createElement("div");
       meta.className = "validation-meta";
-      meta.textContent = `${text(validation.independent_lineage_count, "0")} independent lineages · support ${text((validation.supporting_evidence_ids || []).length, "0")} · contradict ${text((validation.contradicting_evidence_ids || []).length, "0")} · unresolved ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
+      meta.textContent = `${text(validation.independent_lineage_count, "0")} 条独立来源链 · 支持 ${text((validation.supporting_evidence_ids || []).length, "0")} · 冲突 ${text((validation.contradicting_evidence_ids || []).length, "0")} · 未解决 ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
       row.append(meta);
       (validation.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         row.append(issueLine);
       });
       validations.append(row);
@@ -1818,18 +2191,18 @@
     if (result.pipeline_status !== "READY") {
       const notice = document.createElement("div");
       notice.className = "notice error";
-      notice.textContent = "证据链未闭合；Evidence 仍可审计，但不会升级为 Fact/Finding，也不会给出风险结论。";
+      notice.textContent = "证据链未闭合；证据仍可审计，但不会升级为事实（FACT）/发现（FINDING），也不会给出风险结论。";
       panel.append(notice);
       const issues = document.createElement("ul");
       issues.className = "stock-issues";
       (result.issues || []).forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issues.append(item);
       });
       if (issues.childElementCount) panel.append(issues);
       const availableHeading = document.createElement("h3");
-      availableHeading.textContent = "Available Evidence · not promoted to Fact";
+      availableHeading.textContent = "可用证据 · 未升级为事实（FACT）";
       panel.append(availableHeading);
       const available = document.createElement("div");
       available.className = "stock-available-evidence";
@@ -1841,10 +2214,10 @@
         const metadata = document.createElement("div");
         metadata.className = "research-evidence-meta";
         [
-          `Evidence: ${text(evidence.evidence_id)}`,
-          `Value: ${text(evidence.value)} ${text(evidence.unit, "")}`,
-          `Period: ${text(evidence.period)}`,
-          `Lineage: ${text(evidence.lineage_id)}`,
+          `证据（EVIDENCE）：${text(evidence.evidence_id)}`,
+          `数值：${text(evidence.value)} ${text(evidence.unit, "")}`,
+          `期间：${text(evidence.period)}`,
+          `来源链：${text(evidence.lineage_id)}`,
         ].forEach((lineText) => {
           const item = document.createElement("div");
           item.textContent = lineText;
@@ -1858,7 +2231,7 @@
     }
 
     const factHeading = document.createElement("h3");
-    factHeading.textContent = "Verified financial facts";
+    factHeading.textContent = "已验证的财务事实";
     panel.append(factHeading);
     const metricLabels = new Map((state.stockResearchTemplate && state.stockResearchTemplate.metrics || []).map((item) => [item.metric, item.label]));
     const factGrid = document.createElement("div");
@@ -1883,7 +2256,7 @@
     risk.className = "stock-risk-summary";
     const riskHeader = document.createElement("header");
     const riskTitle = document.createElement("strong");
-    riskTitle.textContent = "Deterministic risk summary";
+    riskTitle.textContent = "确定性风险摘要";
     riskHeader.append(riskTitle, chip(stockRiskStatusLabel(result.risk && result.risk.status), stockRiskStatusClass(result.risk && result.risk.status)));
     risk.append(riskHeader);
     const riskText = document.createElement("p");
@@ -1900,7 +2273,7 @@
     panel.append(risk);
 
     const anomalyHeading = document.createElement("h3");
-    anomalyHeading.textContent = "Deterministic anomalies";
+    anomalyHeading.textContent = "确定性异常";
     panel.append(anomalyHeading);
     const anomalies = document.createElement("div");
     anomalies.className = "stock-findings";
@@ -1912,14 +2285,14 @@
       details.append(line);
       const meta = document.createElement("div");
       meta.className = "research-evidence-meta";
-      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${text(finding.methodology)}`;
+      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${displayMethodology(finding.methodology)}`;
       details.append(meta);
       anomalies.append(details);
     });
     if (anomalies.childElementCount) panel.append(anomalies);
 
     const chainHeading = document.createElement("h3");
-    chainHeading.textContent = "Finding → Fact → Evidence";
+    chainHeading.textContent = "发现（FINDING）→事实（FACT）→证据（EVIDENCE）";
     panel.append(chainHeading);
     const chain = document.createElement("div");
     chain.className = "stock-findings";
@@ -1933,19 +2306,19 @@
       const metadata = document.createElement("div");
       metadata.className = "research-evidence-meta";
       const findingLine = document.createElement("div");
-      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      findingLine.textContent = `发现（FINDING）：${text(finding.finding_id)} · ${text(finding.severity)}`;
       metadata.append(findingLine);
       (finding.fact_ids || []).forEach((factId) => {
         const fact = factsById.get(factId);
         if (!fact) return;
         const factLine = document.createElement("div");
-        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        factLine.textContent = `事实（FACT）：${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
         metadata.append(factLine);
         (fact.evidence_ids || []).forEach((evidenceId) => {
           const evidence = evidenceById.get(evidenceId);
           if (!evidence) return;
           const evidenceLine = document.createElement("div");
-          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          evidenceLine.textContent = `证据（EVIDENCE）：${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · 来源链 ${text(evidence.lineage_id)}`;
           metadata.append(evidenceLine);
         });
       });
@@ -1962,7 +2335,7 @@
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "运行 ETF / Fund 研究后查看资产事实、风险与 Evidence 闭合。";
+      empty.textContent = "运行 ETF / 基金研究后查看资产事实、风险与证据闭合。";
       panel.append(empty);
       return;
     }
@@ -1971,21 +2344,21 @@
     summary.className = "fund-research-summary";
     summary.append(
       chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
-      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+      chip(`运行：${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
       chip(fundRiskStatusLabel(result.risk && result.risk.status), fundRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
-      scenarioText.textContent = `${text(result.scenario.label)} · ${text(result.scenario.description)}`;
+      scenarioText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)}`;
       summary.append(scenarioText);
     }
     panel.append(summary);
 
     const nodeHeading = document.createElement("h3");
-    nodeHeading.textContent = "Source nodes";
+    nodeHeading.textContent = "来源节点";
     panel.append(nodeHeading);
     const nodeGrid = document.createElement("div");
     nodeGrid.className = "research-grid";
@@ -2006,13 +2379,13 @@
       if (node.scope_description) {
         const scope = document.createElement("div");
         scope.className = "muted";
-        scope.textContent = node.scope_description;
+        scope.textContent = displayDescription(node.scope_description);
         card.append(scope);
       }
       (node.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         card.append(issueLine);
       });
       nodeGrid.append(card);
@@ -2020,7 +2393,7 @@
     if (nodeGrid.childElementCount) panel.append(nodeGrid);
 
     const validationHeading = document.createElement("h3");
-    validationHeading.textContent = "Source validation";
+    validationHeading.textContent = "来源验证";
     panel.append(validationHeading);
     const validations = document.createElement("div");
     validations.className = "research-validations";
@@ -2032,12 +2405,12 @@
       row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
       const meta = document.createElement("div");
       meta.className = "validation-meta";
-      meta.textContent = `${text(validation.independent_lineage_count, "0")} independent lineages · support ${text((validation.supporting_evidence_ids || []).length, "0")} · contradict ${text((validation.contradicting_evidence_ids || []).length, "0")} · unresolved ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
+      meta.textContent = `${text(validation.independent_lineage_count, "0")} 条独立来源链 · 支持 ${text((validation.supporting_evidence_ids || []).length, "0")} · 冲突 ${text((validation.contradicting_evidence_ids || []).length, "0")} · 未解决 ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
       row.append(meta);
       (validation.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         row.append(issueLine);
       });
       validations.append(row);
@@ -2047,18 +2420,18 @@
     if (result.pipeline_status !== "READY") {
       const notice = document.createElement("div");
       notice.className = "notice error";
-      notice.textContent = "证据链未闭合；Evidence 仍可审计，但不会升级为 Fact/Finding，也不会给出风险结论。";
+      notice.textContent = "证据链未闭合；证据仍可审计，但不会升级为事实（FACT）/发现（FINDING），也不会给出风险结论。";
       panel.append(notice);
       const issues = document.createElement("ul");
       issues.className = "fund-issues";
       (result.issues || []).forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issues.append(item);
       });
       if (issues.childElementCount) panel.append(issues);
       const availableHeading = document.createElement("h3");
-      availableHeading.textContent = "Available Evidence · not promoted to Fact";
+      availableHeading.textContent = "可用证据 · 未升级为事实（FACT）";
       panel.append(availableHeading);
       const available = document.createElement("div");
       available.className = "fund-available-evidence";
@@ -2070,10 +2443,10 @@
         const metadata = document.createElement("div");
         metadata.className = "research-evidence-meta";
         [
-          `Evidence: ${text(evidence.evidence_id)}`,
-          `Value: ${text(evidence.value)} ${text(evidence.unit, "")}`,
-          `Period: ${text(evidence.period)}`,
-          `Lineage: ${text(evidence.lineage_id)}`,
+          `证据（EVIDENCE）：${text(evidence.evidence_id)}`,
+          `数值：${text(evidence.value)} ${text(evidence.unit, "")}`,
+          `期间：${text(evidence.period)}`,
+          `来源链：${text(evidence.lineage_id)}`,
         ].forEach((lineText) => {
           const item = document.createElement("div");
           item.textContent = lineText;
@@ -2087,7 +2460,7 @@
     }
 
     const factHeading = document.createElement("h3");
-    factHeading.textContent = "Verified fund facts";
+    factHeading.textContent = "已验证的基金事实";
     panel.append(factHeading);
     const metricLabels = new Map((state.fundResearchTemplate && state.fundResearchTemplate.metrics || []).map((item) => [item.metric, item.label]));
     const factGrid = document.createElement("div");
@@ -2112,7 +2485,7 @@
     risk.className = "fund-risk-summary";
     const riskHeader = document.createElement("header");
     const riskTitle = document.createElement("strong");
-    riskTitle.textContent = "Deterministic fund risk summary";
+    riskTitle.textContent = "确定性基金风险摘要";
     riskHeader.append(riskTitle, chip(fundRiskStatusLabel(result.risk && result.risk.status), fundRiskStatusClass(result.risk && result.risk.status)));
     risk.append(riskHeader);
     const riskText = document.createElement("p");
@@ -2129,7 +2502,7 @@
     panel.append(risk);
 
     const findingHeading = document.createElement("h3");
-    findingHeading.textContent = "Deterministic fund risks";
+    findingHeading.textContent = "确定性基金风险";
     panel.append(findingHeading);
     const findings = document.createElement("div");
     findings.className = "fund-findings";
@@ -2141,14 +2514,14 @@
       details.append(line);
       const meta = document.createElement("div");
       meta.className = "research-evidence-meta";
-      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${text(finding.methodology)}`;
+      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${displayMethodology(finding.methodology)}`;
       details.append(meta);
       findings.append(details);
     });
     if (findings.childElementCount) panel.append(findings);
 
     const chainHeading = document.createElement("h3");
-    chainHeading.textContent = "Finding → Fact → Evidence";
+    chainHeading.textContent = "发现（FINDING）→事实（FACT）→证据（EVIDENCE）";
     panel.append(chainHeading);
     const chain = document.createElement("div");
     chain.className = "fund-findings";
@@ -2162,19 +2535,19 @@
       const metadata = document.createElement("div");
       metadata.className = "research-evidence-meta";
       const findingLine = document.createElement("div");
-      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      findingLine.textContent = `发现（FINDING）：${text(finding.finding_id)} · ${text(finding.severity)}`;
       metadata.append(findingLine);
       (finding.fact_ids || []).forEach((factId) => {
         const fact = factsById.get(factId);
         if (!fact) return;
         const factLine = document.createElement("div");
-        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        factLine.textContent = `事实（FACT）：${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
         metadata.append(factLine);
         (fact.evidence_ids || []).forEach((evidenceId) => {
           const evidence = evidenceById.get(evidenceId);
           if (!evidence) return;
           const evidenceLine = document.createElement("div");
-          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          evidenceLine.textContent = `证据（EVIDENCE）：${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · 来源链 ${text(evidence.lineage_id)}`;
           metadata.append(evidenceLine);
         });
       });
@@ -2191,7 +2564,7 @@
     if (!result) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "运行可转债研究后查看最低资产事实、公式、风险与 Evidence 闭合。";
+      empty.textContent = "运行可转债研究后查看最低资产事实、公式、风险与证据闭合。";
       panel.append(empty);
       return;
     }
@@ -2200,21 +2573,21 @@
     summary.className = "convertible-bond-research-summary";
     summary.append(
       chip(researchStatusLabel(result.pipeline_status), researchStatusClass(result.pipeline_status)),
-      chip(`Run ${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
+      chip(`运行：${researchStatusLabel(result.run_status)}`, researchStatusClass(result.run_status)),
       chip(convertibleBondRiskStatusLabel(result.risk && result.risk.status), convertibleBondRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · owner ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
-      scenarioText.textContent = `${text(result.scenario.label)} · ${text(result.scenario.description)}`;
+      scenarioText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)}`;
       summary.append(scenarioText);
     }
     panel.append(summary);
 
     const nodeHeading = document.createElement("h3");
-    nodeHeading.textContent = "Source nodes";
+    nodeHeading.textContent = "来源节点";
     panel.append(nodeHeading);
     const nodeGrid = document.createElement("div");
     nodeGrid.className = "research-grid";
@@ -2233,13 +2606,13 @@
       if (node.scope_description) {
         const scope = document.createElement("div");
         scope.className = "muted";
-        scope.textContent = node.scope_description;
+        scope.textContent = displayDescription(node.scope_description);
         card.append(scope);
       }
       (node.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         card.append(issueLine);
       });
       nodeGrid.append(card);
@@ -2247,7 +2620,7 @@
     if (nodeGrid.childElementCount) panel.append(nodeGrid);
 
     const validationHeading = document.createElement("h3");
-    validationHeading.textContent = "Source validation";
+    validationHeading.textContent = "来源验证";
     panel.append(validationHeading);
     const validations = document.createElement("div");
     validations.className = "research-validations";
@@ -2259,12 +2632,12 @@
       row.append(title, chip(text(validation.status), researchStatusClass(validation.status)));
       const meta = document.createElement("div");
       meta.className = "validation-meta";
-      meta.textContent = `${text(validation.independent_lineage_count, "0")} independent lineages · support ${text((validation.supporting_evidence_ids || []).length, "0")} · contradict ${text((validation.contradicting_evidence_ids || []).length, "0")} · unresolved ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
+      meta.textContent = `${text(validation.independent_lineage_count, "0")} 条独立来源链 · 支持 ${text((validation.supporting_evidence_ids || []).length, "0")} · 冲突 ${text((validation.contradicting_evidence_ids || []).length, "0")} · 未解决 ${text((validation.unresolved_evidence_ids || []).length, "0")}`;
       row.append(meta);
       (validation.issues || []).forEach((issue) => {
         const issueLine = document.createElement("div");
         issueLine.className = "muted";
-        issueLine.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        issueLine.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         row.append(issueLine);
       });
       validations.append(row);
@@ -2274,18 +2647,18 @@
     if (result.pipeline_status !== "READY") {
       const notice = document.createElement("div");
       notice.className = "notice error";
-      notice.textContent = "证据链未闭合；Evidence 仍可审计，但不会升级为 Fact/Finding，也不会给出风险结论。";
+      notice.textContent = "证据链未闭合；证据仍可审计，但不会升级为事实（FACT）/发现（FINDING），也不会给出风险结论。";
       panel.append(notice);
       const issues = document.createElement("ul");
       issues.className = "convertible-bond-issues";
       (result.issues || []).forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issues.append(item);
       });
       if (issues.childElementCount) panel.append(issues);
       const availableHeading = document.createElement("h3");
-      availableHeading.textContent = "Available Evidence · not promoted to Fact";
+      availableHeading.textContent = "可用证据 · 未升级为事实（FACT）";
       panel.append(availableHeading);
       const available = document.createElement("div");
       available.className = "convertible-bond-available-evidence";
@@ -2297,10 +2670,10 @@
         const metadata = document.createElement("div");
         metadata.className = "research-evidence-meta";
         [
-          `Evidence: ${text(evidence.evidence_id)}`,
-          `Value: ${text(evidence.value)} ${text(evidence.unit, "")}`,
-          `Period: ${text(evidence.period)}`,
-          `Lineage: ${text(evidence.lineage_id)}`,
+          `证据（EVIDENCE）：${text(evidence.evidence_id)}`,
+          `数值：${text(evidence.value)} ${text(evidence.unit, "")}`,
+          `期间：${text(evidence.period)}`,
+          `来源链：${text(evidence.lineage_id)}`,
         ].forEach((lineText) => {
           const item = document.createElement("div");
           item.textContent = lineText;
@@ -2314,7 +2687,7 @@
     }
 
     const factHeading = document.createElement("h3");
-    factHeading.textContent = "Verified convertible-bond facts";
+    factHeading.textContent = "已验证的可转债事实";
     panel.append(factHeading);
     const template = state.convertibleBondResearchTemplate;
     const metricLabels = new Map((template && template.metrics || []).map((item) => [item.metric, item.label]));
@@ -2331,8 +2704,8 @@
       value.className = "convertible-bond-fact-value";
       let displayValue = text(fact.value);
       const levelMetric = fact.metric === "credit_rating_rank" || fact.metric === "liquidity_score";
-      if (fact.metric === "credit_rating_rank") displayValue = `${text(creditLabels[String(fact.value)], "未知评级")} · rank ${displayValue}`;
-      if (fact.metric === "liquidity_score") displayValue = `${text(liquidityLabels[String(fact.value)], "未知流动性")} · score ${displayValue}`;
+      if (fact.metric === "credit_rating_rank") displayValue = `${text(creditLabels[String(fact.value)], "未知评级")} · 序数 ${displayValue}`;
+      if (fact.metric === "liquidity_score") displayValue = `${text(liquidityLabels[String(fact.value)], "未知流动性")} · 分数 ${displayValue}`;
       value.textContent = levelMetric ? displayValue : `${displayValue} ${text(fact.unit, "")}`;
       const period = document.createElement("div");
       period.className = "muted";
@@ -2343,7 +2716,7 @@
     if (factGrid.childElementCount) panel.append(factGrid);
 
     const formulaHeading = document.createElement("h3");
-    formulaHeading.textContent = "Deterministic formulas";
+    formulaHeading.textContent = "确定性公式";
     panel.append(formulaHeading);
     const formulas = document.createElement("div");
     formulas.className = "convertible-bond-formulas";
@@ -2358,7 +2731,7 @@
     risk.className = "convertible-bond-risk-summary";
     const riskHeader = document.createElement("header");
     const riskTitle = document.createElement("strong");
-    riskTitle.textContent = "Deterministic convertible-bond risk summary";
+    riskTitle.textContent = "确定性可转债风险摘要";
     riskHeader.append(riskTitle, chip(convertibleBondRiskStatusLabel(result.risk && result.risk.status), convertibleBondRiskStatusClass(result.risk && result.risk.status)));
     risk.append(riskHeader);
     const riskText = document.createElement("p");
@@ -2375,7 +2748,7 @@
     panel.append(risk);
 
     const findingHeading = document.createElement("h3");
-    findingHeading.textContent = "Deterministic convertible-bond risks";
+    findingHeading.textContent = "确定性可转债风险";
     panel.append(findingHeading);
     const findings = document.createElement("div");
     findings.className = "convertible-bond-findings";
@@ -2387,14 +2760,14 @@
       details.append(line);
       const meta = document.createElement("div");
       meta.className = "research-evidence-meta";
-      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${text(finding.methodology)}`;
+      meta.textContent = `${text(finding.finding_id)} · ${text(finding.severity)} · ${displayMethodology(finding.methodology)}`;
       details.append(meta);
       findings.append(details);
     });
     if (findings.childElementCount) panel.append(findings);
 
     const chainHeading = document.createElement("h3");
-    chainHeading.textContent = "Finding → Fact → Evidence";
+    chainHeading.textContent = "发现（FINDING）→事实（FACT）→证据（EVIDENCE）";
     panel.append(chainHeading);
     const chain = document.createElement("div");
     chain.className = "convertible-bond-findings";
@@ -2408,19 +2781,19 @@
       const metadata = document.createElement("div");
       metadata.className = "research-evidence-meta";
       const findingLine = document.createElement("div");
-      findingLine.textContent = `Finding: ${text(finding.finding_id)} · ${text(finding.severity)}`;
+      findingLine.textContent = `发现（FINDING）：${text(finding.finding_id)} · ${text(finding.severity)}`;
       metadata.append(findingLine);
       (finding.fact_ids || []).forEach((factId) => {
         const fact = factsById.get(factId);
         if (!fact) return;
         const factLine = document.createElement("div");
-        factLine.textContent = `Fact: ${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
+        factLine.textContent = `事实（FACT）：${text(fact.fact_id)} · ${text(fact.metric)} = ${text(fact.value)} ${text(fact.unit)} · ${text(fact.status)}`;
         metadata.append(factLine);
         (fact.evidence_ids || []).forEach((evidenceId) => {
           const evidence = evidenceById.get(evidenceId);
           if (!evidence) return;
           const evidenceLine = document.createElement("div");
-          evidenceLine.textContent = `Evidence: ${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · lineage ${text(evidence.lineage_id)}`;
+          evidenceLine.textContent = `证据（EVIDENCE）：${text(evidence.evidence_id)} · ${text(evidence.source)} · ${text(evidence.period)} · ${text(evidence.value)} · 来源链 ${text(evidence.lineage_id)}`;
           metadata.append(evidenceLine);
         });
       });
@@ -2448,7 +2821,7 @@
       chip(text(result.risk_level), ""),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.scenario && result.scenario.label)} · ${text(result.summary)} · owner ${text(result.owner_id)}`;
+    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${text(result.summary)} · 隔离标识 ${text(result.owner_id)}`;
     summary.append(summaryText);
     panel.append(summary);
 
@@ -2473,7 +2846,7 @@
       issues.className = "portfolio-optimization-issues";
       result.issues.forEach((issue) => {
         const item = document.createElement("li");
-        item.textContent = `${text(issue.code)}: ${text(issue.safe_message)}`;
+        item.textContent = `${text(issue.code)}: ${displayDescription(issue.safe_message)}`;
         issues.append(item);
       });
       panel.append(issues);
@@ -2481,7 +2854,7 @@
 
     if (result.status === "READY") {
       const targetHeading = document.createElement("h3");
-      targetHeading.textContent = "Current → deterministic target weights";
+      targetHeading.textContent = "当前 → 确定性目标权重";
       panel.append(targetHeading);
       const targets = document.createElement("div");
       targets.className = "portfolio-optimization-targets";
@@ -2496,19 +2869,19 @@
         const grid = document.createElement("dl");
         addMetadata(grid, "Current", `${text(target.current_weight_pct)}%`);
         addMetadata(grid, "Target", `${text(target.target_weight_pct)}%`);
-        addMetadata(grid, "Delta", `${text(target.delta_pct)} pp`);
+        addMetadata(grid, "Delta", `${text(target.delta_pct)} 个百分点`);
         addMetadata(grid, "Asset cap", `${text(target.allowed_max_weight_pct)}%`);
         card.append(grid);
         const rationale = document.createElement("div");
         rationale.className = "muted";
-        rationale.textContent = text(target.rationale);
+        rationale.textContent = displayDescription(target.rationale);
         card.append(rationale);
         targets.append(card);
       });
       if (targets.childElementCount) panel.append(targets);
 
       const constraintHeading = document.createElement("h3");
-      constraintHeading.textContent = "Constraint arithmetic";
+      constraintHeading.textContent = "约束算术";
       panel.append(constraintHeading);
       const constraints = document.createElement("div");
       constraints.className = "portfolio-optimization-constraints";
@@ -2519,7 +2892,7 @@
         details.append(line);
         const meta = document.createElement("div");
         meta.className = "research-evidence-meta";
-        meta.textContent = `Current ${text(constraint.current_weight_pct)}% → Target ${text(constraint.target_weight_pct)}% · cap ${text(constraint.allowed_max_weight_pct)}% · delta ${text(constraint.delta_pct)} pp · ${text(constraint.rationale)}`;
+        meta.textContent = `当前 ${text(constraint.current_weight_pct)}% → 目标 ${text(constraint.target_weight_pct)}% · 上限 ${text(constraint.allowed_max_weight_pct)}% · 变化 ${text(constraint.delta_pct)} 个百分点 · ${displayDescription(constraint.rationale)}`;
         details.append(meta);
         constraints.append(details);
       });
@@ -2534,7 +2907,7 @@
     const list = document.createElement("ul");
     (result.invalidation_conditions || []).forEach((condition) => {
       const item = document.createElement("li");
-      item.textContent = condition;
+      item.textContent = displayDescription(condition);
       list.append(item);
     });
     invalidation.append(list);
@@ -2567,9 +2940,10 @@
   async function apiError(response) {
     try {
       const payload = await response.json();
-      return new Error(payload.message || "API request failed");
+      const message = payload && typeof payload.message === "string" ? payload.message : "";
+      return new Error(message && /[\u3400-\u9fff]/.test(message) ? message : "接口请求失败");
     } catch (_) {
-      return new Error("API request failed");
+      return new Error("接口请求失败");
     }
   }
 
@@ -2598,15 +2972,15 @@
     if (!requestOwner) {
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
-      setPortfolioContextStatus("需要 owner", "blocked");
-      setError("请输入 owner 标识。");
+      setPortfolioContextStatus("需要隔离标识", "blocked");
+      setError("请输入隔离标识。");
       return;
     }
     if (!raw) {
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
       setPortfolioContextStatus("未提供 JSON", "blocked");
-      setError("请粘贴已脱敏的 Portfolio JSON。");
+      setError("请粘贴已脱敏的持仓 JSON。");
       return;
     }
     let portfolio;
@@ -2619,7 +2993,7 @@
       state.portfolioContext = null;
       renderPortfolio(state.queryTemplate?.portfolio || null);
       setPortfolioContextStatus("JSON 无效", "blocked");
-      setError("Portfolio JSON 无法解析；输入原文不会写入错误信息。");
+      setError("持仓 JSON 无法解析；输入原文不会写入错误信息。");
       return;
     }
     if (requestOwner !== state.ownerId) {
@@ -2649,7 +3023,7 @@
       state.portfolioContext = result.portfolio;
       renderPortfolio(state.portfolioContext, "已确认 · 当前会话只读");
       setPortfolioContextStatus(
-        `已确认 · ${text(result.position_count)} positions`,
+        `已确认 · ${text(result.position_count)} 个持仓`,
         "pass",
       );
     } catch (error) {
@@ -2658,7 +3032,7 @@
         setPortfolioContextStatus("未确认", "blocked");
         renderPortfolio(state.queryTemplate?.portfolio || null);
       }
-      setError(error.message || "Portfolio 校验失败");
+      setError(error.message || "持仓校验失败");
     } finally {
       submit.disabled = false;
     }
@@ -2673,8 +3047,8 @@
     if (!requestOwner) {
       state.profileContext = null;
       renderConfirmedProfile(null);
-      setProfileContextStatus("需要 owner", "blocked");
-      setError("请输入 owner 标识。");
+      setProfileContextStatus("需要隔离标识", "blocked");
+      setError("请输入隔离标识。");
       return;
     }
     if (requestOwner !== state.ownerId) {
@@ -2713,7 +3087,7 @@
         renderConfirmedProfile(null);
         setProfileContextStatus("未确认", "blocked");
       }
-      setError(error.message || "Risk Profile 确认失败");
+      setError(error.message || "风险画像确认失败");
     } finally {
       submit.disabled = false;
     }
@@ -2749,7 +3123,7 @@
       if (state.ownerId !== ownerId || state.templateSequence !== sequence) return null;
       state.templateContext = template;
       state.queryTemplate = template;
-      byId("query-template-meta").textContent = `Fixture ${text(template.fixture_id)} · generated_at ${text(template.generated_at)} · 合成持仓模板`;
+      byId("query-template-meta").textContent = `合成数据 ${text(template.fixture_id)} · 生成时间 ${text(template.generated_at)} · 合成持仓模板`;
       renderPortfolio(
         state.portfolioContext || template.portfolio,
         state.portfolioContext ? "已确认 · 当前会话只读" : "只读 · 合成模板",
@@ -2775,7 +3149,7 @@
     if (state.ownerId !== ownerId || state.researchSequence !== sequence) return null;
     state.researchTemplate = template;
     renderResearchScenarioOptions(template.scenarios);
-    byId("research-template-meta").textContent = `Matrix ${text(template.matrix_id)} · ${text(template.node_count)} nodes · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    byId("research-template-meta").textContent = `矩阵 ${text(template.matrix_id)} · ${text(template.node_count)} 个节点 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
     return template;
   }
 
@@ -2789,7 +3163,7 @@
     if (state.ownerId !== ownerId || state.stockResearchSequence !== sequence) return null;
     state.stockResearchTemplate = template;
     renderStockResearchScenarioOptions(template.scenarios);
-    byId("stock-research-template-meta").textContent = `Stock ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} metrics · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    byId("stock-research-template-meta").textContent = `个股 ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} 项指标 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
     return template;
   }
 
@@ -2803,7 +3177,7 @@
     if (state.ownerId !== ownerId || state.fundResearchSequence !== sequence) return null;
     state.fundResearchTemplate = template;
     renderFundResearchScenarioOptions(template.scenarios);
-    byId("fund-research-template-meta").textContent = `Fund ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} metrics · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    byId("fund-research-template-meta").textContent = `基金 ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} 项指标 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
     return template;
   }
 
@@ -2817,7 +3191,7 @@
     if (state.ownerId !== ownerId || state.convertibleBondResearchSequence !== sequence) return null;
     state.convertibleBondResearchTemplate = template;
     renderConvertibleBondResearchScenarioOptions(template.scenarios);
-    byId("convertible-bond-research-template-meta").textContent = `Convertible Bond ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} metrics · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    byId("convertible-bond-research-template-meta").textContent = `可转债 ${text(template.subject)} · ${text(template.period)} · ${text(template.metrics?.length, "0")} 项指标 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
     return template;
   }
 
@@ -2831,7 +3205,7 @@
     if (state.ownerId !== ownerId || state.portfolioOptimizationSequence !== sequence) return null;
     state.portfolioOptimizationTemplate = template;
     renderPortfolioOptimizationScenarioOptions(template.scenarios);
-    byId("portfolio-optimization-template-meta").textContent = `Method ${text(template.methodology_version)} · ${text((template.rules || []).length, "0")} rules · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+    byId("portfolio-optimization-template-meta").textContent = `方法 ${text(template.methodology_version)} · ${text((template.rules || []).length, "0")} 条规则 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
     return template;
   }
 
@@ -2842,15 +3216,15 @@
     if (!requestOwner) {
       clearProfileProposal({ clearInput: false });
       clearAdvisorPlan();
-      setProfileProposalStatus("需要 owner", "blocked");
-      setError("请输入 owner 标识。");
+      setProfileProposalStatus("需要隔离标识", "blocked");
+      setError("请输入隔离标识。");
       return;
     }
     if (!raw) {
       clearProfileProposal({ clearInput: false });
       clearAdvisorPlan();
       setProfileProposalStatus("未提供 JSON", "blocked");
-      setError("请粘贴已脱敏的 ProfileExtractionProposal JSON。");
+      setError("请粘贴已脱敏的画像提取提案 JSON。");
       return;
     }
     let extraction;
@@ -2863,7 +3237,7 @@
       clearProfileProposal({ clearInput: false });
       clearAdvisorPlan();
       setProfileProposalStatus("JSON 无效", "blocked");
-      setError("Profile 提案 JSON 无法解析；输入原文不会写入错误信息。");
+      setError("画像提案 JSON 无法解析；输入原文不会写入错误信息。");
       return;
     }
     if (requestOwner !== state.ownerId) {
@@ -2911,7 +3285,7 @@
       renderProfileProposalResult(null);
       const conflictCount = (result.draft.conflicts || []).length;
       setProfileProposalStatus(
-        conflictCount ? `${conflictCount} conflicts` : "无冲突 · 可确认",
+        conflictCount ? `${conflictCount} 个冲突` : "无冲突 · 可确认",
         conflictCount ? "review" : "pass",
       );
       setProfileProposalConfirmStatus(conflictCount ? "待选择" : "待确认");
@@ -2924,7 +3298,7 @@
         clearProfileProposal({ clearInput: false });
         setProfileProposalStatus("未生成", "blocked");
       }
-      setError(error.message || "Profile 提案验证失败");
+      setError(error.message || "风险画像提案验证失败");
     } finally {
       submit.disabled = false;
     }
@@ -2937,7 +3311,7 @@
     const submit = byId("confirm-profile-proposal");
     if (!draft || !questionnaire || !extraction) {
       setProfileProposalConfirmStatus("请先预览", "blocked");
-      setError("请先预览结构化 Profile 提案。");
+      setError("请先预览结构化风险画像提案。");
       return;
     }
     const resolutions = {};
@@ -2982,7 +3356,7 @@
         renderProfileProposalResult(null);
         setProfileProposalConfirmStatus("未确认", "blocked");
       }
-      setError(error.message || "Profile 提案确认失败");
+      setError(error.message || "画像提案确认失败");
     } finally {
       submit.disabled = false;
     }
@@ -2993,8 +3367,8 @@
     const submit = byId("preview-advisor-plan");
     if (!requestOwner) {
       clearAdvisorPlan();
-      setAdvisorPlanStatus("需要 owner", "blocked");
-      setError("请输入 owner 标识。");
+      setAdvisorPlanStatus("需要隔离标识", "blocked");
+      setError("请输入隔离标识。");
       return;
     }
     if (requestOwner !== state.ownerId) {
@@ -3033,7 +3407,7 @@
       if (state.ownerId !== requestOwner || state.templateSequence !== planSequence) return;
       state.advisorPlan = await response.json();
       renderAdvisorPlan(state.advisorPlan);
-      setAdvisorPlanStatus(`已生成 · ${text(state.advisorPlan.node_count)} nodes`, "pass");
+      setAdvisorPlanStatus(`已生成 · ${text(state.advisorPlan.node_count)} 个节点`, "pass");
     } catch (error) {
       if (state.ownerId === requestOwner && state.templateSequence === planSequence) {
         clearAdvisorPlan();
@@ -3068,7 +3442,7 @@
     byId("detail-content").replaceChildren();
     const detailEmpty = document.createElement("div");
     detailEmpty.className = "empty-state";
-    detailEmpty.textContent = "读取 owner 后查看已保存的决策事件。";
+    detailEmpty.textContent = "读取隔离标识后查看已保存的决策事件。";
     byId("detail-content").append(detailEmpty);
     state.researchTemplate = null;
     state.researchRun = null;
@@ -3101,7 +3475,7 @@
     state.portfolioOptimizationTemplate = null;
     state.portfolioOptimizationRun = null;
     state.portfolioOptimizationSequence += 1;
-    byId("portfolio-optimization-template-meta").textContent = "运行时读取确定性 cap-and-redistribute 方法与合成组合模板。";
+    byId("portfolio-optimization-template-meta").textContent = "运行时读取确定性上限重分配（cap-and-redistribute）方法与合成组合模板。";
     clearPortfolioOptimizationScenarioOptions();
     setPortfolioOptimizationStatus("待运行");
     renderPortfolioOptimization(null);
@@ -3118,11 +3492,11 @@
     const queryId = byId("query-id").value.trim();
     const submit = byId("run-advisor-query");
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     if (!queryId) {
-      setError("请输入 query ID。");
+      setError("请输入查询 ID。");
       return;
     }
     setError("");
@@ -3158,7 +3532,7 @@
       if (result.event && result.event.event_id) await loadEvent(result.event.event_id);
     } catch (error) {
       setQueryStatus("未运行", "blocked");
-      setError(error.message || "运行 Advisor 查询失败");
+      setError(error.message || "运行投顾查询失败");
     } finally {
       submit.disabled = false;
     }
@@ -3174,7 +3548,7 @@
     const submit = byId("run-research-matrix");
     const scenarioSelect = byId("research-scenario");
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     setError("");
@@ -3194,7 +3568,7 @@
       renderResearchScenarioOptions(template.scenarios);
       const scenarioId = scenarioSelect.value || "BASELINE_READY";
       scenarioSelect.disabled = true;
-      byId("research-template-meta").textContent = `Matrix ${text(template.matrix_id)} · ${text(template.node_count)} nodes · ${text((template.scenarios || []).length, "0")} replay scenarios · generated_at ${text(template.generated_at)}`;
+      byId("research-template-meta").textContent = `矩阵 ${text(template.matrix_id)} · ${text(template.node_count)} 个节点 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
       const response = await fetch("/api/v1/advisor/research-runs", {
         method: "POST",
         headers: {
@@ -3242,7 +3616,7 @@
     const submit = byId("run-stock-research");
     const scenarioSelect = byId("stock-research-scenario");
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     setError("");
@@ -3308,7 +3682,7 @@
     const submit = byId("run-fund-research");
     const scenarioSelect = byId("fund-research-scenario");
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     setError("");
@@ -3355,7 +3729,7 @@
       state.fundResearchRun = null;
       renderFundResearch(null);
       setFundResearchStatus("未运行", "blocked");
-      setError(error.message || "运行 ETF / Fund 研究失败");
+      setError(error.message || "运行 ETF / 基金研究失败");
     } finally {
       submit.disabled = false;
       if (state.ownerId === requestOwner && state.fundResearchSequence === sequence) {
@@ -3374,7 +3748,7 @@
     const submit = byId("run-convertible-bond-research");
     const scenarioSelect = byId("convertible-bond-research-scenario");
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     setError("");
@@ -3435,7 +3809,7 @@
     const submit = byId("run-portfolio-optimization");
     const scenarioSelect = byId("portfolio-optimization-scenario");
     if (!requestOwner) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     if (!state.portfolioOptimizationTemplate) {
@@ -3450,7 +3824,7 @@
     if (!template || state.ownerId !== requestOwner) return;
     if (!state.profileContext || !state.profileContext.profile) {
       setPortfolioOptimizationStatus("需先确认画像", "review");
-      setError("请先确认 Risk Profile，再生成组合目标结构。");
+      setError("请先确认风险画像，再生成组合目标结构。");
       return;
     }
     const requestSequence = ++state.portfolioOptimizationSequence;
@@ -3520,13 +3894,13 @@
     clear(byId("detail-content"));
     const loadingDetail = document.createElement("div");
     loadingDetail.className = "empty-state";
-    loadingDetail.textContent = "读取当前 owner 的决策回执…";
+    loadingDetail.textContent = "读取当前隔离标识的决策回执…";
     byId("detail-content").append(loadingDetail);
     if (ownerChanged || !state.ownerId) {
       resetOwnerScopedViews();
     }
     if (!state.ownerId) {
-      setError("请输入 owner 标识。");
+      setError("请输入隔离标识。");
       return;
     }
     try {
@@ -3546,13 +3920,13 @@
       byId("detail-content").replaceChildren();
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = state.events.length ? "选择一条回执查看详情。" : "这个 owner 还没有保存的决策事件。";
+      empty.textContent = state.events.length ? "选择一条回执查看详情。" : "这个隔离标识还没有保存的决策事件。";
       byId("detail-content").append(empty);
       try {
         await loadTemplateContext(requestOwner, templateSequence);
       } catch (error) {
         if (state.ownerId === requestOwner && state.templateSequence === templateSequence) {
-          setError(error.message || "读取 Portfolio/Risk Profile 模板失败");
+      setError(error.message || "读取持仓/风险画像模板失败");
         }
       }
       if (state.ownerId === requestOwner && !state.researchTemplate) {
@@ -3581,7 +3955,7 @@
         } catch (error) {
           if (state.ownerId === requestOwner) {
             clearFundResearchScenarioOptions();
-            setError(error.message || "读取 ETF / Fund 研究场景目录失败");
+            setError(error.message || "读取 ETF / 基金研究场景目录失败");
           }
         }
       }
@@ -3634,6 +4008,29 @@
       node.classList.add("bad");
       node.textContent = "● API 不可用";
     }
+  }
+
+  function syncNavigation(targetId = window.location.hash.replace(/^#/, "")) {
+    const items = [...document.querySelectorAll(".nav-item")];
+    if (!items.length) return;
+    const target = items.find((item) => item.getAttribute("href") === `#${targetId}`)
+      || items.find((item) => item.getAttribute("href") === "#overview")
+      || items[0];
+    items.forEach((item) => {
+      const selected = item === target;
+      item.classList.toggle("active", selected);
+      if (selected) item.setAttribute("aria-current", "location");
+      else item.removeAttribute("aria-current");
+    });
+  }
+
+  function initializeNavigation() {
+    const items = [...document.querySelectorAll(".nav-item")];
+    items.forEach((item) => {
+      item.addEventListener("click", () => syncNavigation(item.hash.slice(1)));
+    });
+    window.addEventListener("hashchange", () => syncNavigation());
+    syncNavigation();
   }
 
   byId("load-events").addEventListener("click", loadEvents);
@@ -3744,6 +4141,7 @@
       setProfileContextStatus("需重新确认", "review");
     });
   });
+  initializeNavigation();
   checkHealth();
   loadEvents();
 })();

@@ -269,7 +269,7 @@ def test_research_scenario_workbench_static_boundary_is_text_only() -> None:
     assert "离线合成演示" in page.text
     assert js.status_code == 200
     assert "scenario_id" in js.text
-    assert "Available Evidence" in js.text
+    assert "可用证据" in js.text
     assert "innerHTML" not in js.text
     assert "https://" not in page.text
     assert css.status_code == 200 and ".research-scenario-picker" in css.text

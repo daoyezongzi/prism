@@ -1,0 +1,76 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+STATIC = ROOT / "app" / "api" / "static"
+
+
+def test_primary_navigation_is_chinese_and_has_initial_selection() -> None:
+    markup = (STATIC / "index.html").read_text(encoding="utf-8")
+
+    expected_links = {
+        "#overview": "总览",
+        "#advisor": "投顾查询",
+        "#portfolio": "持仓",
+        "#context-memory": "上下文记忆",
+        "#portfolio-optimization": "组合优化",
+        "#research-tracks": "研究轨道",
+        "#stock-research": "个股研究",
+        "#fund-research": "ETF / 基金研究",
+        "#convertible-bond-research": "可转债研究",
+        "#evidence": "证据链",
+        "#profile": "风险画像",
+    }
+    for href, label in expected_links.items():
+        assert f'href="{href}"' in markup
+        assert label in markup
+    assert '<nav class="nav-list" aria-label="工作区分区">' in markup
+    assert 'href="#overview" aria-current="location"' in markup
+
+    forbidden_core_labels = (
+        "Decision workspace",
+        "Evidence chain explorer",
+        "Context Memory",
+        "Research Tracks",
+        "Risk Profile 确认失败",
+        "AUDIT FIRST",
+        "INVESTMENT RESEARCH WORKSPACE",
+    )
+    for label in forbidden_core_labels:
+        assert label not in markup
+
+
+def test_navigation_renderer_syncs_hash_selection_and_safe_localization() -> None:
+    script = (STATIC / "app.js").read_text(encoding="utf-8")
+
+    for token in (
+        "function syncNavigation(",
+        'item.classList.toggle("active", selected)',
+        'item.setAttribute("aria-current", "location")',
+        'window.addEventListener("hashchange"',
+        'item.addEventListener("click", () => syncNavigation(item.hash.slice(1)))',
+        "function displayScenarioLabel(",
+        "function displayDescription(",
+        "function displayMethodology(",
+        "操作未完成，请检查输入或稍后重试。",
+        '"synthetic fixture omitted a required field": "合成样例缺少必需字段"',
+        '"exposure or concentration input is not complete": "暴露或集中度输入不完整"',
+        '"Review technology exposure through Macro, Industry, Stock and ETF/Fund tracks.":',
+        'DISPLAY_VALUE_LABELS[rendered.toUpperCase()]',
+        'option.value = scenario.scenario_id || ""',
+        'select.value = known ? previous : options[0].scenario_id',
+    ):
+        assert token in script
+
+    for label in (
+        "Evidence chain explorer",
+        "Decision workspace",
+        "Current owner",
+        "Risk Profile 确认失败",
+        "Profile 提案验证失败",
+        "Portfolio 校验失败",
+        "需复核的安全问题（issue）",
+    ):
+        assert label not in script

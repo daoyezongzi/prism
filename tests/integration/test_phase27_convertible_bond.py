@@ -473,7 +473,7 @@ def test_convertible_workbench_static_boundary_is_text_only_and_same_origin() ->
     assert page.status_code == js.status_code == css.status_code == 200
     assert 'id="convertible-bond-research"' in page.text
     assert 'id="convertible-bond-research-scenario"' in page.text
-    assert "synthetic/offline replay" in page.text
+    assert "合成离线回放" in page.text
     assert "/api/v1/advisor/convertible-bond-research-template" in js.text
     assert "/api/v1/advisor/convertible-bond-research-runs" in js.text
     assert "innerHTML" not in js.text

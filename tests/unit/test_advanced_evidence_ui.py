@@ -22,7 +22,7 @@ def test_advanced_evidence_markup_exposes_auditable_controls() -> None:
         "advanced-evidence-detail",
     ):
         assert f'id="{element_id}"' in markup
-    assert "Evidence chain explorer" in markup
+    assert "证据链浏览器" in markup
     assert "陈旧缓存与备用来源" in markup
 
 
@@ -36,8 +36,8 @@ def test_advanced_evidence_renderer_keeps_owner_and_quality_boundaries() -> None
         "CACHE_FRESH",
         "FALLBACK_PROVIDER",
         "CACHE_STALE_FALLBACK",
-        "STALE · 陈旧/需复核",
-        "当前 Evidence 尚未进入 Fact/Finding",
+        "陈旧/需复核（STALE）",
+        "当前证据尚未进入事实（FACT）/发现（FINDING）",
         "textContent",
     ):
         assert token in script

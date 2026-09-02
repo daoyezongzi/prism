@@ -6,9 +6,10 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 31 Advanced Evidence UI is accepted in the dedicated
-> `D:\Github_Storage\prism-phase-31` worktree. Its plan, implementation, independent review and
-> browser acceptance are recorded; the next phase must start in another brand-new worktree.
+> Active phase: Phase 32 Chinese UI and stable navigation selection is accepted in the dedicated
+> `D:\Github_Storage\prism-phase-32` worktree. Its plan, implementation, independent review and
+> browser acceptance are recorded; the next phase must start from this accepted commit in
+> another brand-new worktree.
 
 ## P0 — Foundation
 
@@ -96,6 +97,10 @@
   quality/serving-mode/source/promotion filters, provenance/freshness details, explicit stale /
   fallback review notices and no recommendation/API side effects; keep backend indexing,
   real SkillHub, authentication, cloud persistence and automatic refresh deferred.
+- [x] Localize the Phase 32 workbench UI into Chinese while preserving stable machine IDs,
+  enum values and audit labels; synchronize left navigation active/`aria-current` state on
+  clicks, hash changes and direct hash loads; keep Scenario Simulation and other P2 work out
+  of this phase.
 
 ## External inputs / decisions
 
@@ -116,9 +121,9 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 31 is accepted in the dedicated `D:\Github_Storage\prism-phase-31` worktree; its plan,
-implementation, review fixes and final verification are recorded in
-`docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md`. The next useful action is to start
-the next clearly scoped phase in a new worktree (Scenario Simulation), while keeping real
-authentication, live Provider access, cloud/production persistence, backend indexing and broad
-conversational memory deferred.
+Phase 32 is accepted in the dedicated `D:\Github_Storage\prism-phase-32` worktree; its plan,
+implementation, independent review, full regression and real-browser acceptance are recorded in
+`docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md`. The next useful action is to
+create a fresh Phase 33 worktree from that accepted commit and execute the handoff plan for
+Scenario Simulation, while keeping real authentication, live Provider access, cloud/production
+persistence, backend indexing and broad conversational memory deferred.

@@ -329,7 +329,7 @@ def test_fund_workbench_static_boundary_is_text_only_and_same_origin() -> None:
     assert page.status_code == js.status_code == css.status_code == 200
     assert 'id="fund-research"' in page.text
     assert 'id="fund-research-scenario"' in page.text
-    assert "synthetic/offline replay" in page.text
+    assert "合成离线回放" in page.text
     assert "/api/v1/advisor/fund-research-template" in js.text
     assert "/api/v1/advisor/fund-research-runs" in js.text
     assert "innerHTML" not in js.text

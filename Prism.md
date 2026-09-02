@@ -1374,11 +1374,12 @@ Evaluation Dashboard
 Advanced Explainability
 ```
 
-截至 2026-09-02，P1 路线中的 Provider Cache/Fallback 与 Advanced Evidence UI 已在独立
-worktree 完成验收：工作台可在当前 owner 的已加载结果中查看 provider/source/lineage、
-取得时间、serving mode、质量状态和 Finding → Fact → Evidence 闭合路径；stale、fallback
-与未闭合结果仍明确要求复核。该状态不等于真实 SkillHub 在线接入、生产认证、云持久化或
-生产 SLA；相关外部输入和生产边界继续按本规范保留。
+截至 2026-09-02，P1 路线中的 Provider Cache/Fallback、Advanced Evidence UI 与中文
+工作台/稳定导航已在独立 worktree 完成验收：工作台可在当前 owner 的已加载结果中查看
+provider/source/lineage、取得时间、serving mode、质量状态和 Finding → Fact → Evidence
+闭合路径；stale、fallback 与未闭合结果仍明确要求复核；左侧导航点击、hash 变化和直接
+hash 加载保持唯一选中态。该状态不等于真实 SkillHub 在线接入、生产认证、云持久化或生产
+SLA；Scenario Simulation 等 P2 能力和相关外部输入继续按本规范保留。
 
 ---
 

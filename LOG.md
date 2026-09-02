@@ -1279,3 +1279,35 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
   真实浏览器 smoke 覆盖五轨道、Advisor、stale/fallback、context restore、owner 清理、
   窄屏键盘和无外部请求。
 - Phase 31 已在独立 worktree 接受，未 push；下一阶段必须从该接受提交创建全新 worktree。
+
+## 2026-09-02 — MVP Phase 32 中文 UI 与导航选中态（已验收）
+
+### 计划、实现与独立审查
+
+- 从 Phase 31 accepted `d6fccd7` 创建全新 worktree
+  `D:\Github_Storage\prism-phase-32`，分支为
+  `codex/mvp-phase-32-ui-localization-navigation`；先提交计划
+  `docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md`（`b6f958c`）。
+- 将静态 HTML、动态状态/错误/方法说明、Evidence 元数据、研究场景与无障碍文案统一为
+  中文；保留 Provider/source/lineage、Evidence ID、schema/API 字段和稳定枚举代码，
+  只在展示层建立“中文说明 + 可检索代码”映射。
+- 左侧导航保留既有 section hash，在点击、`hashchange`、首次加载和直接打开 hash 时
+  同步 `.active` 与 `aria-current="location"`；不新增路由、请求或后端契约。
+- 独立审查记录于
+  `docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md`：修复场景
+  option 机器值被翻译、降级分支英文描述/小写单位泄漏和 ISSUE 标题大小写问题；确认
+  owner/异步清理、text-only DOM/CSP、稳定 ID 和无外部请求边界未回归。
+
+### 验证与产品边界
+
+- 新增中文 UI/导航静态契约并更新历史静态断言；全量回归 `436 passed`，仅已知
+  Starlette/httpx deprecation warning；`node --check`、`compileall`、`git diff --check`
+  通过。
+- `evaluate_mvp --repeat 100 --json` 为 `9/9`、所有质量指标 `1.0`；resilience load 为
+  fresh/stale 各 `100/100`、错误 `0`；wheel `115` entries，包含静态资源且隔离检查通过。
+- 真实本地 headless 浏览器 smoke 覆盖导航点击/直接 hash、五轨道与 Advisor、场景
+  PARTIAL、stale/fallback、Evidence 详情、Context Memory 恢复、owner 清理、窄屏键盘；
+  `external_requests=[]`、`console_errors=[]`。
+- 本阶段不实现 Scenario Simulation、Recommendation History、Portfolio Rebalancing、
+  Evaluation Dashboard、实时 SkillHub、认证、云持久化或后端索引；下一阶段必须从本
+  阶段接受提交另建全新 Phase 33 worktree，并先阅读其 P2 计划。

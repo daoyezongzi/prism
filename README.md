@@ -147,6 +147,13 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   `434` 项回归、固定评测、resilience 回归、wheel、静态边界与真实本地浏览器验收通过。
   详见 [Advanced Evidence UI 契约](docs/advanced-evidence-ui.md) 与
   [Phase 31 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)。
+- Phase 32 已加入并验收中文工作台与稳定左侧导航：静态和动态用户文案统一为中文，
+  状态/场景/方法说明保留可审计的稳定代码标识；点击导航、`hashchange` 和直接打开
+  hash 均同步 `.active` 与 `aria-current="location"`，不改变 API、Provider、Evidence
+  或稳定枚举契约。`436` 项回归、固定评测、resilience、wheel、静态边界与真实本地
+  浏览器验收通过，外部请求与 console error 均为 `[]`。详见
+  [Phase 32 中文 UI 与导航计划](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
+  与 [Phase 32 独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)。
 
 尚未实现：
 
@@ -258,6 +265,8 @@ python -m pytest
 - [Phase 30 Provider Cache/Fallback 复审](docs/reviews/2026-09-02-phase-30-provider-cache-fallback-review.md)
 - [Phase 31 Advanced Evidence UI 契约](docs/advanced-evidence-ui.md)
 - [Phase 31 Advanced Evidence UI 计划与验收](docs/plans/2026-09-02-mvp-phase-31-advanced-evidence-ui.md)
+- [Phase 32 中文 UI 与导航计划与验收](docs/plans/2026-09-02-mvp-phase-32-ui-localization-navigation.md)
+- [Phase 32 中文 UI 与导航独立审查](docs/reviews/2026-09-02-phase-32-ui-localization-navigation-review.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

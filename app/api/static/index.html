@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
     <meta name="description" content="Prism 可解释投资研究工作台">
-    <title>Prism · Decision Workspace</title>
+    <title>Prism · 决策工作台</title>
     <link rel="stylesheet" href="/static/styles.css">
     <script src="/static/app.js" defer></script>
   </head>
@@ -16,24 +16,24 @@
           <span class="brand-mark" aria-hidden="true">P</span>
           <div>
             <strong>Prism</strong>
-            <span>Decision workspace</span>
+            <span>决策工作台</span>
           </div>
         </div>
-        <nav class="nav-list">
-          <a class="nav-item active" href="#overview">Overview</a>
-          <a class="nav-item" href="#advisor">Advisor</a>
-          <a class="nav-item" href="#portfolio">Portfolio</a>
-          <a class="nav-item" href="#context-memory">Context Memory</a>
-          <a class="nav-item" href="#portfolio-optimization">Optimization</a>
-          <a class="nav-item" href="#research-tracks">Research Tracks</a>
-          <a class="nav-item" href="#stock-research">Stock Research</a>
-          <a class="nav-item" href="#fund-research">ETF / Fund Research</a>
-          <a class="nav-item" href="#convertible-bond-research">Convertible Bond Research</a>
-          <a class="nav-item" href="#evidence">Evidence</a>
-          <a class="nav-item" href="#profile">Risk Profile</a>
+        <nav class="nav-list" aria-label="工作区分区">
+          <a class="nav-item active" href="#overview" aria-current="location">总览</a>
+          <a class="nav-item" href="#advisor">投顾查询</a>
+          <a class="nav-item" href="#portfolio">持仓</a>
+          <a class="nav-item" href="#context-memory">上下文记忆</a>
+          <a class="nav-item" href="#portfolio-optimization">组合优化</a>
+          <a class="nav-item" href="#research-tracks">研究轨道</a>
+          <a class="nav-item" href="#stock-research">个股研究</a>
+          <a class="nav-item" href="#fund-research">ETF / 基金研究</a>
+          <a class="nav-item" href="#convertible-bond-research">可转债研究</a>
+          <a class="nav-item" href="#evidence">证据链</a>
+          <a class="nav-item" href="#profile">风险画像</a>
         </nav>
         <div class="sidebar-note">
-          <span class="eyebrow">AUDIT FIRST</span>
+          <span class="eyebrow">审计优先</span>
           <p>每个动作都绑定画像、风险约束与证据回执。</p>
         </div>
       </aside>
@@ -41,7 +41,7 @@
       <main class="main">
         <header class="topbar">
           <div>
-            <span class="eyebrow">INVESTMENT RESEARCH WORKSPACE</span>
+            <span class="eyebrow">投资研究工作台</span>
             <h1>决策回执</h1>
           </div>
           <div class="health" id="health-status" aria-live="polite">
@@ -51,12 +51,12 @@
 
         <section class="hero" id="overview">
           <div>
-            <span class="eyebrow clay">PROFILE-CONDITIONED</span>
+            <span class="eyebrow clay">画像约束</span>
             <h2>同一持仓，不同约束，<em>不同答案。</em></h2>
             <p>Prism 不只保存建议文本，而是保存建议为何成立、何时失效的完整回执。</p>
           </div>
           <div class="owner-form">
-            <label for="owner-id">当前 owner</label>
+            <label for="owner-id">当前隔离标识</label>
             <div class="owner-input">
               <input id="owner-id" value="demo-owner" autocomplete="off" spellcheck="false">
               <button id="load-events" type="button">读取回执</button>
@@ -71,15 +71,15 @@
           <section class="panel advisor-panel" id="advisor" aria-labelledby="advisor-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">ADVISOR</span>
+                <span class="eyebrow">投顾查询</span>
                 <h2 id="advisor-title">最近决策</h2>
               </div>
-              <span class="count-pill" id="event-count">0 events</span>
+              <span class="count-pill" id="event-count">0 条事件</span>
             </div>
             <form id="advisor-query-form" class="query-form">
               <div class="query-form-head">
                 <div>
-                  <span class="eyebrow clay">STRUCTURED QUERY</span>
+                  <span class="eyebrow clay">结构化查询</span>
                   <h3>用同一持仓测试不同约束</h3>
                 </div>
                 <span id="query-status" class="status-chip">待运行</span>
@@ -105,7 +105,7 @@
               </div>
               <div class="query-fields">
                 <label>
-                  <span>Query ID</span>
+                  <span>查询 ID</span>
                   <input id="query-id" name="query_id" value="ui-advisor-001" autocomplete="off" spellcheck="false" required>
                 </label>
                 <label>
@@ -156,19 +156,19 @@
                 </label>
               </div>
               <div class="query-form-actions">
-                <button id="run-advisor-query" class="query-submit" type="submit">运行 Advisor 查询</button>
-                <span class="query-note">BALANCED / CONSERVATIVE 只改变画像约束，事实仍来自脱敏 fixture。</span>
+                <button id="run-advisor-query" class="query-submit" type="submit">运行投顾查询（ADVISOR）</button>
+                <span class="query-note">平衡 / 保守画像只改变约束，事实仍来自脱敏合成数据。</span>
               </div>
             </form>
             <div id="event-list" class="event-list" aria-live="polite">
-              <div class="empty-state">输入 owner 后读取已保存的决策事件。</div>
+              <div class="empty-state">输入隔离标识后读取已保存的决策事件。</div>
             </div>
           </section>
 
           <section class="panel research-panel" id="research-tracks" aria-labelledby="research-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">RESEARCH TRACKS</span>
+                <span class="eyebrow clay">研究轨道</span>
                 <h2 id="research-title">四轨道研究矩阵</h2>
               </div>
               <span id="research-status" class="status-chip">待运行</span>
@@ -186,17 +186,17 @@
               </label>
               <button id="run-research-matrix" class="query-submit" type="button">运行研究矩阵</button>
             </div>
-            <p class="research-boundary">Macro、Industry、Stock、ETF/Fund 只展示结构化研究状态与证据链；READY 不代表可交易建议，退化场景不会升级为 Fact/Finding。</p>
+            <p class="research-boundary">宏观、行业、个股、ETF/基金只展示结构化研究状态与证据链；就绪（READY）不代表可交易建议，退化场景不会升级为事实或发现。</p>
             <div id="research-matrix-content" class="research-content" aria-live="polite">
-              <div class="empty-state">运行矩阵后查看四类节点、独立来源验证与 Finding → Fact → Evidence。</div>
+              <div class="empty-state">运行矩阵后查看四类节点、独立来源验证与发现（FINDING）→事实（FACT）→证据（EVIDENCE）。</div>
             </div>
           </section>
 
           <section class="panel stock-research-panel" id="stock-research" aria-labelledby="stock-research-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">DEMO F · STOCK RESEARCH</span>
-                <h2 id="stock-research-title">个股研究 Evidence Card</h2>
+                <span class="eyebrow clay">演示 F · 个股研究</span>
+                <h2 id="stock-research-title">个股研究证据卡</h2>
               </div>
               <span id="stock-research-status" class="status-chip">待运行</span>
             </div>
@@ -209,21 +209,21 @@
                 <select id="stock-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
                 </select>
-                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+                <small>仅为合成离线回放，不代表实时行情。</small>
               </label>
               <button id="run-stock-research" class="query-submit" type="button">运行个股研究</button>
             </div>
-            <p class="research-boundary">财务事实、异常和风险均来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
+            <p class="research-boundary">财务事实、异常和风险均来自双来源证据与确定性规则；就绪（READY）不是买卖建议，退化场景不会升级为事实或发现。</p>
             <div id="stock-research-content" class="stock-research-content" aria-live="polite">
-              <div class="empty-state">运行个股研究后查看财务事实、异常、风险与 Evidence 闭合。</div>
+              <div class="empty-state">运行个股研究后查看财务事实、异常、风险与证据闭合。</div>
             </div>
           </section>
 
           <section class="panel fund-research-panel" id="fund-research" aria-labelledby="fund-research-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">DEMO G · ETF / FUND RESEARCH</span>
-                <h2 id="fund-research-title">ETF / Fund 资产 Evidence Card</h2>
+                <span class="eyebrow clay">演示 G · ETF / 基金研究</span>
+                <h2 id="fund-research-title">ETF / 基金资产证据卡</h2>
               </div>
               <span id="fund-research-status" class="status-chip">待运行</span>
             </div>
@@ -236,21 +236,21 @@
                 <select id="fund-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
                 </select>
-                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+                <small>仅为合成离线回放，不代表实时行情。</small>
               </label>
-              <button id="run-fund-research" class="query-submit" type="button">运行 ETF / Fund 研究</button>
+              <button id="run-fund-research" class="query-submit" type="button">运行 ETF / 基金研究</button>
             </div>
-            <p class="research-boundary">资产事实、集中度、费用、波动与回撤风险来自双来源 Evidence 与确定性规则；READY 不是买卖建议，退化场景不会升级为 Fact/Finding。</p>
+            <p class="research-boundary">资产事实、集中度、费用、波动与回撤风险来自双来源证据与确定性规则；就绪（READY）不是买卖建议，退化场景不会升级为事实或发现。</p>
             <div id="fund-research-content" class="fund-research-content" aria-live="polite">
-              <div class="empty-state">运行 ETF / Fund 研究后查看资产事实、风险与 Evidence 闭合。</div>
+              <div class="empty-state">运行 ETF / 基金研究后查看资产事实、风险与证据闭合。</div>
             </div>
           </section>
 
           <section class="panel convertible-bond-research-panel" id="convertible-bond-research" aria-labelledby="convertible-bond-research-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">DEMO H · CONVERTIBLE BOND RESEARCH</span>
-                <h2 id="convertible-bond-research-title">可转债资产 Evidence Card</h2>
+                <span class="eyebrow clay">演示 H · 可转债研究</span>
+                <h2 id="convertible-bond-research-title">可转债资产证据卡</h2>
               </div>
               <span id="convertible-bond-research-status" class="status-chip">待运行</span>
             </div>
@@ -263,42 +263,42 @@
                 <select id="convertible-bond-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
                 </select>
-                <small>仅为 synthetic/offline replay，不代表实时行情。</small>
+                <small>仅为合成离线回放，不代表实时行情。</small>
               </label>
               <button id="run-convertible-bond-research" class="query-submit" type="button">运行可转债研究</button>
             </div>
-            <p class="research-boundary">正股、转股价、转股价值、转股溢价率、债底、到期收益、信用和流动性均绑定 Evidence；公式由服务端确定性计算，退化场景不会升级为 Fact/Finding。</p>
+            <p class="research-boundary">正股、转股价、转股价值、转股溢价率、债底、到期收益、信用和流动性均绑定证据；公式由服务端确定性计算，退化场景不会升级为事实或发现。</p>
             <div id="convertible-bond-research-content" class="convertible-bond-research-content" aria-live="polite">
-              <div class="empty-state">运行可转债研究后查看最低资产事实、公式、风险与 Evidence 闭合。</div>
+              <div class="empty-state">运行可转债研究后查看最低资产事实、公式、风险与证据闭合。</div>
             </div>
           </section>
 
           <section class="panel portfolio-panel" id="portfolio" aria-labelledby="portfolio-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">PORTFOLIO SNAPSHOT</span>
+                <span class="eyebrow clay">持仓快照</span>
                 <h2 id="portfolio-title">当前持仓</h2>
               </div>
               <span id="portfolio-context-label" class="muted">只读 · 合成模板</span>
             </div>
             <div class="context-import">
-              <label for="portfolio-json">粘贴已脱敏的 Portfolio JSON</label>
+              <label for="portfolio-json">粘贴已脱敏的持仓 JSON</label>
               <textarea id="portfolio-json" rows="7" autocomplete="off" spellcheck="false" placeholder="仅粘贴 portfolio-import-bundle.v1；当前会话只读，不代表真实账户"></textarea>
               <div class="context-import-actions">
-                <button id="confirm-portfolio" class="query-submit" type="button">验证并加载 Portfolio</button>
+                <button id="confirm-portfolio" class="query-submit" type="button">验证并加载持仓</button>
                 <span id="portfolio-context-status" class="status-chip">未确认</span>
               </div>
-              <small>本地同源校验，不上传文件、不保存原文；owner 必须与上方隔离标识一致。</small>
+              <small>本地同源校验，不上传文件、不保存原文；隔离标识必须与上方一致。</small>
             </div>
             <div id="portfolio-content" class="portfolio-content" aria-live="polite">
-              <div class="empty-state">读取 owner 模板后查看持仓快照与基金穿透范围。</div>
+              <div class="empty-state">读取隔离标识模板后查看持仓快照与基金穿透范围。</div>
             </div>
           </section>
 
           <section class="panel context-memory-panel" id="context-memory" aria-labelledby="context-memory-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">CONTEXT MEMORY · MVP</span>
+                <span class="eyebrow clay">上下文记忆 · MVP</span>
                 <h2 id="context-memory-title">可审计上下文记忆</h2>
               </div>
               <span id="context-memory-status" class="status-chip">未读取</span>
@@ -306,41 +306,41 @@
             <div class="context-confirm-actions">
               <div>
                 <strong>保存或读取已确认上下文</strong>
-                <small>只保存 Risk Questionnaire、Risk Profile、Portfolio snapshot 与可选引用；不保存聊天原文、Prompt、凭据或实时 Provider 响应。</small>
+                <small>只保存风险问卷、风险画像、持仓快照与可选引用；不保存聊天原文、提示词、凭据或实时数据提供方响应。</small>
               </div>
               <div class="context-import-actions">
                 <button id="load-context-memory" class="query-submit" type="button">读取最近上下文</button>
                 <button id="save-context-memory" class="query-submit" type="button">保存当前上下文</button>
               </div>
             </div>
-            <p class="research-boundary">本地 MVP 的 owner 隔离键不是身份认证，也不是云同步；记录不可覆盖、不可删除。恢复必须显式点击，并会清空旧的 Advisor、Research、Optimization 派生结果，之后重新运行。</p>
+            <p class="research-boundary">本地 MVP 的隔离标识不是身份认证，也不是云同步；记录不可覆盖、不可删除。恢复必须显式点击，并会清空旧的投顾、研究、组合优化派生结果，之后重新运行。</p>
             <div id="context-memory-content" class="context-memory-content" aria-live="polite">
-              <div class="empty-state">读取 owner 后查看最近的结构化上下文记忆。</div>
+              <div class="empty-state">读取隔离标识后查看最近的结构化上下文记忆。</div>
             </div>
           </section>
 
           <section class="panel portfolio-optimization-panel" id="portfolio-optimization" aria-labelledby="portfolio-optimization-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow clay">PORTFOLIO ENGINE · DEMO I</span>
+                <span class="eyebrow clay">组合引擎 · 演示 I</span>
                 <h2 id="portfolio-optimization-title">组合目标结构提案</h2>
               </div>
               <span id="portfolio-optimization-status" class="status-chip">待运行</span>
             </div>
             <div class="research-actions">
               <div id="portfolio-optimization-template-meta" class="query-meta">
-                运行时读取确定性 cap-and-redistribute 方法与合成组合模板。
+                运行时读取确定性上限重分配（cap-and-redistribute）方法与合成组合模板。
               </div>
               <label class="research-scenario-picker" for="portfolio-optimization-scenario">
                 <span>回放场景</span>
                 <select id="portfolio-optimization-scenario" disabled>
                   <option value="">读取场景目录…</option>
                 </select>
-                <small>synthetic/offline replay；不是交易指令。</small>
+                <small>合成离线回放；不是交易指令。</small>
               </label>
               <button id="run-portfolio-optimization" class="query-submit" type="button">生成目标结构</button>
             </div>
-            <p class="research-boundary">目标权重只由已确认持仓、Risk Profile 和风险预算确定性计算；不预测收益、不接入实时行情、不写入决策回执。</p>
+            <p class="research-boundary">目标权重只由已确认持仓、风险画像和风险预算确定性计算；不预测收益、不接入实时行情、不写入决策回执。</p>
             <div id="portfolio-optimization-content" class="portfolio-optimization-content" aria-live="polite">
               <div class="empty-state">生成提案后查看当前→目标权重、约束上限、算术解释与失效条件。</div>
             </div>
@@ -349,7 +349,7 @@
           <section class="panel detail-panel" aria-labelledby="detail-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">DECISION RECEIPT</span>
+                <span class="eyebrow">决策回执</span>
                 <h2 id="detail-title">选择一条回执</h2>
               </div>
               <span id="detail-status" class="status-chip">待读取</span>
@@ -362,20 +362,20 @@
           <section class="panel evidence-panel" id="evidence" aria-labelledby="evidence-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">TRACE · ADVANCED</span>
-                <h2 id="evidence-title">Evidence chain explorer</h2>
+                <span class="eyebrow">证据链 · 高级</span>
+                <h2 id="evidence-title">证据链浏览器</h2>
               </div>
               <span class="muted">来源 · 新鲜度 · 闭合路径</span>
             </div>
             <div class="advanced-evidence-intro">
-              <strong>只浏览当前 owner 已加载的 Evidence</strong>
-              <span>陈旧缓存与备用来源会保留原始身份，并明确标记为需复核；不会升级为 VERIFIED 事实。</span>
+              <strong>只浏览当前隔离标识已加载的证据</strong>
+              <span>陈旧缓存与备用来源会保留原始身份，并明确标记为需复核；不会升级为已验证（VERIFIED）事实。</span>
             </div>
             <div id="advanced-evidence-explorer" class="advanced-evidence-explorer" aria-live="polite">
-              <div class="advanced-evidence-controls" aria-label="Evidence filters">
+              <div class="advanced-evidence-controls" aria-label="证据筛选条件">
                 <label class="advanced-evidence-search">
-                  <span>搜索 Evidence</span>
-                  <input id="advanced-evidence-search" type="search" autocomplete="off" spellcheck="false" placeholder="ID / source / field / period">
+                  <span>搜索证据</span>
+                  <input id="advanced-evidence-search" type="search" autocomplete="off" spellcheck="false" placeholder="ID / 来源 / 字段 / 期间">
                 </label>
                 <label>
                   <span>质量状态</span>
@@ -405,36 +405,36 @@
               </div>
               <div id="advanced-evidence-summary" class="advanced-evidence-summary" aria-live="polite"></div>
               <div class="advanced-evidence-layout">
-                <div id="advanced-evidence-list" class="advanced-evidence-list" role="listbox" aria-label="Evidence records"></div>
+                <div id="advanced-evidence-list" class="advanced-evidence-list" role="listbox" aria-label="证据记录"></div>
                 <aside id="advanced-evidence-detail" class="advanced-evidence-detail" aria-live="polite">
-                  <div class="empty-state">运行研究或选择 PASS 回执后查看 Evidence 详情。</div>
+                  <div class="empty-state">运行研究或选择通过（PASS）回执后查看证据详情。</div>
                 </aside>
               </div>
             </div>
             <div id="evidence-content" class="evidence-content">
-              <div class="empty-state">选择 PASS 回执后展开证据。</div>
+              <div class="empty-state">选择通过（PASS）回执后展开证据。</div>
             </div>
           </section>
 
           <section class="panel profile-panel" id="profile" aria-labelledby="profile-title">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">RISK PROFILE</span>
+                <span class="eyebrow">风险画像</span>
                 <h2 id="profile-title">约束上下文</h2>
               </div>
             </div>
             <div class="context-confirm-actions">
               <div>
                 <strong>确认当前风险问卷</strong>
-                <small>沿用现有表单与确定性 scorer；确认只在当前会话生效。</small>
+                <small>沿用现有表单与确定性评分器；确认只在当前会话生效。</small>
               </div>
               <div class="context-import-actions">
-                <button id="confirm-profile" class="query-submit" type="button">确认 Risk Profile</button>
+                <button id="confirm-profile" class="query-submit" type="button">确认风险画像</button>
                 <span id="profile-context-status" class="status-chip">未确认</span>
               </div>
             </div>
             <div id="profile-template-content" class="profile-context" aria-live="polite">
-              <div class="empty-state">读取 owner 模板后查看风险问卷约束。</div>
+              <div class="empty-state">读取隔离标识模板后查看风险问卷约束。</div>
             </div>
             <div id="profile-confirmation-content" class="profile-confirmation" aria-live="polite">
               <div class="empty-state">确认问卷后查看确定性画像结果。</div>
@@ -443,7 +443,7 @@
               <div class="context-confirm-actions">
                 <div>
                   <strong id="profile-proposal-title">审阅结构化提取提案</strong>
-                  <small>仅接受已脱敏的 typed values 与 input digest；不解析或保存自然语言原文。</small>
+                  <small>仅接受已脱敏的结构化值与输入摘要；不解析或保存自然语言原文。</small>
                 </div>
                 <div class="context-import-actions">
                   <button id="preview-profile-proposal" class="query-submit" type="button">预览画像提案</button>
@@ -451,9 +451,9 @@
                 </div>
               </div>
               <div class="context-import">
-                <label for="profile-proposal-json">粘贴已脱敏的 ProfileExtractionProposal JSON</label>
+                <label for="profile-proposal-json">粘贴已脱敏的画像提取提案 JSON</label>
                 <textarea id="profile-proposal-json" rows="7" autocomplete="off" spellcheck="false" placeholder="仅粘贴 profile-extraction.v1；只保留结构化候选值与 64 位 input_digest"></textarea>
-                <small>提案只在当前会话使用；owner 必须与上方隔离标识及当前问卷一致。</small>
+                <small>提案只在当前会话使用；隔离标识必须与上方输入及当前问卷一致。</small>
               </div>
               <div id="profile-proposal-content" class="profile-proposal-content" aria-live="polite">
                 <div class="empty-state">粘贴提案后查看问卷与提取值的冲突。</div>
@@ -461,7 +461,7 @@
               <div class="context-confirm-actions profile-proposal-confirm-actions">
                 <div>
                   <strong>确认提案选择</strong>
-                  <small>所有冲突必须逐项选择；未确认不会生成 Risk Profile。</small>
+                  <small>所有冲突必须逐项选择；未确认不会生成风险画像。</small>
                 </div>
                 <div class="context-import-actions">
                   <button id="confirm-profile-proposal" class="query-submit" type="button" disabled>确认画像提案</button>
@@ -469,7 +469,7 @@
                 </div>
               </div>
               <div id="profile-proposal-result" class="profile-proposal-result" aria-live="polite">
-                <div class="empty-state">确认提案后查看保留冲突选择的 Risk Profile。</div>
+                <div class="empty-state">确认提案后查看保留冲突选择的风险画像。</div>
               </div>
             </div>
             <div id="profile-content" class="profile-content">

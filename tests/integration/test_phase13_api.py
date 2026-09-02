@@ -229,9 +229,9 @@ def test_api_static_workbench_has_explainable_sections() -> None:
     client, store = _client()
     page = client.get("/")
     assert page.status_code == 200
-    assert "Decision workspace" in page.text
-    assert "Evidence chain" in page.text
-    assert "Risk Profile" in page.text
+    assert "决策工作台" in page.text
+    assert "证据链" in page.text
+    assert "风险画像" in page.text
     css = client.get("/static/styles.css")
     js = client.get("/static/app.js")
     assert css.status_code == 200 and "--clay" in css.text
