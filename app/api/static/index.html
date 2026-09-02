@@ -7,6 +7,7 @@
     <meta name="description" content="Prism 可解释投资研究工作台">
     <title>Prism · 决策工作台</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/dev-mode.js" defer></script>
     <script src="/static/app.js" defer></script>
   </head>
   <body>
@@ -60,27 +61,27 @@
             <div class="nav-expert-items" id="nav-expert-items">
               <span class="nav-subgroup-title">建议与回顾</span>
               <a class="nav-item active" href="#overview" aria-current="location">总览</a>
-              <a class="nav-item" href="#advisor">投顾查询</a>
               <a class="nav-item" href="#recommendation-history">历史建议</a>
+              <a class="nav-item dev-only" href="#advisor">投顾查询（原始表单）</a>
 
               <span class="nav-subgroup-title">组合与边界</span>
-              <a class="nav-item" href="#portfolio">持仓</a>
-              <a class="nav-item" href="#profile">风险画像</a>
-              <a class="nav-item" href="#portfolio-optimization">组合优化</a>
-              <a class="nav-item" href="#portfolio-rebalancing">组合再平衡</a>
+              <a class="nav-item" href="#portfolio">我的持仓</a>
+              <a class="nav-item" href="#portfolio-optimization">目标结构</a>
+              <a class="nav-item" href="#portfolio-rebalancing">调仓方案</a>
               <a class="nav-item" href="#scenario-simulation">情景模拟</a>
+              <a class="nav-item dev-only" href="#profile">风险画像（原始）</a>
 
               <span class="nav-subgroup-title">研究工具</span>
-              <a class="nav-item" href="#research-tracks">研究轨道</a>
               <a class="nav-item" href="#stock-research">个股研究</a>
               <a class="nav-item" href="#fund-research">ETF / 基金研究</a>
               <a class="nav-item" href="#convertible-bond-research">可转债研究</a>
-              <a class="nav-item" href="#evidence">证据链</a>
+              <a class="nav-item dev-only" href="#research-tracks">研究轨道矩阵</a>
+              <a class="nav-item dev-only" href="#evidence">证据链</a>
 
-              <span class="nav-subgroup-title">检查与设置</span>
-              <a class="nav-item" href="#context-memory">上下文记忆</a>
-              <a class="nav-item" href="#advanced-explainability">高级可解释性</a>
-              <a class="nav-item" href="#evaluation-dashboard">评测看板</a>
+              <span class="nav-subgroup-title">为什么与检查</span>
+              <a class="nav-item" href="#advanced-explainability">为什么这样判断</a>
+              <a class="nav-item dev-only" href="#context-memory">上下文记忆</a>
+              <a class="nav-item dev-only" href="#evaluation-dashboard">评测看板</a>
             </div>
           </div>
         </nav>
@@ -114,7 +115,7 @@
               <span class="persona-avatar" aria-hidden="true">＋</span>
               <span class="persona-name">添加持仓</span>
             </button>
-            <details class="persona-library">
+            <details class="persona-library dev-only">
               <summary>切换示例画像</summary>
               <div class="persona-library-options">
                 <button class="persona-chip" type="button" data-persona="persona-zhang-r3" title="张先生：35岁白领，R3平衡型，科技重仓">
@@ -133,20 +134,20 @@
             </details>
           </div>
           <div class="topbar-actions">
-            <button id="view-mode-toggle" class="mode-toggle-btn" type="button" aria-expanded="false" aria-controls="expert-workspace-grid" title="打开详细数据、证据与历史工具">
+            <button id="open-companion-btn" class="companion-trigger-btn" type="button" aria-label="打开图表分析视图">
+              <span class="companion-sparkle" aria-hidden="true">✦</span>
+              <span>分析视图</span>
+            </button>
+            <button id="view-mode-toggle" class="mode-toggle-btn" type="button" aria-expanded="false" aria-controls="expert-workspace-grid" title="展开更多详细工具">
               <span id="mode-toggle-icon" aria-hidden="true">＋</span>
               <span id="mode-toggle-text">更多工具</span>
             </button>
-            <details class="topbar-settings">
-              <summary aria-label="打开设置">设置</summary>
+            <details class="topbar-settings dev-only">
+              <summary aria-label="打开开发者设置">设置</summary>
               <div class="topbar-settings-menu">
                 <button id="open-llm-config-btn" class="llm-config-trigger-btn" type="button" title="配置可选的大模型接口；不配置也能使用内置分析">
                   <span class="llm-config-dot" id="llm-config-status-dot">⚪</span>
                   <span id="llm-config-btn-label">模型设置</span>
-                </button>
-                <button id="open-companion-btn" class="companion-trigger-btn" type="button" aria-label="打开分析视图">
-                  <span class="companion-sparkle" aria-hidden="true">✦</span>
-                  <span>打开分析视图</span>
                 </button>
               </div>
             </details>
@@ -456,7 +457,7 @@
             <h2>分析会围绕你的边界展开，<em>不会替你做决定。</em></h2>
             <p>先确认风险承受能力和持仓，再选择体检、研究或调仓。结果会说明为什么这样判断，以及什么时候需要重新检查。</p>
           </div>
-          <details class="owner-form technical-owner-settings">
+          <details class="owner-form technical-owner-settings dev-only dev-outline">
             <summary>高级：切换本地数据空间</summary>
             <div class="owner-form-body">
               <label for="owner-id">当前隔离标识</label>
@@ -474,13 +475,20 @@
         <div class="workspace-grid" id="expert-workspace-grid" hidden aria-labelledby="expert-workspace-title">
           <div class="expert-mode-banner">
             <div>
-              <span class="eyebrow clay">详细工作台</span>
-              <h2 id="expert-workspace-title">需要时，再打开完整数据和审计工具</h2>
-              <p>这里适合复核原始输入、历史结果、证据来源和假设变化；日常使用不需要操作这些模块。</p>
+              <span class="eyebrow clay">更多分析工具</span>
+              <h2 id="expert-workspace-title">需要更多细节时，在这里展开</h2>
+              <p>这里有更完整的研究、组合与历史工具，帮助你在做决定前看得更清楚；日常使用不一定需要。</p>
             </div>
             <button class="mode-toggle-btn expert-close-btn" type="button" aria-label="返回开始分析" data-close-expert="true">返回开始</button>
           </div>
-          <section class="panel advisor-panel" id="advisor" aria-labelledby="advisor-title">
+          <div class="dev-tools-banner">
+            <span class="dev-tools-banner-icon" aria-hidden="true">🛠</span>
+            <div>
+              <strong>你正处于开发者模式</strong>
+              <p>带虚线边框、标注「开发者可见」的模块只对开发与评审展示（系统架构、原始数据、评测与证据审计）；普通用户看不到它们。点击左下角「退出」即可回到普通视图。</p>
+            </div>
+          </div>
+          <section class="panel advisor-panel dev-only" id="advisor" aria-labelledby="advisor-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">详细查询</span>
@@ -577,7 +585,7 @@
             </div>
           </section>
 
-          <section class="panel research-panel" id="research-tracks" aria-labelledby="research-title">
+          <section class="panel research-panel dev-only" id="research-tracks" aria-labelledby="research-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow clay">研究轨道</span>
@@ -616,7 +624,7 @@
               <div id="stock-research-template-meta" class="query-meta">
                  输入或复核一只股票的关键事实、风险和来源。
               </div>
-              <label class="research-scenario-picker" for="stock-research-scenario">
+              <label class="research-scenario-picker dev-only" for="stock-research-scenario">
                 <span>回放场景</span>
                 <select id="stock-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
@@ -627,7 +635,7 @@
             </div>
              <p class="research-boundary">结果用于研究参考，不是买卖建议；信息不足或来源冲突时会明确提示。</p>
             <div id="stock-research-content" class="stock-research-content" aria-live="polite">
-              <div class="empty-state">运行个股研究后查看财务事实、异常、风险与证据闭合。</div>
+              <div class="empty-state">运行后，这里会列出这只股票的关键财务事实、值得注意的异常，以及每条结论的信息来源。</div>
             </div>
           </section>
 
@@ -643,7 +651,7 @@
               <div id="fund-research-template-meta" class="query-meta">
                  了解 ETF / 基金的持仓集中度、费用和风险。
               </div>
-              <label class="research-scenario-picker" for="fund-research-scenario">
+              <label class="research-scenario-picker dev-only" for="fund-research-scenario">
                 <span>回放场景</span>
                 <select id="fund-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
@@ -654,7 +662,7 @@
             </div>
              <p class="research-boundary">结果用于研究参考，不是买卖建议；信息不足或来源冲突时会明确提示。</p>
             <div id="fund-research-content" class="fund-research-content" aria-live="polite">
-              <div class="empty-state">运行 ETF / 基金研究后查看资产事实、风险与证据闭合。</div>
+              <div class="empty-state">运行后，这里会列出这只 ETF / 基金的关键事实、集中度与费用风险，以及每条结论的信息来源。</div>
             </div>
           </section>
 
@@ -670,7 +678,7 @@
               <div id="convertible-bond-research-template-meta" class="query-meta">
                  查看正股、转股价值、信用和流动性等关键指标。
               </div>
-              <label class="research-scenario-picker" for="convertible-bond-research-scenario">
+              <label class="research-scenario-picker dev-only" for="convertible-bond-research-scenario">
                 <span>回放场景</span>
                 <select id="convertible-bond-research-scenario" disabled>
                   <option value="">读取场景目录…</option>
@@ -681,7 +689,7 @@
             </div>
              <p class="research-boundary">结果用于研究参考，不是买卖建议；公式和数据来源会在结果中标明。</p>
             <div id="convertible-bond-research-content" class="convertible-bond-research-content" aria-live="polite">
-              <div class="empty-state">运行可转债研究后查看最低资产事实、公式、风险与证据闭合。</div>
+              <div class="empty-state">运行后，这里会列出这只可转债的正股、转股价值、信用与流动性等关键指标，以及计算所依据的信息来源。</div>
             </div>
           </section>
 
@@ -691,9 +699,9 @@
                 <span class="eyebrow clay">持仓快照</span>
                 <h2 id="portfolio-title">当前持仓</h2>
               </div>
-              <span id="portfolio-context-label" class="muted">只读 · 合成模板</span>
+              <span id="portfolio-context-label" class="muted">示例持仓 · 只读</span>
             </div>
-            <div class="context-import">
+            <div class="context-import dev-only">
               <label for="portfolio-json">粘贴已脱敏的持仓 JSON</label>
               <textarea id="portfolio-json" rows="7" autocomplete="off" spellcheck="false" placeholder="仅粘贴 portfolio-import-bundle.v1；当前会话只读，不代表真实账户"></textarea>
               <div class="context-import-actions">
@@ -703,11 +711,11 @@
               <small>本地同源校验，不上传文件、不保存原文；隔离标识必须与上方一致。</small>
             </div>
             <div id="portfolio-content" class="portfolio-content" aria-live="polite">
-              <div class="empty-state">读取隔离标识模板后查看持仓快照与基金穿透范围。</div>
+              <div class="empty-state">加载后这里会显示你的持仓明细，以及每只基金实际持有的底层股票。</div>
             </div>
           </section>
 
-          <section class="panel context-memory-panel" id="context-memory" aria-labelledby="context-memory-title">
+          <section class="panel context-memory-panel dev-only" id="context-memory" aria-labelledby="context-memory-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow clay">上下文记忆 · MVP</span>
@@ -743,7 +751,7 @@
               <div id="portfolio-optimization-template-meta" class="query-meta">
                  根据已确认的画像与持仓，给出一个受风险上限约束的目标结构。
               </div>
-              <label class="research-scenario-picker" for="portfolio-optimization-scenario">
+              <label class="research-scenario-picker dev-only" for="portfolio-optimization-scenario">
                 <span>回放场景</span>
                 <select id="portfolio-optimization-scenario" disabled>
                   <option value="">读取场景目录…</option>
@@ -754,7 +762,7 @@
             </div>
              <p class="research-boundary">只计算结构，不预测收益、不接入实时行情，也不会自动下单。</p>
             <div id="portfolio-optimization-content" class="portfolio-optimization-content" aria-live="polite">
-              <div class="empty-state">生成提案后查看当前→目标权重、约束上限、算术解释与失效条件。</div>
+              <div class="empty-state">生成后，这里会对比你当前的权重和建议的目标权重，并说明每一步调整的理由和适用条件。</div>
             </div>
           </section>
 
@@ -775,17 +783,17 @@
                 <select id="scenario-simulation-scenario" disabled>
                   <option value="">读取场景目录…</option>
                 </select>
-                <small>服务端固定场景覆盖层，不修改已观测事实。</small>
+                <small>选择一个假设情景，看看你的组合会怎样变化。</small>
               </label>
               <button id="run-scenario-simulation" class="query-submit" type="button">运行情景模拟</button>
             </div>
              <p class="research-boundary">这是“如果……会怎样”的模拟，不会修改已观测数据，也不是交易指令。</p>
             <div id="scenario-simulation-content" class="scenario-simulation-content" aria-live="polite">
-              <div class="empty-state">运行情景模拟后查看基线 vs 假设覆盖层的指标对比与目标权重变化。</div>
+              <div class="empty-state">运行后，这里会对比“当前情况”和“假设发生变化后”的风险指标与仓位变化。</div>
             </div>
           </section>
 
-          <section class="panel detail-panel" aria-labelledby="detail-title">
+          <section class="panel detail-panel dev-only" aria-labelledby="detail-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">决策回执</span>
@@ -798,7 +806,7 @@
             </div>
           </section>
 
-          <section class="panel evidence-panel" id="evidence" aria-labelledby="evidence-title">
+          <section class="panel evidence-panel dev-only" id="evidence" aria-labelledby="evidence-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">证据链 · 高级</span>
@@ -855,7 +863,7 @@
             </div>
           </section>
 
-          <section class="panel profile-panel" id="profile" aria-labelledby="profile-title">
+          <section class="panel profile-panel dev-only" id="profile" aria-labelledby="profile-title">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">风险画像</span>
@@ -934,9 +942,9 @@
               </div>
             </div>
             <div id="history-list-content" class="history-list-content" aria-live="polite">
-              <div class="empty-state">读取隔离标识后查看已归档的不可变决策建议。</div>
+              <div class="empty-state">这里会按时间保存你过去的每一次分析结果，方便随时回看当时的建议和依据。</div>
             </div>
-            <div class="history-compare-box">
+            <div class="history-compare-box dev-only">
                <h3>比较两次结果</h3>
               <div class="compare-inputs">
                 <input id="compare-receipt-a" placeholder="基准回执 ID (receipt_a)" autocomplete="off">
@@ -967,13 +975,13 @@
               </div>
             </div>
             <div id="rebalancing-metrics-content" class="rebalancing-metrics-content" aria-live="polite">
-              <div class="empty-state">点击上方按钮生成确定性再平衡行动清单。</div>
+              <div class="empty-state">点击上方按钮，生成一份控制换手率的调仓行动清单。</div>
             </div>
             <div id="rebalancing-actions-content" class="rebalancing-actions-content" aria-live="polite">
-              <div class="empty-state">再平衡动作清单（BUY/SELL/REDUCE/HOLD）。</div>
+              <div class="empty-state">这里会列出每只标的的具体动作：买入、卖出、减仓或保持不变。</div>
             </div>
             <div id="rebalancing-steps-content" class="rebalancing-steps-content" aria-live="polite">
-              <div class="empty-state">先卖后买有序执行步长序列。</div>
+              <div class="empty-state">这里会给出建议的执行顺序：一般先卖出、后买入，分步完成。</div>
             </div>
           </section>
 
@@ -995,17 +1003,17 @@
               </div>
             </div>
             <div id="explainability-drivers-content" class="explainability-drivers-content" aria-live="polite">
-              <div class="empty-state">点击生成核心驱动因素权重与贡献度。</div>
+              <div class="empty-state">点击后，这里会列出影响这次结论的关键因素，以及它们各自的分量。</div>
             </div>
             <div id="explainability-counterfactual-content" class="explainability-counterfactual-content" aria-live="polite">
-              <div class="empty-state">反事实条件推演（若画像/暴露改变，建议将如何调整）。</div>
+              <div class="empty-state">这里会推演“如果情况不同会怎样”：比如你的风险偏好或持仓变化后，建议会如何调整。</div>
             </div>
             <div id="explainability-triggers-content" class="explainability-triggers-content" aria-live="polite">
-              <div class="empty-state">显式失效条件清单（财报更新、异动等）。</div>
+              <div class="empty-state">这里会列出需要重新检查的情形，比如财报更新、股价异动等。</div>
             </div>
           </section>
 
-          <section class="panel evaluation-panel" id="evaluation-dashboard" aria-labelledby="evaluation-title">
+          <section class="panel evaluation-panel dev-only" id="evaluation-dashboard" aria-labelledby="evaluation-title">
             <div class="panel-head">
               <div>
                  <span class="eyebrow clay">系统信息</span>

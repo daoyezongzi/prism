@@ -49,115 +49,115 @@
   const byId = (id) => document.getElementById(id);
 
   const DISPLAY_VALUE_LABELS = Object.freeze({
-    READY: "就绪（READY）",
-    PASS: "通过（PASS）",
-    VERIFIED: "已验证（VERIFIED）",
-    STALE: "陈旧/需复核（STALE）",
-    CONFLICTING: "来源冲突（CONFLICTING）",
-    INVALID: "无效（INVALID）",
-    REVIEW_REQUIRED: "待复核（REVIEW_REQUIRED）",
-    BLOCKED: "已阻断（BLOCKED）",
-    COMPLETED: "已完成（COMPLETED）",
-    COMPLETE: "已完成（COMPLETE）",
-    PARTIAL: "部分完成（PARTIAL）",
-    FAILED: "失败（FAILED）",
-    EMPTY: "无结果（EMPTY）",
-    SUPPORTED: "已支持（SUPPORTED）",
-    CONTRADICTED: "来源冲突（CONTRADICTED）",
-    UNRESOLVED: "未解决（UNRESOLVED）",
-    INSUFFICIENT: "数据不足（INSUFFICIENT）",
-    CLEAR: "规则未触发（CLEAR）",
-    WATCH: "需关注（WATCH）",
-    HIGH_RISK: "高风险（HIGH_RISK）",
-    GROWTH: "成长（GROWTH）",
-    ETF_FUND: "ETF / 基金（ETF_FUND）",
-    MACRO: "宏观（MACRO）",
-    INDUSTRY: "行业（INDUSTRY）",
-    STOCK: "个股（STOCK）",
-    TECHNOLOGY: "科技（Technology）",
-    HEALTHCARE: "医疗健康（Healthcare）",
-    FINANCE: "金融（Finance）",
-    INDUSTRIALS: "工业（Industrials）",
-    UTILITIES: "公用事业（Utilities）",
-    UNCLASSIFIED: "未分类（UNCLASSIFIED）",
-    EXPLICIT_SAVE: "显式保存（EXPLICIT_SAVE）",
-    HOLD: "持有（HOLD）",
-    REDUCE: "降低（REDUCE）",
-    BUY: "买入（BUY）",
-    SELL: "卖出（SELL）",
-    WATCHLIST: "观察（WATCHLIST）",
-    BALANCED: "平衡（BALANCED）",
-    CONSERVATIVE: "保守（CONSERVATIVE）",
-    AGGRESSIVE: "进取（AGGRESSIVE）",
-    LOW: "低（LOW）",
-    MEDIUM: "中（MEDIUM）",
-    HIGH: "高（HIGH）",
-    SHORT: "短期（SHORT）",
-    LONG: "长期（LONG）",
-    NOVICE: "新手（NOVICE）",
-    INTERMEDIATE: "中等（INTERMEDIATE）",
-    EXPERIENCED: "丰富（EXPERIENCED）",
-    MODERATE: "中等（MODERATE）",
-    CNY: "人民币元（CNY）",
-    PCT: "百分比（PCT）",
-    USD: "美元（USD）",
-    RATING_RANK: "评级序数（rating_rank）",
-    SCORE: "分数（score）",
-    REPAIRED: "已修复（REPAIRED）",
-    WITHIN_LIMIT: "未超过上限（WITHIN_LIMIT）",
-    USE_QUESTIONNAIRE: "使用问卷值（USE_QUESTIONNAIRE）",
-    USE_EXTRACTION: "使用提取值（USE_EXTRACTION）",
-    DIRECT: "主数据提供方直连（DIRECT）",
-    CACHE_FRESH: "新鲜缓存（CACHE_FRESH）",
-    FALLBACK_PROVIDER: "备用数据提供方（FALLBACK_PROVIDER）",
-    CACHE_STALE_FALLBACK: "陈旧缓存回退（CACHE_STALE_FALLBACK）",
-    UNAVAILABLE: "未提供（UNAVAILABLE）",
-    ACCOUNTS_RECEIVABLE_CNY: "应收账款（accounts_receivable_cny）",
-    DEBT_RATIO_PCT: "资产负债率（debt_ratio_pct）",
-    GROSS_MARGIN_PCT: "毛利率（gross_margin_pct）",
-    NET_PROFIT_CNY: "净利润（net_profit_cny）",
-    OPERATING_CASH_FLOW_CNY: "经营活动现金流（operating_cash_flow_cny）",
-    REVENUE_CNY: "营业收入（revenue_cny）",
-    REVENUE: "营业收入（revenue）",
-    TECHNOLOGY_WEIGHT_PCT: "科技行业权重（technology_weight_pct）",
-    GROWTH_PCT: "增长率（growth_pct）",
-    POLICY_RATE_PCT: "政策利率（policy_rate_pct）",
-    ANNUALIZED_VOLATILITY_PCT: "年化波动率（annualized_volatility_pct）",
-    EXPENSE_RATIO_PCT: "费率（expense_ratio_pct）",
-    MAX_DRAWDOWN_PCT: "最大回撤（max_drawdown_pct）",
-    TOP10_WEIGHT_PCT: "前十大持仓权重（top10_weight_pct）",
-    TRACKING_ERROR_PCT: "跟踪误差（tracking_error_pct）",
-    BOND_FLOOR: "债底（bond_floor）",
-    BOND_PRICE: "转债价格（bond_price）",
-    CONVERSION_PREMIUM_PCT: "转股溢价率（conversion_premium_pct）",
-    CONVERSION_PRICE: "转股价（conversion_price）",
-    CONVERSION_VALUE: "转股价值（conversion_value）",
-    CREDIT_RATING_RANK: "信用评级序数（credit_rating_rank）",
-    LIQUIDITY_SCORE: "流动性等级序数（liquidity_score）",
-    UNDERLYING_STOCK_PRICE: "正股价格（underlying_stock_price）",
-    YIELD_TO_MATURITY_PCT: "到期收益率（yield_to_maturity_pct）",
-    CAP_AND_REDISTRIBUTE_V1: "上限重分配（CAP_AND_REDISTRIBUTE_V1）",
-    LTE: "不高于（LTE）",
-    GTE: "不低于（GTE）",
-    GT: "高于（GT）",
-    LT: "低于（LT）",
-    EQ: "等于（EQ）",
-    INFO: "提示（INFO）",
-    WARN: "警告（WARN）",
-    WARNING: "警告（WARNING）",
-    CRITICAL: "严重（CRITICAL）",
-    ERROR: "错误（ERROR）",
-    SOURCE_PARTIAL: "来源部分缺失（SOURCE_PARTIAL）",
-    SOURCE_DISAGREEMENT: "来源分歧（SOURCE_DISAGREEMENT）",
-    SOURCE_EMPTY: "来源无结果（SOURCE_EMPTY）",
-    SOURCE_FAILED: "来源失败（SOURCE_FAILED）",
-    INFEASIBLE: "不可行（INFEASIBLE）",
-    "Synthetic Balanced ETF": "合成平衡 ETF（Synthetic Balanced ETF）",
-    "Synthetic Technology Basket": "合成科技资产篮子（Synthetic Technology Basket）",
-    "Synthetic Healthcare Basket": "合成医疗健康资产篮子（Synthetic Healthcare Basket）",
-    "Synthetic Finance Basket": "合成金融资产篮子（Synthetic Finance Basket）",
-    "Synthetic Industrials Basket": "合成工业资产篮子（Synthetic Industrials Basket）",
-    "Synthetic Utilities Basket": "合成公用事业资产篮子（Synthetic Utilities Basket）",
+    READY: "就绪",
+    PASS: "通过",
+    VERIFIED: "已验证",
+    STALE: "陈旧/需复核",
+    CONFLICTING: "来源冲突",
+    INVALID: "无效",
+    REVIEW_REQUIRED: "待复核",
+    BLOCKED: "已阻断",
+    COMPLETED: "已完成",
+    COMPLETE: "已完成",
+    PARTIAL: "部分完成",
+    FAILED: "失败",
+    EMPTY: "无结果",
+    SUPPORTED: "已支持",
+    CONTRADICTED: "来源冲突",
+    UNRESOLVED: "未解决",
+    INSUFFICIENT: "数据不足",
+    CLEAR: "规则未触发",
+    WATCH: "需关注",
+    HIGH_RISK: "高风险",
+    GROWTH: "成长",
+    ETF_FUND: "ETF / 基金",
+    MACRO: "宏观",
+    INDUSTRY: "行业",
+    STOCK: "个股",
+    TECHNOLOGY: "科技",
+    HEALTHCARE: "医疗健康",
+    FINANCE: "金融",
+    INDUSTRIALS: "工业",
+    UTILITIES: "公用事业",
+    UNCLASSIFIED: "未分类",
+    EXPLICIT_SAVE: "显式保存",
+    HOLD: "持有",
+    REDUCE: "降低",
+    BUY: "买入",
+    SELL: "卖出",
+    WATCHLIST: "观察",
+    BALANCED: "平衡",
+    CONSERVATIVE: "保守",
+    AGGRESSIVE: "进取",
+    LOW: "低",
+    MEDIUM: "中",
+    HIGH: "高",
+    SHORT: "短期",
+    LONG: "长期",
+    NOVICE: "新手",
+    INTERMEDIATE: "中等",
+    EXPERIENCED: "丰富",
+    MODERATE: "中等",
+    CNY: "人民币元",
+    PCT: "百分比",
+    USD: "美元",
+    RATING_RANK: "评级序数",
+    SCORE: "分数",
+    REPAIRED: "已修复",
+    WITHIN_LIMIT: "未超过上限",
+    USE_QUESTIONNAIRE: "使用问卷值",
+    USE_EXTRACTION: "使用提取值",
+    DIRECT: "主数据提供方直连",
+    CACHE_FRESH: "新鲜缓存",
+    FALLBACK_PROVIDER: "备用数据提供方",
+    CACHE_STALE_FALLBACK: "陈旧缓存回退",
+    UNAVAILABLE: "未提供",
+    ACCOUNTS_RECEIVABLE_CNY: "应收账款",
+    DEBT_RATIO_PCT: "资产负债率",
+    GROSS_MARGIN_PCT: "毛利率",
+    NET_PROFIT_CNY: "净利润",
+    OPERATING_CASH_FLOW_CNY: "经营活动现金流",
+    REVENUE_CNY: "营业收入",
+    REVENUE: "营业收入",
+    TECHNOLOGY_WEIGHT_PCT: "科技行业权重",
+    GROWTH_PCT: "增长率",
+    POLICY_RATE_PCT: "政策利率",
+    ANNUALIZED_VOLATILITY_PCT: "年化波动率",
+    EXPENSE_RATIO_PCT: "费率",
+    MAX_DRAWDOWN_PCT: "最大回撤",
+    TOP10_WEIGHT_PCT: "前十大持仓权重",
+    TRACKING_ERROR_PCT: "跟踪误差",
+    BOND_FLOOR: "债底",
+    BOND_PRICE: "转债价格",
+    CONVERSION_PREMIUM_PCT: "转股溢价率",
+    CONVERSION_PRICE: "转股价",
+    CONVERSION_VALUE: "转股价值",
+    CREDIT_RATING_RANK: "信用评级序数",
+    LIQUIDITY_SCORE: "流动性等级序数",
+    UNDERLYING_STOCK_PRICE: "正股价格",
+    YIELD_TO_MATURITY_PCT: "到期收益率",
+    CAP_AND_REDISTRIBUTE_V1: "上限重分配",
+    LTE: "不高于",
+    GTE: "不低于",
+    GT: "高于",
+    LT: "低于",
+    EQ: "等于",
+    INFO: "提示",
+    WARN: "警告",
+    WARNING: "警告",
+    CRITICAL: "严重",
+    ERROR: "错误",
+    SOURCE_PARTIAL: "来源部分缺失",
+    SOURCE_DISAGREEMENT: "来源分歧",
+    SOURCE_EMPTY: "来源无结果",
+    SOURCE_FAILED: "来源失败",
+    INFEASIBLE: "不可行",
+    "Synthetic Balanced ETF": "合成平衡 ETF",
+    "Synthetic Technology Basket": "合成科技资产篮子",
+    "Synthetic Healthcare Basket": "合成医疗健康资产篮子",
+    "Synthetic Finance Basket": "合成金融资产篮子",
+    "Synthetic Industrials Basket": "合成工业资产篮子",
+    "Synthetic Utilities Basket": "合成公用事业资产篮子",
   });
 
   const DISPLAY_SCENARIO_LABELS = Object.freeze({
@@ -809,8 +809,11 @@
     });
   }
 
-  function addMetadata(container, label, value) {
+  function addMetadata(container, label, value, { devOnly = false } = {}) {
     const item = document.createElement("div");
+    // 纯内部标识（Owner / Bundle / 各类 *_id / 指纹 / run_id 等）对普通股民没有意义，
+    // 标记 dev-only 后在普通模式隐藏、开发者模式仍完整展示，不丢失可审计信息。
+    if (devOnly) item.classList.add("dev-only");
     const dt = document.createElement("dt");
     dt.textContent = displayLabel(label);
     const dd = document.createElement("dd");
@@ -819,23 +822,23 @@
     container.append(item);
   }
 
-  function renderPortfolio(portfolio, sourceLabel = "只读 · 合成模板") {
+  function renderPortfolio(portfolio, sourceLabel = "示例持仓 · 只读") {
     byId("portfolio-context-label").textContent = sourceLabel;
     const panel = byId("portfolio-content");
     clear(panel);
     if (!portfolio) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent = "读取隔离标识模板后查看持仓快照与基金穿透范围。";
+      empty.textContent = "加载后这里会显示你的持仓明细，以及每只基金实际持有的底层股票。";
       panel.append(empty);
       return;
     }
     const snapshot = portfolio.position_snapshot;
     const summary = document.createElement("dl");
     summary.className = "portfolio-summary";
-    addMetadata(summary, "Owner", portfolio.owner_id);
-    addMetadata(summary, "Bundle", portfolio.bundle_id);
-    addMetadata(summary, "Position snapshot", snapshot.snapshot_id);
+    addMetadata(summary, "Owner", portfolio.owner_id, { devOnly: true });
+    addMetadata(summary, "Bundle", portfolio.bundle_id, { devOnly: true });
+    addMetadata(summary, "Position snapshot", snapshot.snapshot_id, { devOnly: true });
     addMetadata(summary, "As of", snapshot.as_of);
     addMetadata(summary, "Base currency", snapshot.base_currency);
     panel.append(summary);
@@ -855,8 +858,8 @@
       header.append(title, chip(text(position.asset_type), ""));
       card.append(header);
       const metadata = document.createElement("dl");
-      addMetadata(metadata, "Asset", position.asset_id);
-      addMetadata(metadata, "Position", position.position_id);
+      addMetadata(metadata, "Asset", position.asset_id, { devOnly: true });
+      addMetadata(metadata, "Position", position.position_id, { devOnly: true });
       addMetadata(metadata, "Quantity", position.quantity);
       addMetadata(metadata, "Market value", `${text(position.market_value)} ${text(position.currency)}`);
       card.append(metadata);
@@ -893,8 +896,8 @@
         header.append(title, chip(text(holding.sector, "未分类"), ""));
         card.append(header);
         const metadata = document.createElement("dl");
-        addMetadata(metadata, "Underlying", holding.underlying_asset_id);
-        addMetadata(metadata, "Holding", holding.holding_id);
+        addMetadata(metadata, "Underlying", holding.underlying_asset_id, { devOnly: true });
+        addMetadata(metadata, "Holding", holding.holding_id, { devOnly: true });
         addMetadata(metadata, "Weight", `${text(holding.weight_pct)}%`);
         addMetadata(metadata, "As of", holding.as_of);
         card.append(metadata);
@@ -2173,7 +2176,7 @@
       chip(stockRiskStatusLabel(result.risk && result.risk.status), stockRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
@@ -2402,7 +2405,7 @@
       chip(fundRiskStatusLabel(result.risk && result.risk.status), fundRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
@@ -2631,7 +2634,7 @@
       chip(convertibleBondRiskStatusLabel(result.risk && result.risk.status), convertibleBondRiskStatusClass(result.risk && result.risk.status)),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${text(result.subject)} · ${text(result.period)} · ${text(result.run_id)} · 隔离标识 ${text(result.owner_id)}`;
+    summaryText.textContent = `${text(result.subject)} · ${text(result.period)}`;
     summary.append(summaryText);
     if (result.scenario) {
       const scenarioText = document.createElement("p");
@@ -2875,12 +2878,13 @@
       chip(text(result.risk_level), ""),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${text(result.summary)} · 隔离标识 ${text(result.owner_id)}`;
+    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${text(result.summary)}`;
     summary.append(summaryText);
     panel.append(summary);
 
     const metadata = document.createElement("dl");
-    metadata.className = "metadata-grid";
+    // 方法版本与各类内部 ID 对普通用户没有意义，整块标为开发者可见。
+    metadata.className = "metadata-grid dev-only";
     addMetadata(metadata, "Method", result.methodology_version);
     addMetadata(metadata, "Profile", `${text(result.profile_id)} · v${text(result.profile_version)}`);
     addMetadata(metadata, "Portfolio bundle", result.portfolio_bundle_id);
@@ -2996,7 +3000,7 @@
       chip(text(result.scenario.scenario_id), "clay"),
     );
     const summaryText = document.createElement("p");
-    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)} · 隔离标识 ${text(result.owner_id)}`;
+    summaryText.textContent = `${displayScenarioLabel(result.scenario)} · ${displayScenarioDescription(result.scenario)}`;
     summary.append(summaryText);
     panel.append(summary);
 
@@ -3010,7 +3014,8 @@
     panel.append(assumptionBox);
 
     const metadata = document.createElement("dl");
-    metadata.className = "metadata-grid";
+    // 方法版本、模拟 ID、指纹与 run_id 属于内部审计信息，整块标为开发者可见。
+    metadata.className = "metadata-grid dev-only";
     addMetadata(metadata, "Method", result.methodology_version);
     addMetadata(metadata, "Profile", `${text(result.profile_id)} · v${text(result.profile_version)}`);
     addMetadata(metadata, "Simulation ID", result.simulation_id);
@@ -4542,16 +4547,21 @@
         const card = document.createElement("div");
         card.className = "history-item-card";
         const h = document.createElement("h4");
-        h.textContent = `建议动作: ${item.action_type || "无"} · 标的: ${item.asset || "N/A"}`;
+        h.textContent = `建议动作：${text(item.action_type, "无")} · 标的：${text(item.asset, "—")}`;
         const p1 = document.createElement("p");
-        p1.textContent = `回执 ID: ${item.receipt_id || "无"} · 状态: ${item.status} · 风险得分: ${item.risk_score || "N/A"}`;
+        p1.textContent = `状态：${text(item.status)} · 风险得分：${text(item.risk_score, "—")}`;
         const p2 = document.createElement("p");
-        p2.textContent = `生成时间: ${item.recorded_at} · 哈希: ${item.content_hash.slice(0, 16)}...`;
+        p2.textContent = `生成时间：${text(item.recorded_at)}`;
         card.append(h, p1, p2);
+        // 回执 ID 与内容哈希属于内部审计信息，仅开发者可见。
+        const devMeta = document.createElement("p");
+        devMeta.className = "muted dev-only";
+        devMeta.textContent = `回执 ID：${text(item.receipt_id, "无")} · 哈希：${item.content_hash ? item.content_hash.slice(0, 16) + "…" : "—"}`;
+        card.append(devMeta);
         panel.append(card);
       });
     } catch (err) {
-      showError(err.message);
+      setError(err.message);
     }
   }
 
@@ -4560,7 +4570,7 @@
     const rA = byId("compare-receipt-a").value.trim();
     const rB = byId("compare-receipt-b").value.trim();
     if (!rA || !rB) {
-      showError("请输入两个待比对的回执 ID");
+      setError("请输入两个待比对的回执 ID");
       return;
     }
     try {
@@ -4590,7 +4600,7 @@
       card.append(h, p);
       panel.append(card);
     } catch (err) {
-      showError(err.message);
+      setError(err.message);
     }
   }
 
@@ -4694,7 +4704,7 @@
         stepsPanel.append(sc);
       });
     } catch (err) {
-      showError(err.message);
+      setError(err.message);
     }
   }
 
@@ -4771,7 +4781,7 @@
         trgPanel.append(div);
       });
     } catch (err) {
-      showError(err.message);
+      setError(err.message);
     }
   }
 
@@ -4853,7 +4863,7 @@
       table.append(tbody);
       casesPanel.append(table);
     } catch (err) {
-      showError(err.message);
+      setError(err.message);
     }
   }
 

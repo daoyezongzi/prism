@@ -3799,3 +3799,117 @@ body:not(.expert-mode) .nav-expert-items,
     transform: none;
   }
 }
+
+/* ==========================================================================
+   开发者模式门控 · 三层受众可见性
+   --------------------------------------------------------------------------
+   普通股民只看到任务导向的界面；开发/审计工具（评测看板、数据空间、原始 JSON、
+   四轨道矩阵、证据审计、示例画像、模型密钥）全部保留在 DOM 中（app.js 仍会绑定，
+   不会报错），仅用下面的规则在普通模式下隐藏。进入开发者模式后自动显现。
+   ========================================================================== */
+
+/* 默认（普通用户）：隐藏一切开发/审计元素。 */
+body:not(.dev-mode) .dev-only {
+  display: none !important;
+}
+
+/* 开发者模式下，为被门控的面板加一圈虚线与角标，方便演示时一眼看出“这是对
+   普通用户隐藏的开发工具”。仅作用于大块面板，避免对行内控件产生视觉噪声。 */
+body.dev-mode .panel.dev-only,
+body.dev-mode .dev-only.dev-outline {
+  position: relative;
+  border-style: dashed;
+  border-color: var(--clay-border);
+}
+
+body.dev-mode .panel.dev-only::before,
+body.dev-mode .dev-only.dev-outline::before {
+  content: "开发者可见";
+  position: absolute;
+  top: -9px;
+  right: 14px;
+  z-index: 2;
+  padding: 1px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font: 600 10px/1.6 var(--mono);
+  letter-spacing: 0.05em;
+}
+
+/* 常驻退出芯片（左下角），只在开发者模式出现。 */
+.dev-mode-badge {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px 8px 14px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, #2a2723 0%, #3b352d 100%);
+  color: #f4f3ef;
+  border: 1px solid rgba(217, 119, 87, 0.45);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.dev-mode-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px -6px rgba(24, 24, 22, 0.4);
+}
+
+.dev-mode-badge-exit {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--clay);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 开发者模式说明横幅（置于详细工作台顶部）。 */
+.dev-tools-banner {
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--radius-md);
+  background: var(--clay-soft);
+}
+
+body.dev-mode .dev-tools-banner {
+  display: flex;
+}
+
+.dev-tools-banner .dev-tools-banner-icon {
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.dev-tools-banner strong {
+  display: block;
+  font-size: 13.5px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.dev-tools-banner p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* 顶栏数据服务状态：从醒目的“运维绿点”降级为克制的次要信息。 */
+.health {
+  font-size: 11.5px;
+  color: var(--ink-subtle);
+  opacity: 0.75;
+}
