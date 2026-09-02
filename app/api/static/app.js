@@ -543,6 +543,19 @@
   }
 
   function clearDerivedResultsForContextRestore() {
+    state.selected = null;
+    state.selectedDecisionEvent = null;
+    state.advancedEvidenceSelectedKey = "";
+    renderEvents();
+    renderProfile(null);
+    renderEvidence(null);
+    byId("detail-status").className = "status-chip";
+    byId("detail-status").textContent = "待选择";
+    clear(byId("detail-content"));
+    const detailEmpty = document.createElement("div");
+    detailEmpty.className = "empty-state";
+    detailEmpty.textContent = "上下文已恢复；请重新运行 Advisor 后查看新的决策回执。";
+    byId("detail-content").append(detailEmpty);
     clearAdvisorPlan();
     clearProfileProposal();
     state.researchRun = null;

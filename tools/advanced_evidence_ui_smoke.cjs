@@ -24,6 +24,9 @@ const visibleRows = () => page.locator("#advanced-evidence-list .advanced-eviden
 try {
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await waitForText("#health-status", "API 已连接");
+  await page.locator("#owner-id").fill("phase31-ui-owner");
+  await page.locator("#load-events").click();
+  await waitForText("#advanced-evidence-summary", "0 Evidence");
 
   await page.locator("#run-research-matrix").click();
   await waitForText("#research-status", "READY");
@@ -72,6 +75,8 @@ try {
   if (!staleText.includes("STALE") || !staleText.includes("CACHE_STALE_FALLBACK")) {
     throw new Error("stale/fallback provenance was not visible");
   }
+  const staleFirstRowText = await page.locator("#advanced-evidence-list .advanced-evidence-row").first().textContent();
+  if (!staleFirstRowText.includes("Research Matrix")) throw new Error(`stale first row was not matrix evidence: ${staleFirstRowText}`);
   await page.locator("#advanced-evidence-list .advanced-evidence-row").first().click();
   const staleDetail = await page.locator("#advanced-evidence-detail").textContent();
   if (!staleDetail.includes("不能作为 VERIFIED Fact") || !staleDetail.includes("2.1 min")) {
@@ -98,6 +103,23 @@ try {
   await waitForText("#stock-research-status", "READY");
   const fallbackText = await page.locator("#advanced-evidence-list").textContent();
   if (!fallbackText.includes("FALLBACK_PROVIDER")) throw new Error("fallback provider mode was not visible");
+
+  await page.locator("#run-fund-research").click();
+  await waitForText("#fund-research-status", "READY");
+  if (!(await page.locator("#advanced-evidence-list").textContent()).includes("ETF / Fund Research")) {
+    throw new Error("fund research evidence was not aggregated");
+  }
+  await page.locator("#run-convertible-bond-research").click();
+  await waitForText("#convertible-bond-research-status", "READY");
+  if (!(await page.locator("#advanced-evidence-list").textContent()).includes("Convertible Bond Research")) {
+    throw new Error("convertible-bond research evidence was not aggregated");
+  }
+  await page.locator("#run-advisor-query").click();
+  await waitForText("#query-status", "PASS");
+  await waitForText("#advanced-evidence-list", "Advisor receipt");
+  if (!(await page.locator("#advanced-evidence-list").textContent()).includes("Advisor receipt")) {
+    throw new Error("advisor receipt evidence was not aggregated");
+  }
 
   await page.locator("#owner-id").fill("phase31-other-owner");
   await page.locator("#load-events").click();

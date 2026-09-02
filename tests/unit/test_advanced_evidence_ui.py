@@ -22,7 +22,7 @@ def test_advanced_evidence_markup_exposes_auditable_controls() -> None:
         "advanced-evidence-detail",
     ):
         assert f'id="{element_id}"' in markup
-    assert "Evidence explorer" in markup
+    assert "Evidence chain explorer" in markup
     assert "陈旧缓存与备用来源" in markup
 
 
