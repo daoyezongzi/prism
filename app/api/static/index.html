@@ -98,6 +98,10 @@
             </button>
           </div>
           <div class="topbar-actions">
+            <button id="open-llm-config-btn" class="llm-config-trigger-btn" type="button" title="直接在前端配置您的大模型 API Key (DeepSeek / Qwen / OpenAI)">
+              <span class="llm-config-dot" id="llm-config-status-dot">⚪</span>
+              <span id="llm-config-btn-label">大模型配置 (API Key)</span>
+            </button>
             <button id="view-mode-toggle" class="mode-toggle-btn" type="button" title="切换 Copilot 任务模式 / 专家控制台模式">
               <span id="mode-toggle-icon">🔬</span>
               <span id="mode-toggle-text">专家工作台</span>
@@ -274,6 +278,54 @@
                   </button>
                 </div>
                 <div id="parsed-portfolio-status" class="parsed-portfolio-status" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 大模型 API Key 与服务商配置弹窗 -->
+          <div id="llm-config-modal" class="copilot-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="llm-config-modal-title">
+            <div class="copilot-modal-content">
+              <div class="copilot-modal-header">
+                <h3 id="llm-config-modal-title">⚙️ 配置大模型 API Key</h3>
+                <button id="close-llm-config-modal-btn" class="modal-close-btn" type="button" aria-label="关闭">×</button>
+              </div>
+              <div class="copilot-modal-body">
+                <p class="modal-hint">支持直连 DeepSeek、通义千问、OpenAI 或任意兼容接口（配置将保存在本地浏览器）：</p>
+                
+                <div style="margin-bottom:12px;">
+                  <label for="llm-provider-select" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">服务商预设：</label>
+                  <select id="llm-provider-select" class="portfolio-textarea" style="height:38px; padding:6px 10px;">
+                    <option value="deepseek">DeepSeek (官方 api.deepseek.com)</option>
+                    <option value="qwen">阿里云通义千问 (DashScope)</option>
+                    <option value="openai">OpenAI (官方 / 中转)</option>
+                    <option value="custom">自定义兼容接口 (Custom URL)</option>
+                  </select>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                  <label for="llm-api-key-input" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">API Key：</label>
+                  <input type="password" id="llm-api-key-input" class="portfolio-textarea" style="height:38px; padding:6px 10px;" placeholder="sk-..." autocomplete="off">
+                </div>
+
+                <div style="margin-bottom:12px;">
+                  <label for="llm-base-url-input" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">API Base URL：</label>
+                  <input type="text" id="llm-base-url-input" class="portfolio-textarea" style="height:38px; padding:6px 10px;" placeholder="默认: DeepSeek / 兼容 API 端点" autocomplete="off">
+                </div>
+
+                <div style="margin-bottom:14px;">
+                  <label for="llm-model-input" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">模型名称 (Model)：</label>
+                  <input type="text" id="llm-model-input" class="portfolio-textarea" style="height:38px; padding:6px 10px;" value="deepseek-chat" autocomplete="off">
+                </div>
+
+                <div class="modal-actions" style="gap:8px;">
+                  <button id="btn-clear-llm-config" class="copilot-action-btn secondary" type="button">
+                    <span>重置为内置引擎</span>
+                  </button>
+                  <button id="btn-save-llm-config" class="copilot-action-btn primary" type="button">
+                    <span>💾 保存配置</span>
+                  </button>
+                </div>
+                <div id="llm-config-status" class="parsed-portfolio-status" style="display:none;"></div>
               </div>
             </div>
           </div>

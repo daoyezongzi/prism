@@ -1992,6 +1992,31 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
 /* ==========================================================================
    Direction 2: 实时流式对话与自定义持仓弹窗样式
    ========================================================================== */
+.llm-config-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  border: 1px solid var(--outline);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.llm-config-trigger-btn:hover {
+  background: var(--clay-soft);
+  border-color: var(--clay-border);
+  color: var(--clay-hover);
+}
+
+.llm-config-dot {
+  font-size: 10px;
+}
+
 .custom-portfolio-chip {
   background: #fdf2f8 !important;
   border-color: #fbcfe8 !important;
@@ -2185,11 +2210,16 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+}
+
+.copilot-modal.active,
+.copilot-modal[style*="display: flex"] {
+  display: flex !important;
 }
 
 .copilot-modal-content {
@@ -2200,6 +2230,8 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   max-width: 540px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  position: relative;
+  z-index: 1001;
   animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -2226,11 +2258,20 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
 .modal-close-btn {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
   color: var(--ink-subtle);
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  position: relative;
+  z-index: 1002;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  color: var(--alert);
+  background: var(--surface-hover);
 }
 
 .copilot-modal-body {

@@ -140,10 +140,17 @@ class CopilotChatApiRequest(BaseModel):
     portfolio_context: dict[str, Any] | None = None
     history: list[dict[str, Any]] | None = None
     stream: bool = True
+    llm_config: dict[str, Any] | None = None
 
 
 class CopilotParsePortfolioApiRequest(BaseModel):
     text: str
+
+
+class CopilotConfigApiRequest(BaseModel):
+    api_key: str = ""
+    base_url: str = "https://api.deepseek.com/v1"
+    model: str = "deepseek-chat"
 
 
 _STATIC_DIR = Path(__file__).parent / "static"
@@ -1127,6 +1134,7 @@ def create_app(
                 history=history_objs,
                 persona_info=req.persona_info,
                 portfolio_context=req.portfolio_context,
+                llm_config=req.llm_config,
             ):
                 payload_str = json.dumps(chunk, ensure_ascii=False)
                 yield f"data: {payload_str}\n\n"
@@ -1147,6 +1155,38 @@ def create_app(
         """Natural language to structured portfolio entity extraction."""
         result = await copilot_agent.parse_portfolio_from_text(req.text)
         return JSONResponse(content=result)
+
+    @api.post("/api/v1/copilot/config")
+    def copilot_update_config_endpoint(req: CopilotConfigApiRequest):
+        """Update active LLM client configuration in memory."""
+        from app.llm.client import LLMConfig
+        copilot_agent.client.config = LLMConfig(
+            api_key=req.api_key.strip(),
+            base_url=req.base_url.strip(),
+            model=req.model.strip(),
+        )
+        return JSONResponse(
+            content={
+                "status": "SUCCESS",
+                "is_configured": copilot_agent.client.is_configured,
+                "model": copilot_agent.client.config.model,
+                "base_url": copilot_agent.client.config.base_url,
+            }
+        )
+
+    @api.get("/api/v1/copilot/config")
+    def copilot_get_config_endpoint():
+        """Get active LLM client configuration state."""
+        cfg = copilot_agent.client.config
+        masked_key = (cfg.api_key[:3] + "..." + cfg.api_key[-4:]) if len(cfg.api_key) > 7 else ("***" if cfg.api_key else "")
+        return JSONResponse(
+            content={
+                "is_configured": copilot_agent.client.is_configured,
+                "masked_api_key": masked_key,
+                "base_url": cfg.base_url,
+                "model": cfg.model,
+            }
+        )
 
     @api.get("/api/v1/copilot/live-quote")
     def copilot_live_quote_endpoint(symbol: str = "300750"):

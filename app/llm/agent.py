@@ -11,7 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from app.llm.client import AsyncLLMClient
+from app.llm.client import AsyncLLMClient, LLMConfig
 from app.llm.prompts import (
     COPILOT_SYSTEM_PROMPT,
     COPILOT_TOOLS,
@@ -46,8 +46,11 @@ class CopilotAgent:
         history: list[CopilotMessage] | None = None,
         persona_info: dict[str, Any] | None = None,
         portfolio_context: dict[str, Any] | None = None,
+        llm_config: dict[str, Any] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Stream real-time multi-agent thinking, tool execution, and grounded advisory response."""
+
+        active_client = AsyncLLMClient(LLMConfig(**llm_config)) if (llm_config and llm_config.get("api_key")) else self.client
 
         persona = persona_info or {
             "name": "张先生",
@@ -82,7 +85,7 @@ class CopilotAgent:
         executed_tools: list[dict[str, Any]] = []
 
         # Execute LLM streaming
-        async for chunk in self.client.stream_chat(messages, tools=COPILOT_TOOLS):
+        async for chunk in active_client.stream_chat(messages, tools=COPILOT_TOOLS):
             chunk_type = chunk.get("type")
 
             if chunk_type == "reasoning":

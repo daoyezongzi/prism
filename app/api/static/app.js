@@ -6008,6 +6008,11 @@
           },
           history: chatHistory.slice(-6),
           stream: true,
+          llm_config: llmConfig.apiKey ? {
+            api_key: llmConfig.apiKey,
+            base_url: llmConfig.baseUrl,
+            model: llmConfig.model,
+          } : null,
         }),
       });
 
@@ -6075,15 +6080,136 @@
     handleStreamingChat(q);
   }
 
+  // 大模型 API Key 前端直接配置管理
+  const llmConfig = {
+    apiKey: localStorage.getItem("prism_llm_api_key") || "",
+    baseUrl: localStorage.getItem("prism_llm_base_url") || "https://api.deepseek.com/v1",
+    model: localStorage.getItem("prism_llm_model") || "deepseek-chat",
+    provider: localStorage.getItem("prism_llm_provider") || "deepseek",
+  };
+
+  function updateLLMConfigUI() {
+    const dot = byId("llm-config-status-dot");
+    const label = byId("llm-config-btn-label");
+    const badge = byId("chat-model-badge");
+
+    if (llmConfig.apiKey) {
+      if (dot) dot.textContent = "🟢";
+      if (label) label.textContent = `已接入 (${llmConfig.model})`;
+      if (badge) badge.textContent = `${llmConfig.model} · 实时在线`;
+    } else {
+      if (dot) dot.textContent = "⚪";
+      if (label) label.textContent = "大模型配置 (API Key)";
+      if (badge) badge.textContent = "内置智能引擎 · 问财实时数据";
+    }
+
+    const provSel = byId("llm-provider-select");
+    if (provSel) provSel.value = llmConfig.provider || "deepseek";
+    const keyInput = byId("llm-api-key-input");
+    if (keyInput) keyInput.value = llmConfig.apiKey || "";
+    const urlInput = byId("llm-base-url-input");
+    if (urlInput) urlInput.value = llmConfig.baseUrl || "https://api.deepseek.com/v1";
+    const modelInput = byId("llm-model-input");
+    if (modelInput) modelInput.value = llmConfig.model || "deepseek-chat";
+  }
+
+  function openLLMConfigModal() {
+    updateLLMConfigUI();
+    const modal = byId("llm-config-modal");
+    if (modal) {
+      modal.style.display = "flex";
+    }
+  }
+
+  function closeLLMConfigModal() {
+    const modal = byId("llm-config-modal");
+    if (modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  async function handleSaveLLMConfig() {
+    const keyInput = byId("llm-api-key-input");
+    const urlInput = byId("llm-base-url-input");
+    const modelInput = byId("llm-model-input");
+    const provSel = byId("llm-provider-select");
+    const statusBox = byId("llm-config-status");
+
+    llmConfig.apiKey = (keyInput?.value || "").trim();
+    llmConfig.baseUrl = (urlInput?.value || "https://api.deepseek.com/v1").trim();
+    llmConfig.model = (modelInput?.value || "deepseek-chat").trim();
+    llmConfig.provider = provSel?.value || "custom";
+
+    localStorage.setItem("prism_llm_api_key", llmConfig.apiKey);
+    localStorage.setItem("prism_llm_base_url", llmConfig.baseUrl);
+    localStorage.setItem("prism_llm_model", llmConfig.model);
+    localStorage.setItem("prism_llm_provider", llmConfig.provider);
+
+    updateLLMConfigUI();
+
+    try {
+      await fetch("/api/v1/copilot/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: llmConfig.apiKey,
+          base_url: llmConfig.baseUrl,
+          model: llmConfig.model,
+        }),
+      });
+    } catch (e) {}
+
+    if (statusBox) {
+      statusBox.style.display = "block";
+      statusBox.textContent = llmConfig.apiKey
+        ? `✅ 大模型配置已成功保存！当前模型：${llmConfig.model}`
+        : "✅ 已重置为内置金融智能体引擎";
+    }
+
+    setTimeout(() => {
+      closeLLMConfigModal();
+    }, 1000);
+  }
+
+  function handleClearLLMConfig() {
+    llmConfig.apiKey = "";
+    llmConfig.baseUrl = "https://api.deepseek.com/v1";
+    llmConfig.model = "deepseek-chat";
+    llmConfig.provider = "deepseek";
+
+    localStorage.removeItem("prism_llm_api_key");
+    localStorage.removeItem("prism_llm_base_url");
+    localStorage.removeItem("prism_llm_model");
+    localStorage.removeItem("prism_llm_provider");
+
+    updateLLMConfigUI();
+
+    fetch("/api/v1/copilot/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ api_key: "", base_url: "https://api.deepseek.com/v1", model: "deepseek-chat" }),
+    }).catch(() => {});
+
+    const statusBox = byId("llm-config-status");
+    if (statusBox) {
+      statusBox.style.display = "block";
+      statusBox.textContent = "已清空自定义 Key，恢复内置引擎。";
+    }
+  }
+
   // 自定义持仓弹窗交互
   function openPortfolioModal() {
     const modal = byId("portfolio-modal");
-    if (modal) modal.style.display = "flex";
+    if (modal) {
+      modal.style.display = "flex";
+    }
   }
 
   function closePortfolioModal() {
     const modal = byId("portfolio-modal");
-    if (modal) modal.style.display = "none";
+    if (modal) {
+      modal.style.display = "none";
+    }
   }
 
   async function handleParsePortfolioSubmit() {
@@ -6189,6 +6315,44 @@
   const parsePortBtn = byId("btn-parse-portfolio");
   if (parsePortBtn) parsePortBtn.addEventListener("click", handleParsePortfolioSubmit);
 
+  // LLM Config Modal Events
+  const openLLMBtn = byId("open-llm-config-btn");
+  if (openLLMBtn) openLLMBtn.addEventListener("click", openLLMConfigModal);
+  const closeLLMBtn = byId("close-llm-config-modal-btn");
+  if (closeLLMBtn) closeLLMBtn.addEventListener("click", closeLLMConfigModal);
+  const saveLLMBtn = byId("btn-save-llm-config");
+  if (saveLLMBtn) saveLLMBtn.addEventListener("click", handleSaveLLMConfig);
+  const clearLLMBtn = byId("btn-clear-llm-config");
+  if (clearLLMBtn) clearLLMBtn.addEventListener("click", handleClearLLMConfig);
+
+  const provSel = byId("llm-provider-select");
+  if (provSel) {
+    provSel.addEventListener("change", () => {
+      const p = provSel.value;
+      const urlInput = byId("llm-base-url-input");
+      const modelInput = byId("llm-model-input");
+      if (p === "deepseek") {
+        if (urlInput) urlInput.value = "https://api.deepseek.com/v1";
+        if (modelInput) modelInput.value = "deepseek-chat";
+      } else if (p === "qwen") {
+        if (urlInput) urlInput.value = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+        if (modelInput) modelInput.value = "qwen-plus";
+      } else if (p === "openai") {
+        if (urlInput) urlInput.value = "https://api.openai.com/v1";
+        if (modelInput) modelInput.value = "gpt-4o-mini";
+      }
+    });
+  }
+
+  // Backdrop click listener for closing modals
+  document.querySelectorAll(".copilot-modal").forEach(m => {
+    m.addEventListener("click", (e) => {
+      if (e.target === m) {
+        m.style.display = "none";
+      }
+    });
+  });
+
   // Persona Switcher
   document.querySelectorAll(".persona-chip[data-persona]").forEach(chip => {
     chip.addEventListener("click", () => switchPersona(chip.dataset.persona));
@@ -6230,10 +6394,12 @@
   const backdrop = byId("companion-backdrop");
   if (backdrop) backdrop.addEventListener("click", closeVisualCompanion);
 
-  // 快捷键支持：Esc 关闭，Alt+V 切换
+  // 快捷键支持：Esc 关闭所有弹窗和伴侣，Alt+V 切换伴侣
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeVisualCompanion();
+      closePortfolioModal();
+      closeLLMConfigModal();
     } else if (e.altKey && (e.key === "v" || e.key === "V")) {
       e.preventDefault();
       toggleVisualCompanion();
@@ -6277,6 +6443,7 @@
 
   initializeNavigation();
   checkHealth();
+  updateLLMConfigUI();
   switchPersona("persona-zhang-r3");
   loadEvents();
   loadRecommendationHistory();

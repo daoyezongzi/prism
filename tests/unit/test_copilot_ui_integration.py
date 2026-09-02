@@ -49,6 +49,10 @@ def test_copilot_markup_structure() -> None:
         "copilot-chat-messages",
         "portfolio-modal",
         "btn-parse-portfolio",
+        "open-llm-config-btn",
+        "llm-config-modal",
+        "btn-save-llm-config",
+        "btn-clear-llm-config",
     ):
         assert f'id="{element_id}"' in markup
 
@@ -76,6 +80,10 @@ def test_copilot_script_personas_and_workflows() -> None:
         "function handleStreamingChat(",
         "function handleParsePortfolioSubmit(",
         "function openPortfolioModal(",
+        "function closePortfolioModal(",
+        "function openLLMConfigModal(",
+        "function closeLLMConfigModal(",
+        "function handleSaveLLMConfig(",
         "function buildCopilotDrilldownRow(",
         "function buildCopilotMetricBox(",
         "function buildCopilotLoadingCard(",
@@ -127,6 +135,7 @@ def test_copilot_styles_and_responsive_rules() -> None:
         ".copilot-chat-stream-panel",
         ".copilot-modal",
         ".portfolio-textarea",
+        ".llm-config-trigger-btn",
     ):
         assert selector in styles
 
