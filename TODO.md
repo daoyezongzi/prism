@@ -6,9 +6,9 @@
 >
 > Overall execution plan: [docs/plans/2026-09-01-foundation.md](docs/plans/2026-09-01-foundation.md)
 >
-> Active phase: Phase 28 Portfolio Optimization target-structure proposal is accepted in the
-> dedicated `D:\Github_Storage\prism-phase-28` worktree; Phase 29 starts only after a new
-> worktree is created and its plan is submitted.
+> Active phase: Phase 29 structured Context Memory is accepted in the dedicated
+> `D:\Github_Storage\prism-phase-29` worktree. The next phase must start in a new worktree
+> with its plan committed before implementation.
 
 ## P0 — Foundation
 
@@ -47,7 +47,7 @@
 - [x] Implement source-lineage-aware cross validation and disagreement handling for executed fixture observations; live provider nodes remain deferred.
 - [x] Consume complete-run validation through the Evidence/Finding bridge and emit a closed DecisionTrace; degraded runs remain review/blocked.
 - [x] Implement and independently accept the risk and compliance gates.
-- [ ] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
+- [x] Build Portfolio, Advisor, Evidence and Risk Profile workbench views.
 - [x] Connect a structured Advisor Query form to the fixture-first API, replay receipt and
   owner-isolated Evidence view; broader Portfolio/Risk Profile interactions remain open.
 - [x] Compose deterministic HOLD/REDUCE Recommendations from a dual-PASS gate and create a self-validating Decision Receipt.
@@ -83,6 +83,11 @@
   `CAP_AND_REDISTRIBUTE_V1`, owner-scoped API/UI, profile-conditioned caps, closed target /
   constraint arithmetic, and explicit REVIEW_REQUIRED/BLOCKED scenarios; keep correlation,
   liquidity, asset-category caps, backtest, trading and Recommendation effects deferred.
+- [x] Add the independent Phase 29 owner-scoped structured Context Memory ledger with immutable
+  profile/questionnaire/portfolio snapshots, optional typed references, deterministic identity,
+  SQLite migration/restart reads, explicit browser recovery and stale/owner isolation; keep
+  raw chat, semantic retrieval, automatic restore, cloud sync, authentication and delete/TTL
+  deferred.
 
 ## External inputs / decisions
 
@@ -103,8 +108,7 @@ These inputs block claims of real SkillHub integration or submission readiness, 
 
 ## Next useful action
 
-Phase 28 is accepted in the dedicated `D:\Github_Storage\prism-phase-28` worktree; its final
-browser, concurrency, wheel and regression evidence is recorded in the Phase 28 plan. Create
-a new worktree for Phase 29 and submit that phase's plan before implementation. Keep real
-authentication, live Provider access, production persistence and broad conversational memory
-deferred.
+Phase 29 is accepted in the dedicated `D:\Github_Storage\prism-phase-29` worktree; its final
+browser, concurrency, wheel and regression evidence is recorded in the Phase 29 plan. The next
+useful action is to select and plan Phase 30 in a brand-new worktree. Keep real authentication,
+live Provider access, cloud/production persistence and broad conversational memory deferred.

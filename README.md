@@ -126,12 +126,20 @@ Prism 是面向同花顺 A18 赛题的个性化证券研究与决策支持工作
   100 次固定评测、并发、wheel、静态边界和真实浏览器验收通过；这些仍是离线
   fixture/ASGI 证据，不代表相关性/流动性最优、实时市场准确率或生产 SLA。详见
   [Portfolio Optimization 契约](docs/portfolio-optimization.md)。
+- Phase 29 已加入 owner-scoped、不可变、可审计的结构化 Context Memory：只保存已确认的
+  Risk Questionnaire/Profile、Portfolio bundle/snapshot 与可选 Intent/Plan/研究/优化
+  引用，服务端派生 `memory_id`/SHA-256 `content_hash`，SQLite 迁移可跨重启读取，工作台
+  支持刷新后读取与显式恢复；恢复会清空旧派生结果并要求重新运行，不保存聊天原文、Prompt、
+  Provider/LLM 输出或凭据。阶段 `19` 项、全量 `417` 项回归、100 owner 并发/重启、wheel
+  和真实浏览器验收通过；本地 fixture/ASGI 数字不代表生产认证、云同步或外部 SLA。详见
+  [Context Memory 契约](docs/context-memory.md)。
 
 尚未实现：
 
 - 真实同花顺问财 SkillHub Provider 网络接入；
 - 实时自然语言画像提取与真实宏观/行业/个股/基金研究节点；
 - Recommendation/Decision Receipt 的生产级持久化审计与认证 API；
+- 结构化 Context Memory 之外的长期对话记忆、语义检索、自动恢复与跨设备同步；
 - 完整 Portfolio/Risk Profile CRUD、真实持仓导入和真实端到端场景；
 - 组合相关性/协方差、流动性压力、交易成本、资产类别上限、历史回测和全局最优求解；
 - 宏观、行业、个股、ETF/Fund、可转债的真实 SkillHub Provider、实时数据和完整工作台消费；
@@ -229,6 +237,8 @@ python -m pytest
 - [Phase 27 可转债资产研究计划与验收](docs/plans/2026-09-02-mvp-phase-27-convertible-bond.md)
 - [Phase 28 Portfolio Optimization 契约](docs/portfolio-optimization.md)
 - [Phase 28 Portfolio Optimization 计划与验收](docs/plans/2026-09-02-mvp-phase-28-portfolio-optimization.md)
+- [Phase 29 Context Memory 契约](docs/context-memory.md)
+- [Phase 29 Context Memory 计划与验收](docs/plans/2026-09-02-mvp-phase-29-persistent-context-memory.md)
 - [任务状态](TODO.md)
 - [执行记录](LOG.md)
 

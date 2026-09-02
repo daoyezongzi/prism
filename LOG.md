@@ -1147,3 +1147,50 @@ Phase 27 已在本地 worktree 接受，最终验收记录见
 - 明确产品差异：不输出黑箱最优权重或买卖列表，而是把画像、快照、暴露、预算、约束
   算术和失效条件绑定在可重放提案上；输入不完整时保留 REVIEW_REQUIRED/BLOCKED，绝不
   以零值掩盖缺失。Phase 28 已在独立 worktree 接受，未 push。
+
+## 2026-09-02 — MVP Phase 29 structured context memory
+
+### 计划与边界
+
+- 从 Phase 28 接受提交 `ba5d316` 创建全新 worktree
+  `D:\Github_Storage\prism-phase-29`，分支为
+  `codex/mvp-phase-29-persistent-context`。
+- 先提交 `docs/plans/2026-09-02-mvp-phase-29-persistent-context-memory.md`（`24b1a7e`），
+  明确本阶段只做已确认结构化上下文的显式保存、读取和恢复；自然语言聊天、语义/向量
+  检索、自动恢复、云端同步、生产认证、实时 Provider、删除/TTL、交易和 Recommendation
+  旁路均不做。
+
+### 本地实现
+
+- 新增 `ContextMemoryWriteRequest`、`ContextMemoryRecord`、`ContextMemoryReferences`、
+  列表/写入响应契约；重验 questionnaire/profile/portfolio 的 owner、问卷、bundle、
+  snapshot 闭合，并验证可选 Intent/Plan 与固定研究/优化引用。
+- 复用 DecisionEventStore 的 WAL、RLock、事务、迁移 runner、owner 校验和安全损坏语义，
+  新增 `002_context_memory.sql`、append-only 幂等写入、UTC 稳定列表和跨重启读取；
+  `memory_id` 与 canonical SHA-256 `content_hash` 由服务端派生，客户端不能伪造。
+- 新增 owner-scoped `POST/GET /api/v1/advisor/context-memory` 与静态工作台卡片；刷新
+  只读取列表而不自动覆盖表单，恢复必须显式点击并清空旧 Advisor/Research/Optimization
+  派生结果。动态内容继续使用 DOM 节点和 `textContent`，不保存聊天或 Provider 原文。
+- 实现提交 `474b853`；审查修复提交 `08a5567` 收口直接 owner 切换、过期异步错误和
+  `STORE_CORRUPT` 安全响应。
+
+### 独立审查与验收
+
+- Phase 29 tests：`19 passed`；覆盖合法/重复/漂移/敏感/extra/naive-time、hash/id、
+  migration/restart、损坏 payload/hash/timestamp/owner、limit、owner 隔离、无
+  DecisionEvent 副作用与 100 次并发幂等写入。
+- 全量回归：`417 passed`，仅已知 Starlette/httpx deprecation warning；
+  `compileall`、公开 import、前端 `node --check`、`git diff --check` 通过。
+- 固定评测 `python -m tools.evaluate_mvp --repeat 100 --json` 保持 9/9 cases、全部
+  指标 `1.0`。
+- `python -m tools.context_memory_load_test --owners 100`：并发写入/读取各 `100 x
+  HTTP 200`，错误 `0`，owner mismatch `0`，store rows `100`，重启后 `100`；写入
+  P50/P95/P99=`361.860/401.891/408.182 ms`，读取=`125.547/141.201/143.637 ms`。
+  这些是本地 fixture/ASGI/SQLite 基线，不是生产 SLA。
+- wheel 构建、隔离安装、公开 import 与 migration versions `[1, 2]` 通过；运行时扫描
+  未发现新增外网、LLM/Gemini、凭据、raw chat、HTML sink、订单或 Recommendation 旁路。
+- 真实本地浏览器完成确认 Profile/Portfolio → 保存 → 刷新读取且不自动恢复 → 显式恢复
+  → 重新运行 Advisor/Optimization；owner 直接切换先清空旧记忆；可见 hash、画像/快照
+  身份、保存时间和“本地记忆非认证”边界，控制台错误 `[]`。
+- Phase 29 已在独立 worktree 接受，未 push；下一阶段必须从该接受提交创建新的 worktree
+  并先提交计划书。

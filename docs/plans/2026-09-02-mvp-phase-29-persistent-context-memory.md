@@ -1,6 +1,6 @@
 # Prism MVP Phase 29：可审计的结构化上下文记忆计划
 
-状态：`PLANNED`
+状态：`ACCEPTED`
 
 日期：2026-09-02
 
@@ -147,5 +147,28 @@ Cache/Fallback、Advanced Evidence UI、实时 SkillHub、生产认证与云持�
 
 ## 7. 验收记录（实现后填写）
 
-- 待实现后填写计划/实现/审查提交、阶段与全量测试、评测/并发、wheel、浏览器和最终状态。
-
+- 计划提交：`24b1a7e docs: plan phase 29 persistent context memory`（先于业务代码）。
+- 实现提交：`474b853 feat: add owner-scoped context memory`。
+- 复审修复：`08a5567 fix: harden context memory isolation and corruption errors`；复审发现
+  直接编辑 owner 后点击读取可能保留旧 UI 状态，已改为先清空旧 owner 并增加过期错误
+  响应保护，同时为损坏记忆行返回安全 `STORE_CORRUPT`。
+- 阶段测试：`19` 项 Phase 29 单元/集成测试通过；全量 `417 passed`（Phase 28 的
+  `398` 项基线保持绿色）。
+- 代码门：`python -m compileall -q app tools tests`、公开 import、前端
+  `node --check app/api/static/app.js`、`git diff --check` 通过。
+- 固定评测：`python -m tools.evaluate_mvp --repeat 100 --json`，9/9 cases，所有
+  指标 `1.0`。
+- 并发/重启：`python -m tools.context_memory_load_test --owners 100`；写入/读取均
+  `100 x HTTP 200`，错误 `0`，owner mismatch `0`，写入 store rows `100`，重启后
+  读取 `100`；观测写入 P50/P95/P99 `361.860/401.891/408.182 ms`、读取
+  `125.547/141.201/143.637 ms`。这是本地 fixture/ASGI/SQLite 基线，不是生产 SLA。
+- wheel：`pip wheel . --no-deps` 成功；安装到隔离目录后公开 import 与迁移版本
+  `[1, 2]` 通过，确认包含 `app/store/context.py`、`002_context_memory.sql` 和
+  静态工作台资源。
+- 浏览器：真实本地页面完成确认 Profile/Portfolio → 保存 → 刷新读取（不自动恢复）→
+  显式恢复 → 重新运行 Advisor/Optimization；owner 直接切换清空旧列表；可见
+  `memory_id/content_hash/saved_at/profile/bundle/snapshot` 与非认证边界；控制台错误 `[]`。
+- 静态边界：新增代码无外网、LLM/Gemini、凭据读取、raw chat、HTML sink、订单或
+  Recommendation 旁路；记忆保存/读取不增加 DecisionEvent 行。
+- 最终状态：Phase 29 `ACCEPTED`；真实 SkillHub、生产认证/云持久化、实时数据、语义
+  长期记忆、自动恢复、删除/TTL 及交易能力继续按本计划保持未实现。
