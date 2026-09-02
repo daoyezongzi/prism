@@ -23,6 +23,7 @@
           <a class="nav-item active" href="#overview">Overview</a>
           <a class="nav-item" href="#advisor">Advisor</a>
           <a class="nav-item" href="#portfolio">Portfolio</a>
+          <a class="nav-item" href="#context-memory">Context Memory</a>
           <a class="nav-item" href="#portfolio-optimization">Optimization</a>
           <a class="nav-item" href="#research-tracks">Research Tracks</a>
           <a class="nav-item" href="#stock-research">Stock Research</a>
@@ -291,6 +292,30 @@
             </div>
             <div id="portfolio-content" class="portfolio-content" aria-live="polite">
               <div class="empty-state">读取 owner 模板后查看持仓快照与基金穿透范围。</div>
+            </div>
+          </section>
+
+          <section class="panel context-memory-panel" id="context-memory" aria-labelledby="context-memory-title">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow clay">CONTEXT MEMORY · MVP</span>
+                <h2 id="context-memory-title">可审计上下文记忆</h2>
+              </div>
+              <span id="context-memory-status" class="status-chip">未读取</span>
+            </div>
+            <div class="context-confirm-actions">
+              <div>
+                <strong>保存或读取已确认上下文</strong>
+                <small>只保存 Risk Questionnaire、Risk Profile、Portfolio snapshot 与可选引用；不保存聊天原文、Prompt、凭据或实时 Provider 响应。</small>
+              </div>
+              <div class="context-import-actions">
+                <button id="load-context-memory" class="query-submit" type="button">读取最近上下文</button>
+                <button id="save-context-memory" class="query-submit" type="button">保存当前上下文</button>
+              </div>
+            </div>
+            <p class="research-boundary">本地 MVP 的 owner 隔离键不是身份认证，也不是云同步；记录不可覆盖、不可删除。恢复必须显式点击，并会清空旧的 Advisor、Research、Optimization 派生结果，之后重新运行。</p>
+            <div id="context-memory-content" class="context-memory-content" aria-live="polite">
+              <div class="empty-state">读取 owner 后查看最近的结构化上下文记忆。</div>
             </div>
           </section>
 

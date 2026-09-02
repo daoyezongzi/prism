@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -83,6 +83,10 @@ from app.service import (
 from app.portfolio import PortfolioImportBundle
 from app.profile import RiskQuestionnaire
 from app.store import (
+    ContextMemoryListResponse,
+    ContextMemoryWriteRequest,
+    ContextMemoryWriteResponse,
+    ContextMemoryCorruptError,
     DecisionEvent,
     DecisionEventStore,
     StoreConflictError,
@@ -90,6 +94,7 @@ from app.store import (
     StoreError,
     StoreOwnerError,
     SQLiteDecisionEventStore,
+    build_context_memory_record,
 )
 from app.store.contracts import build_decision_event
 
@@ -240,6 +245,16 @@ def create_app(
             500,
             "CORRUPT_RECORD",
             "stored decision event failed integrity validation",
+        )
+
+    @api.exception_handler(ContextMemoryCorruptError)
+    async def context_memory_corrupt_error_handler(
+        _: Request, __: ContextMemoryCorruptError
+    ) -> JSONResponse:
+        return _error_response(
+            500,
+            "STORE_CORRUPT",
+            "stored context memory failed integrity validation",
         )
 
     @api.exception_handler(StoreError)
@@ -454,6 +469,44 @@ def create_app(
             questionnaire=questionnaire,
             profile=profile,
         )
+
+    @api.post(
+        "/api/v1/advisor/context-memory",
+        response_model=ContextMemoryWriteResponse,
+    )
+    def save_context_memory(
+        context: ContextMemoryWriteRequest,
+        owner_id: str = Depends(owner_dependency),
+    ) -> ContextMemoryWriteResponse:
+        if context.owner_id != owner_id:
+            raise StoreOwnerError("context memory owner does not match owner scope")
+        try:
+            record = build_context_memory_record(
+                context,
+                saved_at=active_clock(),
+            )
+            stored, created = active_store.save_context_memory(record)
+        except StoreError:
+            raise
+        except (ValidationError, ValueError, TypeError) as exc:
+            raise StoreError("context memory request was refused") from exc
+        return ContextMemoryWriteResponse(record=stored, created=created)
+
+    @api.get(
+        "/api/v1/advisor/context-memory",
+        response_model=ContextMemoryListResponse,
+    )
+    def list_context_memory(
+        limit: int = Query(default=20, ge=1, le=100),
+        owner_id: str = Depends(owner_dependency),
+    ) -> ContextMemoryListResponse:
+        try:
+            records = active_store.list_context_memory(owner_id, limit=limit)
+        except StoreError:
+            raise
+        except (TypeError, ValueError) as exc:
+            raise StoreError("context memory list was refused") from exc
+        return ContextMemoryListResponse(owner_id=owner_id, records=records)
 
     @api.post(
         "/api/v1/advisor/profile-proposals",

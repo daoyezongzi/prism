@@ -194,6 +194,12 @@ def build_decision_event(
 
 
 __all__ = [
+    "ContextMemoryListResponse",
+    "ContextMemoryRecord",
+    "ContextMemoryReferences",
+    "ContextMemorySource",
+    "ContextMemoryWriteRequest",
+    "ContextMemoryWriteResponse",
     "DecisionEvent",
     "DecisionEventSummary",
     "Digest",
@@ -202,3 +208,20 @@ __all__ = [
     "decision_event_id",
     "event_content_payload",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose context contracts without introducing an import cycle."""
+
+    if name in {
+        "ContextMemoryListResponse",
+        "ContextMemoryRecord",
+        "ContextMemoryReferences",
+        "ContextMemorySource",
+        "ContextMemoryWriteRequest",
+        "ContextMemoryWriteResponse",
+    }:
+        from app.store import context as context_module
+
+        return getattr(context_module, name)
+    raise AttributeError(name)

@@ -32,6 +32,9 @@
     portfolioOptimizationTemplate: null,
     portfolioOptimizationRun: null,
     portfolioOptimizationSequence: 0,
+    contextMemoryRecords: [],
+    contextMemorySelected: null,
+    contextMemorySequence: 0,
   };
   const byId = (id) => document.getElementById(id);
 
@@ -100,6 +103,12 @@
 
   function setPortfolioOptimizationStatus(message, className = "") {
     const node = byId("portfolio-optimization-status");
+    node.className = `status-chip ${className}`.trim();
+    node.textContent = message;
+  }
+
+  function setContextMemoryStatus(message, className = "") {
+    const node = byId("context-memory-status");
     node.className = `status-chip ${className}`.trim();
     node.textContent = message;
   }
@@ -461,6 +470,249 @@
       section.append(holdings);
       panel.append(section);
     });
+  }
+
+  function renderContextMemory(records = state.contextMemoryRecords) {
+    const panel = byId("context-memory-content");
+    clear(panel);
+    const items = Array.isArray(records) ? records : [];
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "暂无已保存上下文；保存前必须先确认 Profile 与 Portfolio。";
+      panel.append(empty);
+      return;
+    }
+    items.forEach((record) => {
+      const card = document.createElement("article");
+      card.className = `context-memory-card${state.contextMemorySelected === record.memory_id ? " selected" : ""}`;
+      const header = document.createElement("header");
+      const title = document.createElement("strong");
+      title.textContent = `${text(record.profile?.risk_level)} · ${text(record.memory_id)}`;
+      header.append(title, chip(text(record.source, "EXPLICIT_SAVE"), "pass"));
+      card.append(header);
+      const metadata = document.createElement("dl");
+      metadata.className = "metadata-grid";
+      addMetadata(metadata, "Saved at", record.saved_at);
+      addMetadata(metadata, "Profile", `${text(record.profile?.profile_id)} · v${text(record.profile?.profile_version)}`);
+      addMetadata(metadata, "Questionnaire", record.questionnaire?.questionnaire_id);
+      addMetadata(metadata, "Portfolio bundle", record.portfolio?.bundle_id);
+      addMetadata(metadata, "Position snapshot", record.portfolio?.position_snapshot?.snapshot_id);
+      addMetadata(metadata, "Content hash", record.content_hash);
+      card.append(metadata);
+      const references = record.references || {};
+      const referenceValues = [
+        references.research_run_id && `Research ${references.research_run_id}`,
+        references.stock_research_run_id && `Stock ${references.stock_research_run_id}`,
+        references.fund_research_run_id && `Fund ${references.fund_research_run_id}`,
+        references.convertible_bond_research_run_id && `CB ${references.convertible_bond_research_run_id}`,
+        references.optimization_request_id && `Optimization ${references.optimization_request_id}`,
+      ].filter(Boolean);
+      const note = document.createElement("p");
+      note.className = "context-memory-references";
+      note.textContent = referenceValues.length
+        ? `引用：${referenceValues.join(" · ")}`
+        : "未保存派生研究引用；恢复后需重新运行研究或组合流程。";
+      card.append(note);
+      const actions = document.createElement("div");
+      actions.className = "context-import-actions";
+      const restore = document.createElement("button");
+      restore.type = "button";
+      restore.className = "query-submit";
+      restore.textContent = "显式恢复到当前会话";
+      restore.addEventListener("click", () => restoreContextMemory(record));
+      actions.append(restore);
+      card.append(actions);
+      panel.append(card);
+    });
+  }
+
+  function clearContextMemory() {
+    state.contextMemorySequence += 1;
+    state.contextMemoryRecords = [];
+    state.contextMemorySelected = null;
+    setContextMemoryStatus("未读取");
+    renderContextMemory([]);
+  }
+
+  function clearDerivedResultsForContextRestore() {
+    clearAdvisorPlan();
+    clearProfileProposal();
+    state.researchRun = null;
+    state.researchSequence += 1;
+    renderResearchMatrix(null);
+    setResearchStatus("需重新运行", "review");
+    state.stockResearchRun = null;
+    state.stockResearchSequence += 1;
+    renderStockResearch(null);
+    setStockResearchStatus("需重新运行", "review");
+    state.fundResearchRun = null;
+    state.fundResearchSequence += 1;
+    renderFundResearch(null);
+    setFundResearchStatus("需重新运行", "review");
+    state.convertibleBondResearchRun = null;
+    state.convertibleBondResearchSequence += 1;
+    renderConvertibleBondResearch(null);
+    setConvertibleBondResearchStatus("需重新运行", "review");
+    clearPortfolioOptimizationRun("需重新运行", "review");
+  }
+
+  function restoreContextMemory(record) {
+    if (!record || record.owner_id !== state.ownerId) {
+      state.contextMemorySelected = null;
+      setContextMemoryStatus("恢复被拒绝", "blocked");
+      setError("上下文记忆不属于当前 owner，未恢复。");
+      renderContextMemory();
+      clearDerivedResultsForContextRestore();
+      return;
+    }
+    state.contextMemorySelected = record.memory_id;
+    state.profileContext = {
+      questionnaire: record.questionnaire,
+      profile: record.profile,
+    };
+    state.portfolioContext = record.portfolio;
+    const questionnaireId = text(record.questionnaire?.questionnaire_id, "");
+    const queryId = questionnaireId.endsWith("-questionnaire")
+      ? questionnaireId.slice(0, -"-questionnaire".length)
+      : questionnaireId;
+    if (queryId) byId("query-id").value = queryId;
+    [
+      ["loss-tolerance", record.questionnaire?.loss_tolerance_score],
+      ["investment-horizon", record.questionnaire?.investment_horizon],
+      ["liquidity-need", record.questionnaire?.liquidity_need],
+      ["experience-level", record.questionnaire?.experience_level],
+      ["return-expectation", record.questionnaire?.return_expectation],
+      ["max-drawdown", record.questionnaire?.max_drawdown_tolerance_pct],
+    ].forEach(([id, value]) => {
+      if (value !== undefined && value !== null) byId(id).value = String(value);
+    });
+    renderPortfolio(record.portfolio, "已恢复 · 本地结构化记忆");
+    renderProfileContext(record.questionnaire);
+    renderConfirmedProfile(record.profile);
+    setPortfolioContextStatus("已恢复 · 当前会话只读", "pass");
+    setProfileContextStatus(`已恢复 · ${text(record.profile?.risk_level)}`, "pass");
+    clearDerivedResultsForContextRestore();
+    setContextMemoryStatus("已显式恢复 · 派生结果已清空", "pass");
+    setError("");
+    renderContextMemory();
+  }
+
+  function buildContextMemoryReferences() {
+    const research = state.researchRun;
+    const stock = state.stockResearchRun;
+    const fund = state.fundResearchRun;
+    const convertible = state.convertibleBondResearchRun;
+    const optimization = state.portfolioOptimizationRun;
+    return {
+      research_matrix_id: research?.matrix_id || null,
+      research_run_id: research?.run_id || null,
+      research_scenario_id: research?.scenario?.scenario_id || null,
+      stock_research_run_id: stock?.request_id || null,
+      stock_research_scenario_id: stock?.scenario?.scenario_id || null,
+      fund_research_run_id: fund?.request_id || null,
+      fund_research_scenario_id: fund?.scenario?.scenario_id || null,
+      convertible_bond_research_run_id: convertible?.request_id || null,
+      convertible_bond_research_scenario_id: convertible?.scenario?.scenario_id || null,
+      optimization_request_id: optimization?.request_id || null,
+      optimization_scenario_id: optimization?.scenario?.scenario_id || null,
+    };
+  }
+
+  async function saveContextMemory() {
+    const requestOwner = byId("owner-id").value.trim();
+    if (!requestOwner) {
+      setContextMemoryStatus("需要 owner", "blocked");
+      setError("请输入 owner 标识。");
+      return;
+    }
+    if (requestOwner !== state.ownerId) {
+      state.ownerId = requestOwner;
+      resetOwnerScopedViews();
+      setContextMemoryStatus("需先读取 owner", "review");
+      setError("请先读取该 owner，再确认 Profile 与 Portfolio。");
+      return;
+    }
+    if (!state.profileContext?.profile || !state.profileContext?.questionnaire) {
+      setContextMemoryStatus("需先确认画像", "review");
+      setError("请先确认 Risk Profile，再保存上下文记忆。");
+      return;
+    }
+    if (!state.portfolioContext) {
+      setContextMemoryStatus("需先确认持仓", "review");
+      setError("请先验证并加载 Portfolio，再保存上下文记忆。");
+      return;
+    }
+    const sequence = ++state.contextMemorySequence;
+    const submit = byId("save-context-memory");
+    submit.disabled = true;
+    setError("");
+    setContextMemoryStatus("保存中…");
+    try {
+      const response = await fetch("/api/v1/advisor/context-memory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Owner-ID": requestOwner,
+        },
+        body: JSON.stringify({
+          schema_version: "context-memory-write-request.v1",
+          owner_id: requestOwner,
+          questionnaire: state.profileContext.questionnaire,
+          profile: state.profileContext.profile,
+          portfolio: state.portfolioContext,
+          references: buildContextMemoryReferences(),
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.contextMemorySequence !== sequence) return;
+      const result = await response.json();
+      state.contextMemorySelected = result.record?.memory_id || null;
+      setContextMemoryStatus(result.created ? "已保存 · EXPLICIT_SAVE" : "已复用 · 内容未改变", "pass");
+      await loadContextMemory(requestOwner);
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.contextMemorySequence === sequence) {
+        state.contextMemorySelected = null;
+        setContextMemoryStatus("未保存", "blocked");
+        renderContextMemory();
+      }
+      setError(error.message || "保存上下文记忆失败");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  async function loadContextMemory(ownerId = state.ownerId) {
+    const requestOwner = ownerId;
+    const sequence = ++state.contextMemorySequence;
+    if (!requestOwner) {
+      clearContextMemory();
+      return;
+    }
+    setContextMemoryStatus("读取中…");
+    try {
+      const response = await fetch("/api/v1/advisor/context-memory?limit=20", {
+        headers: { "X-Owner-ID": requestOwner },
+      });
+      if (!response.ok) throw await apiError(response);
+      if (state.ownerId !== requestOwner || state.contextMemorySequence !== sequence) return;
+      const result = await response.json();
+      state.contextMemoryRecords = Array.isArray(result.records) ? result.records : [];
+      state.contextMemorySelected = null;
+      setContextMemoryStatus(
+        state.contextMemoryRecords.length ? `${state.contextMemoryRecords.length} 条最近记忆` : "暂无记忆",
+        state.contextMemoryRecords.length ? "pass" : "",
+      );
+      renderContextMemory();
+    } catch (error) {
+      if (state.ownerId === requestOwner && state.contextMemorySequence === sequence) {
+        state.contextMemoryRecords = [];
+        state.contextMemorySelected = null;
+        setContextMemoryStatus("读取失败", "blocked");
+        renderContextMemory([]);
+      }
+      setError(error.message || "读取上下文记忆失败");
+    }
   }
 
   function renderProfileContext(questionnaire) {
@@ -2355,6 +2607,7 @@
   }
 
   function resetOwnerScopedViews() {
+    clearContextMemory();
     clearTemplateContext({ clearConfirmed: true });
     setQueryStatus("待运行");
     state.events = [];
@@ -2892,6 +3145,16 @@
           }
         }
       }
+      if (state.ownerId === requestOwner) {
+        try {
+          await loadContextMemory(requestOwner);
+        } catch (error) {
+          if (state.ownerId === requestOwner) {
+            setContextMemoryStatus("读取失败", "blocked");
+            setError(error.message || "读取上下文记忆失败");
+          }
+        }
+      }
       if (state.events.length) await loadEvent(state.events[0].event_id);
     } catch (error) {
       state.events = [];
@@ -2949,6 +3212,8 @@
     setConvertibleBondResearchStatus("待运行");
   });
   byId("run-portfolio-optimization").addEventListener("click", runPortfolioOptimization);
+  byId("save-context-memory").addEventListener("click", saveContextMemory);
+  byId("load-context-memory").addEventListener("click", () => loadContextMemory(state.ownerId));
   byId("portfolio-optimization-scenario").addEventListener("change", () => {
     state.portfolioOptimizationRun = null;
     state.portfolioOptimizationSequence += 1;

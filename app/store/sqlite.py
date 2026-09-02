@@ -14,6 +14,7 @@ from app.store.contracts import (
     DecisionEventSummary,
     event_content_payload,
 )
+from app.store.context import ContextMemoryRecord
 
 
 class StoreError(RuntimeError):
@@ -32,12 +33,32 @@ class StoreCorruptError(StoreError):
     """A stored row failed contract or content validation."""
 
 
+class ContextMemoryConflictError(StoreConflictError):
+    """A context-memory identity already carries different content."""
+
+
+class ContextMemoryCorruptError(StoreCorruptError):
+    """A context-memory row failed integrity validation."""
+
+
 class DecisionEventStore(Protocol):
     def save(self, event: DecisionEvent) -> tuple[DecisionEvent, bool]: ...
 
     def get(self, owner_id: str, event_id: str) -> DecisionEvent | None: ...
 
     def list(self, owner_id: str) -> tuple[DecisionEventSummary, ...]: ...
+
+    def save_context_memory(
+        self, record: ContextMemoryRecord
+    ) -> tuple[ContextMemoryRecord, bool]: ...
+
+    def get_context_memory(
+        self, owner_id: str, memory_id: str
+    ) -> ContextMemoryRecord | None: ...
+
+    def list_context_memory(
+        self, owner_id: str, limit: int = 20
+    ) -> tuple[ContextMemoryRecord, ...]: ...
 
     def close(self) -> None: ...
 
@@ -48,6 +69,15 @@ _MIGRATION_DIR = Path(__file__).parent / "migrations"
 def _canonical_event_json(event: DecisionEvent) -> str:
     return json.dumps(
         event.model_dump(mode="json"),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _canonical_context_memory_json(record: ContextMemoryRecord) -> str:
+    return json.dumps(
+        record.model_dump(mode="json"),
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
@@ -230,6 +260,118 @@ class SQLiteDecisionEventStore:
             )
         return tuple(summaries)
 
+    @staticmethod
+    def _parse_context_memory_row(row: sqlite3.Row) -> ContextMemoryRecord:
+        try:
+            payload = json.loads(row["payload_json"])
+            record = ContextMemoryRecord.model_validate(payload)
+            if (
+                record.memory_id != row["memory_id"]
+                or record.owner_id != row["owner_id"]
+                or record.source.value != row["source"]
+                or record.content_hash != row["content_hash"]
+                or record.saved_at.isoformat() != row["saved_at"]
+            ):
+                raise ValueError("row identity does not match payload")
+            return record
+        except Exception as exc:
+            raise ContextMemoryCorruptError(
+                "stored context memory failed validation"
+            ) from exc
+
+    @staticmethod
+    def _validate_context_memory_limit(limit: int) -> int:
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 100:
+            raise StoreError("context memory limit must be between 1 and 100")
+        return limit
+
+    def save_context_memory(
+        self, record: ContextMemoryRecord
+    ) -> tuple[ContextMemoryRecord, bool]:
+        try:
+            normalized = ContextMemoryRecord.model_validate(
+                record.model_dump(mode="python")
+            )
+            _validate_owner(normalized.owner_id)
+        except StoreError:
+            raise
+        except Exception as exc:
+            raise StoreCorruptError(
+                "context memory failed contract validation"
+            ) from exc
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    "SELECT * FROM context_memory WHERE memory_id = ?",
+                    (normalized.memory_id,),
+                ).fetchone()
+                if row is not None:
+                    existing = self._parse_context_memory_row(row)
+                    if existing.owner_id != normalized.owner_id:
+                        raise ContextMemoryConflictError(
+                            "context memory identity belongs to another owner"
+                        )
+                    if existing.content_hash != normalized.content_hash:
+                        raise ContextMemoryConflictError(
+                            "context memory identity already has different content"
+                        )
+                    self._connection.execute("COMMIT")
+                    return existing, False
+                self._connection.execute(
+                    """
+                    INSERT INTO context_memory
+                        (memory_id, owner_id, source, content_hash, payload_json, saved_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        normalized.memory_id,
+                        normalized.owner_id,
+                        normalized.source.value,
+                        normalized.content_hash,
+                        _canonical_context_memory_json(normalized),
+                        normalized.saved_at.isoformat(),
+                    ),
+                )
+                self._connection.execute("COMMIT")
+                return normalized, True
+            except Exception:
+                self._connection.execute("ROLLBACK")
+                raise
+
+    def get_context_memory(
+        self, owner_id: str, memory_id: str
+    ) -> ContextMemoryRecord | None:
+        owner_id = _validate_owner(owner_id)
+        if not isinstance(memory_id, str) or not memory_id.strip():
+            raise StoreError("memory ID is required")
+        with self._lock:
+            row = self._connection.execute(
+                "SELECT * FROM context_memory WHERE owner_id = ? AND memory_id = ?",
+                (owner_id, memory_id.strip()),
+            ).fetchone()
+        return self._parse_context_memory_row(row) if row is not None else None
+
+    def list_context_memory(
+        self, owner_id: str, limit: int = 20
+    ) -> tuple[ContextMemoryRecord, ...]:
+        owner_id = _validate_owner(owner_id)
+        limit = self._validate_context_memory_limit(limit)
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT * FROM context_memory
+                WHERE owner_id = ?
+                """,
+                (owner_id,),
+            ).fetchall()
+        records = [self._parse_context_memory_row(row) for row in rows]
+        records.sort(
+            key=lambda record: (record.saved_at.astimezone(UTC), record.memory_id),
+            reverse=True,
+        )
+        return tuple(records[:limit])
+
     def close(self) -> None:
         with self._lock:
             self._connection.close()
@@ -239,6 +381,8 @@ __all__ = [
     "DecisionEventStore",
     "SQLiteDecisionEventStore",
     "StoreConflictError",
+    "ContextMemoryConflictError",
+    "ContextMemoryCorruptError",
     "StoreCorruptError",
     "StoreError",
     "StoreOwnerError",
