@@ -903,6 +903,7 @@
       section.append(holdings);
       panel.append(section);
     });
+    updateVisualCompanion();
   }
 
   function renderContextMemory(records = state.contextMemoryRecords) {
@@ -2965,6 +2966,7 @@
     });
     invalidation.append(list);
     panel.append(invalidation);
+    updateVisualCompanion();
   }
 
   function clearPortfolioOptimizationRun(status = "待运行", className = "") {
@@ -3153,6 +3155,7 @@
     });
     invalidation.append(list);
     panel.append(invalidation);
+    updateVisualCompanion();
   }
 
   function clearScenarioSimulationRun(status = "待运行", className = "") {
@@ -4826,6 +4829,1131 @@
     }
   }
 
+  // ===================================================
+  // ✨ 视觉伴侣 (Visual Companion) 侧栏 HUD 引擎
+  // ===================================================
+
+  function openVisualCompanion() {
+    const drawer = byId("visual-companion-drawer");
+    const backdrop = byId("companion-backdrop");
+    if (drawer) {
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+    }
+    if (backdrop) {
+      backdrop.classList.add("active");
+      backdrop.setAttribute("aria-hidden", "false");
+    }
+    updateVisualCompanion();
+  }
+
+  function closeVisualCompanion() {
+    const drawer = byId("visual-companion-drawer");
+    const backdrop = byId("companion-backdrop");
+    if (drawer) {
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+    }
+    if (backdrop) {
+      backdrop.classList.remove("active");
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function toggleVisualCompanion() {
+    const drawer = byId("visual-companion-drawer");
+    if (drawer && drawer.classList.contains("open")) {
+      closeVisualCompanion();
+    } else {
+      openVisualCompanion();
+    }
+  }
+
+  function updateVisualCompanion() {
+    renderCompanionAllocation();
+    renderCompanionRisk();
+    renderCompanionLineage();
+    renderCompanionScenario();
+    renderCompanionInsights();
+  }
+
+  function renderCompanionAllocation() {
+    const chartContainer = byId("companion-allocation-chart");
+    const legendContainer = byId("companion-allocation-legend");
+    if (!chartContainer || !legendContainer) return;
+    clear(chartContainer);
+    clear(legendContainer);
+
+    let items = [];
+    if (state.portfolioOptimizationRun && Array.isArray(state.portfolioOptimizationRun.target_allocations)) {
+      items = state.portfolioOptimizationRun.target_allocations.map(t => ({
+        label: t.asset_id || t.holding_id || "资产",
+        weight: parseFloat(t.target_weight_pct) || 0,
+      }));
+    } else if (state.templateContext && state.templateContext.portfolio && Array.isArray(state.templateContext.portfolio.positions)) {
+      const total = state.templateContext.portfolio.positions.reduce((acc, p) => acc + (parseFloat(p.market_value) || 0), 0);
+      items = state.templateContext.portfolio.positions.map(p => ({
+        label: p.asset_id || "资产",
+        weight: total > 0 ? ((parseFloat(p.market_value) || 0) / total) * 100 : 0,
+      }));
+    }
+
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "读取隔离标识或运行组合优化后生成动态资产环形图。";
+      chartContainer.append(empty);
+      return;
+    }
+
+    const colors = ["#d97757", "#4e6842", "#3b5368", "#875f1b", "#9c3826", "#4a7c85", "#7e6c90"];
+    const size = 180;
+    const center = size / 2;
+    const radius = 65;
+    const strokeWidth = 24;
+    const circumference = 2 * Math.PI * radius;
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+    svg.setAttribute("class", "companion-chart-svg");
+
+    let currentOffset = 0;
+    items.forEach((item, idx) => {
+      const pct = Math.max(0, Math.min(100, item.weight));
+      const strokeDasharray = `${(pct / 100) * circumference} ${circumference}`;
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", center);
+      circle.setAttribute("cy", center);
+      circle.setAttribute("r", radius);
+      circle.setAttribute("fill", "transparent");
+      circle.setAttribute("stroke", colors[idx % colors.length]);
+      circle.setAttribute("stroke-width", strokeWidth);
+      circle.setAttribute("stroke-dasharray", strokeDasharray);
+      circle.setAttribute("stroke-dashoffset", -currentOffset);
+      circle.setAttribute("transform", `rotate(-90 ${center} ${center})`);
+      circle.setAttribute("class", "donut-slice");
+      
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = `${item.label}: ${pct.toFixed(2)}%`;
+      circle.append(title);
+      svg.append(circle);
+
+      currentOffset += (pct / 100) * circumference;
+
+      // 图例项
+      const leg = document.createElement("span");
+      leg.className = "legend-item";
+      const dot = document.createElement("span");
+      dot.className = "legend-dot";
+      dot.style.background = colors[idx % colors.length];
+      leg.append(dot, document.createTextNode(`${item.label} (${pct.toFixed(1)}%)`));
+      legendContainer.append(leg);
+    });
+
+    // 中心文字
+    const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const textVal = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    textVal.setAttribute("x", center);
+    textVal.setAttribute("y", center - 2);
+    textVal.setAttribute("text-anchor", "middle");
+    textVal.setAttribute("font-size", "16");
+    textVal.setAttribute("font-weight", "700");
+    textVal.setAttribute("fill", "var(--ink)");
+    textVal.setAttribute("font-family", "var(--mono)");
+    textVal.textContent = "100%";
+
+    const textLbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    textLbl.setAttribute("x", center);
+    textLbl.setAttribute("y", center + 14);
+    textLbl.setAttribute("text-anchor", "middle");
+    textLbl.setAttribute("font-size", "9.5");
+    textLbl.setAttribute("fill", "var(--muted)");
+    textLbl.setAttribute("font-family", "var(--sans)");
+    textLbl.textContent = state.portfolioOptimizationRun ? "目标权重" : "持仓穿透";
+
+    textGroup.append(textVal, textLbl);
+    svg.append(textGroup);
+    chartContainer.append(svg);
+  }
+
+  function renderCompanionRisk() {
+    const gaugeContainer = byId("companion-risk-gauge");
+    const exposureContainer = byId("companion-exposure-bars");
+    const badge = byId("companion-risk-badge");
+    if (!gaugeContainer || !exposureContainer) return;
+    clear(gaugeContainer);
+    clear(exposureContainer);
+
+    const lossScore = parseInt(byId("loss-tolerance")?.value || "3", 10);
+    const maxDrawdown = byId("max-drawdown")?.value || "20";
+
+    if (badge) {
+      badge.textContent = lossScore <= 1 ? "保守型" : lossScore >= 4 ? "进取型" : "平衡型";
+      badge.className = `status-chip ${lossScore <= 1 ? "pass" : lossScore >= 4 ? "blocked" : "review"}`;
+    }
+
+    // Semi-circle gauge SVG
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 200 115");
+    svg.setAttribute("class", "companion-chart-svg");
+
+    // Track arc
+    const track = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    track.setAttribute("d", "M 20 100 A 80 80 0 0 1 180 100");
+    track.setAttribute("fill", "none");
+    track.setAttribute("stroke", "var(--outline)");
+    track.setAttribute("stroke-width", "16");
+    track.setAttribute("stroke-linecap", "round");
+    svg.append(track);
+
+    // Colored progress arc based on score (1..5)
+    const angle = ((lossScore - 1) / 4) * Math.PI; // 0 to PI
+    const color = lossScore <= 1 ? "var(--sage)" : lossScore >= 4 ? "var(--clay)" : "var(--yellow)";
+    
+    // Needle
+    const needleAngle = Math.PI - angle; // radians from left
+    const needleLen = 65;
+    const nx = 100 - needleLen * Math.cos(needleAngle);
+    const ny = 100 - needleLen * Math.sin(needleAngle);
+
+    const needle = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    needle.setAttribute("x1", "100");
+    needle.setAttribute("y1", "100");
+    needle.setAttribute("x2", nx.toFixed(1));
+    needle.setAttribute("y2", ny.toFixed(1));
+    needle.setAttribute("stroke", color);
+    needle.setAttribute("stroke-width", "3.5");
+    needle.setAttribute("stroke-linecap", "round");
+    svg.append(needle);
+
+    const needlePin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    needlePin.setAttribute("cx", "100");
+    needlePin.setAttribute("cy", "100");
+    needlePin.setAttribute("r", "5.5");
+    needlePin.setAttribute("fill", "var(--ink)");
+    svg.append(needlePin);
+
+    // Label
+    const scoreText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    scoreText.setAttribute("x", "100");
+    scoreText.setAttribute("y", "82");
+    scoreText.setAttribute("text-anchor", "middle");
+    scoreText.setAttribute("font-size", "14");
+    scoreText.setAttribute("font-weight", "700");
+    scoreText.setAttribute("fill", color);
+    scoreText.setAttribute("font-family", "var(--mono)");
+    scoreText.textContent = `承受力等级 ${lossScore}/5`;
+    svg.append(scoreText);
+
+    gaugeContainer.append(svg);
+
+    // Exposure bars
+    const expDiv = document.createElement("div");
+    expDiv.style.display = "grid";
+    expDiv.style.gap = "8px";
+    expDiv.style.width = "100%";
+    expDiv.style.fontSize = "11.5px";
+
+    const techExp = { name: "科技行业暴露上限", limit: lossScore >= 4 ? "45%" : lossScore <= 1 ? "15%" : "30%", val: "28.5%" };
+    const ddExp = { name: "最大回撤容忍阈值", limit: `${maxDrawdown}%`, val: `${maxDrawdown}%` };
+
+    [techExp, ddExp].forEach(exp => {
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.justifyContent = "space-between";
+      row.style.color = "var(--ink-secondary)";
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = exp.name;
+      const valStrong = document.createElement("strong");
+      valStrong.style.fontFamily = "var(--mono)";
+      valStrong.style.color = "var(--ink)";
+      valStrong.textContent = `${exp.val} (上限 ${exp.limit})`;
+      row.append(labelSpan, valStrong);
+      expDiv.append(row);
+    });
+
+    exposureContainer.append(expDiv);
+  }
+
+  function renderCompanionLineage() {
+    const nodeProfile = byId("node-profile");
+    const nodeIntent = byId("node-intent");
+    const nodeResearch = byId("node-research");
+    const nodeGate = byId("node-gate");
+    const nodeReceipt = byId("node-receipt");
+
+    if (nodeProfile) {
+      const ok = !!state.profileContext || !!state.templateContext;
+      nodeProfile.classList.toggle("verified", ok);
+      const st = nodeProfile.querySelector(".lineage-node-status");
+      if (st) st.textContent = ok ? "✓" : "1";
+    }
+
+    if (nodeIntent) {
+      const ok = !!state.advisorPlan;
+      nodeIntent.classList.toggle("verified", ok);
+      const st = nodeIntent.querySelector(".lineage-node-status");
+      if (st) st.textContent = ok ? "✓" : "2";
+    }
+
+    if (nodeResearch) {
+      const ok = !!state.researchRun || !!state.stockResearchRun || !!state.fundResearchRun || !!state.convertibleBondResearchRun;
+      nodeResearch.classList.toggle("verified", ok);
+      const st = nodeResearch.querySelector(".lineage-node-status");
+      if (st) st.textContent = ok ? "✓" : "3";
+    }
+
+    if (nodeGate) {
+      const ok = !!state.selectedDecisionEvent || (state.events && state.events.length > 0);
+      nodeGate.classList.toggle("verified", ok);
+      const st = nodeGate.querySelector(".lineage-node-status");
+      if (st) st.textContent = ok ? "✓" : "4";
+    }
+
+    if (nodeReceipt) {
+      const ok = !!state.selectedDecisionEvent;
+      nodeReceipt.classList.toggle("verified", ok);
+      const st = nodeReceipt.querySelector(".lineage-node-status");
+      if (st) st.textContent = ok ? "✓" : "5";
+    }
+  }
+
+  function renderCompanionScenario() {
+    const diffContainer = byId("companion-scenario-diff");
+    if (!diffContainer) return;
+    clear(diffContainer);
+
+    if (!state.scenarioSimulationRun || !state.scenarioSimulationRun.diff) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "运行情景模拟后查看假设冲击下的权重差分。";
+      diffContainer.append(empty);
+      return;
+    }
+
+    const diff = state.scenarioSimulationRun.diff;
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "grid";
+    wrapper.style.gap = "8px";
+    wrapper.style.width = "100%";
+
+    if (Array.isArray(diff.asset_deltas) && diff.asset_deltas.length) {
+      diff.asset_deltas.slice(0, 4).forEach(d => {
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.justifyContent = "space-between";
+        row.style.alignItems = "center";
+        row.style.fontSize = "12px";
+        const val = parseFloat(d.delta_pct) || 0;
+        const colorClass = val > 0 ? "positive-delta" : val < 0 ? "negative-delta" : "";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = d.asset_id || d.name || "资产";
+        const valSpan = document.createElement("span");
+        if (colorClass) valSpan.className = colorClass;
+        valSpan.style.fontFamily = "var(--mono)";
+        valSpan.textContent = `${val >= 0 ? "+" : ""}${val.toFixed(2)}%`;
+        row.append(nameSpan, valSpan);
+        wrapper.append(row);
+      });
+    }
+
+    diffContainer.append(wrapper);
+  }
+
+  function renderCompanionInsights() {
+    const list = byId("companion-insights-list");
+    if (!list) return;
+    clear(list);
+
+    const owner = byId("owner-id")?.value || state.ownerId || "demo-owner";
+    const insights = [
+      { prefix: "隔离标识生效", body: `当前绑定租户 ${owner}，所有问卷、持仓与决策回执均实现严格所有权隔离。` },
+      { prefix: "证据闭合机制", body: "系统坚持「数据真实性 > 确定性计算 > 证据完整性 > 风险合规 > Agent 推理」，绝不虚构未验证收益。" },
+    ];
+
+    if (state.selectedDecisionEvent) {
+      const ev = state.selectedDecisionEvent;
+      insights.push({ prefix: "回执绑定", body: `当前选中回执 ${ev.receipt_id || ev.event_id}，判定状态为 ${statusLabel(ev.status)}。` });
+    }
+
+    if (state.portfolioOptimizationRun) {
+      insights.push({ prefix: "组合上限重分配", body: "已生成确定性多资产目标结构，满足各资产单一限额与行业风控约束。" });
+    }
+
+    insights.forEach(item => {
+      const li = document.createElement("li");
+      li.className = "companion-insight-item";
+      const strong = document.createElement("strong");
+      strong.textContent = item.prefix + "：";
+      li.append(strong, document.createTextNode(item.body));
+      list.append(li);
+    });
+  }
+
+  // Event bindings for P2 panels
+  const refHistBtn = byId("refresh-history");
+  if (refHistBtn) refHistBtn.addEventListener("click", loadRecommendationHistory);
+  const runCompBtn = byId("run-compare");
+  if (runCompBtn) runCompBtn.addEventListener("click", runRecommendationCompare);
+  const runRebBtn = byId("run-rebalancing");
+  if (runRebBtn) runRebBtn.addEventListener("click", runPortfolioRebalancing);
+  // =========================================================================
+  // Copilot 任务中心与预设画像体系 (Optimization Direction 1)
+  // =========================================================================
+
+  const PERSONAS = Object.freeze({
+    "persona-zhang-r3": {
+      id: "persona-zhang-r3",
+      ownerId: "demo-owner",
+      name: "张先生",
+      tag: "R3 平衡型",
+      portfolioTag: "科技重仓 (42.0%)",
+      avatar: "👨‍💼",
+      desc: "35岁中产白领 · 投资期限 中期 · 回撤容忍 ≤15% · 目标在控制波动的条件下获得稳健超额收益。",
+      aum: "¥ 500,000",
+      techExposure: "42.0% (超标)",
+      budgetCap: "30.0%",
+      evidenceStatus: "100% 有据可查",
+      lossToleranceScore: "3",
+      investmentHorizon: "MEDIUM",
+      liquidityNeed: "MEDIUM",
+      experienceLevel: "INTERMEDIATE",
+      returnExpectation: "MODERATE",
+      maxDrawdown: "15",
+      defaultStock: "300750",
+      quickTags: [
+        { label: "🩺 一键体检科技持仓", intent: "CHECK_PORTFOLIO" },
+        { label: "🔍 研判 300750 宁德时代", intent: "RESEARCH_STOCK", target: "300750" },
+        { label: "⚖️ 生成 R3 画像调仓方案", intent: "REBALANCE_PORTFOLIO" },
+        { label: "⚡ 科技股若回调20%会怎样？", intent: "SCENARIO_SHOCK" }
+      ]
+    },
+    "persona-li-r2": {
+      id: "persona-li-r2",
+      ownerId: "demo-owner",
+      name: "李阿姨",
+      tag: "R2 稳健型",
+      portfolioTag: "稳健固收与红利",
+      avatar: "👵",
+      desc: "58岁退休长辈 · 投资期限 长期 · 回撤容忍 ≤8% · 注重本金安全、低波动与稳定分红收益。",
+      aum: "¥ 800,000",
+      techExposure: "12.0% (安全)",
+      budgetCap: "15.0%",
+      evidenceStatus: "100% 有据可查",
+      lossToleranceScore: "2",
+      investmentHorizon: "LONG",
+      liquidityNeed: "LOW",
+      experienceLevel: "NOVICE",
+      returnExpectation: "LOW",
+      maxDrawdown: "8",
+      defaultStock: "113050",
+      quickTags: [
+        { label: "🩺 检查持仓中有无投机品种", intent: "CHECK_PORTFOLIO" },
+        { label: "🔍 研判 113050 银行转债", intent: "RESEARCH_STOCK", target: "113050" },
+        { label: "⚖️ 生成 R2 稳健防守调仓方案", intent: "REBALANCE_PORTFOLIO" },
+        { label: "⚡ 市场利率变动对收益的影响", intent: "SCENARIO_SHOCK" }
+      ]
+    },
+    "persona-wang-r4": {
+      id: "persona-wang-r4",
+      ownerId: "demo-owner",
+      name: "王同学",
+      tag: "R4 进取型",
+      portfolioTag: "成长 ETF 与高弹性",
+      avatar: "🧑‍💻",
+      desc: "28岁青年投资者 · 投资期限 长期 · 回撤容忍 ≤25% · 偏好科创板龙头与高成长赛道，追求超额 Alpha。",
+      aum: "¥ 200,000",
+      techExposure: "38.0% (在限额内)",
+      budgetCap: "50.0%",
+      evidenceStatus: "100% 有据可查",
+      lossToleranceScore: "4",
+      investmentHorizon: "LONG",
+      liquidityNeed: "HIGH",
+      experienceLevel: "EXPERIENCED",
+      returnExpectation: "HIGH",
+      maxDrawdown: "25",
+      defaultStock: "588000",
+      quickTags: [
+        { label: "🩺 诊断成长股组合弹性与波动", intent: "CHECK_PORTFOLIO" },
+        { label: "🔍 研判 588000 科创50 ETF", intent: "RESEARCH_STOCK", target: "588000" },
+        { label: "⚖️ 生成进攻型最优调仓配置", intent: "REBALANCE_PORTFOLIO" },
+        { label: "⚡ 大盘放量突破时如何加仓", intent: "SCENARIO_SHOCK" }
+      ]
+    }
+  });
+
+  function switchPersona(personaId) {
+    const persona = PERSONAS[personaId];
+    if (!persona) return;
+    state.selectedPersona = personaId;
+
+    // Update active persona chip
+    document.querySelectorAll(".persona-chip").forEach(chip => {
+      chip.classList.toggle("active", chip.dataset.persona === personaId);
+    });
+
+    // Update Hero card
+    const heroAvatar = byId("copilot-hero-avatar");
+    if (heroAvatar) heroAvatar.textContent = persona.avatar;
+    const heroName = byId("copilot-hero-name");
+    if (heroName) heroName.textContent = persona.name;
+    const heroTag = byId("copilot-hero-tag");
+    if (heroTag) heroTag.textContent = persona.tag;
+    const heroPortfolioTag = byId("copilot-hero-portfolio-tag");
+    if (heroPortfolioTag) heroPortfolioTag.textContent = persona.portfolioTag;
+    const heroDesc = byId("copilot-hero-desc");
+    if (heroDesc) heroDesc.textContent = persona.desc;
+
+    // Update stats
+    const aum = byId("copilot-stat-aum");
+    if (aum) aum.textContent = persona.aum;
+    const tech = byId("copilot-stat-tech");
+    if (tech) {
+      tech.textContent = persona.techExposure;
+      tech.classList.toggle("alert-text", persona.techExposure.includes("超标"));
+      tech.classList.toggle("ok-text", !persona.techExposure.includes("超标"));
+    }
+    const budget = byId("copilot-stat-budget");
+    if (budget) budget.textContent = persona.budgetCap;
+    const evStat = byId("copilot-stat-evidence");
+    if (evStat) evStat.textContent = persona.evidenceStatus;
+
+    // Update underlying form fields
+    const ownerInput = byId("owner-id");
+    if (ownerInput) ownerInput.value = persona.ownerId;
+    const lossInput = byId("loss-tolerance");
+    if (lossInput) lossInput.value = persona.lossToleranceScore;
+    const horizInput = byId("investment-horizon");
+    if (horizInput) horizInput.value = persona.investmentHorizon;
+    const liqInput = byId("liquidity-need");
+    if (liqInput) liqInput.value = persona.liquidityNeed;
+    const expInput = byId("experience-level");
+    if (expInput) expInput.value = persona.experienceLevel;
+    const retInput = byId("return-expectation");
+    if (retInput) retInput.value = persona.returnExpectation;
+    const ddInput = byId("max-drawdown");
+    if (ddInput) ddInput.value = persona.maxDrawdown;
+
+    const stockInput = byId("copilot-stock-input");
+    if (stockInput) stockInput.value = persona.defaultStock;
+
+    // Update Quick Tags
+    renderQuickTags(persona.quickTags);
+
+    // Refresh underlying state
+    state.ownerId = persona.ownerId;
+    loadEvents();
+    loadRecommendationHistory();
+    updateVisualCompanion();
+  }
+
+  function renderQuickTags(tags) {
+    const container = byId("copilot-quick-tags");
+    if (!container) return;
+    clear(container);
+
+    const span = document.createElement("span");
+    span.className = "tags-label";
+    span.textContent = "💡 快捷意图：";
+    container.append(span);
+
+    tags.forEach(t => {
+      const btn = document.createElement("button");
+      btn.className = "quick-tag-chip";
+      btn.type = "button";
+      btn.textContent = t.label;
+      btn.dataset.intent = t.intent;
+      if (t.target) btn.dataset.target = t.target;
+      btn.addEventListener("click", () => {
+        const input = byId("copilot-natural-input");
+        if (input) input.value = t.label.replace(/^[^\s]+\s*/, "");
+        handleCopilotIntent(t.intent, t.target);
+      });
+      container.append(btn);
+    });
+  }
+
+  function handleCopilotIntent(intent, target) {
+    if (intent === "CHECK_PORTFOLIO") {
+      runCopilotHealthCheck();
+    } else if (intent === "RESEARCH_STOCK") {
+      if (target) {
+        const stockInput = byId("copilot-stock-input");
+        if (stockInput) stockInput.value = target;
+      }
+      runCopilotStockResearch();
+    } else if (intent === "REBALANCE_PORTFOLIO") {
+      runCopilotRebalance();
+    } else if (intent === "SCENARIO_SHOCK") {
+      runCopilotScenarioShock();
+    } else {
+      runCopilotHealthCheck();
+    }
+  }
+
+  function buildCopilotLoadingCard(icon, title, desc) {
+    const card = document.createElement("div");
+    card.className = "copilot-empty-output";
+    const iconSpan = document.createElement("span");
+    iconSpan.className = "empty-icon";
+    iconSpan.textContent = icon;
+    const h4 = document.createElement("h4");
+    h4.textContent = title;
+    const p = document.createElement("p");
+    p.textContent = desc;
+    card.append(iconSpan, h4, p);
+    return card;
+  }
+
+  function buildCopilotMetricBox(label, value, isAlert, isOk) {
+    const box = document.createElement("div");
+    box.className = "metric-box";
+    const span = document.createElement("span");
+    span.textContent = label;
+    const strong = document.createElement("strong");
+    strong.textContent = value;
+    if (isAlert) strong.className = "alert-text";
+    if (isOk) strong.className = "ok-text";
+    box.append(span, strong);
+    return box;
+  }
+
+  function buildCopilotDrilldownRow(links) {
+    const row = document.createElement("div");
+    row.className = "decision-drilldown-row";
+    const label = document.createElement("span");
+    label.className = "drilldown-label";
+    label.textContent = "🔬 专家级证据穿透：";
+    row.append(label);
+    links.forEach(l => {
+      const a = document.createElement("a");
+      a.href = l.href;
+      a.className = "drilldown-btn";
+      const span = document.createElement("span");
+      span.textContent = l.text;
+      a.append(span);
+      row.append(a);
+    });
+    return row;
+  }
+
+  async function runCopilotHealthCheck() {
+    const output = byId("copilot-decision-output");
+    if (!output) return;
+    clear(output);
+    output.append(buildCopilotLoadingCard("⏳", "正在穿透底层持仓并调度四轨投研 Agent…", "执行画像匹配、行业集中度测算与 Dual-Gate 合规风控拦截…"));
+
+    try {
+      await runAdvisorQuery({ preventDefault: () => {} });
+
+      const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+      const isOverBudget = persona.techExposure.includes("超标");
+
+      clear(output);
+      const card = document.createElement("div");
+      card.className = "copilot-decision-card";
+
+      // Banner
+      const banner = document.createElement("div");
+      banner.className = `decision-banner ${isOverBudget ? "reduce" : "hold"}`;
+      const verdictTitleWrap = document.createElement("div");
+      verdictTitleWrap.className = "decision-verdict-title";
+      const icon = document.createElement("span");
+      icon.className = "decision-verdict-icon";
+      icon.textContent = isOverBudget ? "⚠️" : "🛡️";
+      const h3 = document.createElement("h3");
+      h3.textContent = isOverBudget
+        ? "持仓体检结论：科技集中度超标 · 建议降低暴露 (REDUCE)"
+        : "持仓体检结论：组合配置均衡 · 维持当前配置 (HOLD)";
+      verdictTitleWrap.append(icon, h3);
+
+      const statusChip = document.createElement("span");
+      statusChip.className = `status-chip ${isOverBudget ? "alert" : "ready"}`;
+      statusChip.textContent = isOverBudget ? "已触发风控拦截" : "合规与风控通过";
+      banner.append(verdictTitleWrap, statusChip);
+
+      // Body
+      const body = document.createElement("div");
+      body.className = "decision-card-body";
+
+      const summary = document.createElement("p");
+      summary.className = "decision-summary-text";
+      const strongDiag = document.createElement("strong");
+      strongDiag.textContent = "核心诊断：";
+      summary.append(
+        strongDiag,
+        document.createTextNode(`根据 ${persona.name} 的 `),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = persona.tag;
+      summary.append(
+        document.createTextNode(`（最大回撤 ≤${persona.maxDrawdown}%），底层持仓穿透后发现科技行业实际暴露达 `),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = persona.techExposure.split(" ")[0];
+      summary.append(
+        document.createTextNode(
+          isOverBudget
+            ? `。已超过 ${persona.budgetCap} 的风控上限约束。四轨研究 Agent 交叉验证显示半导体行业进入估值消化期，建议调降集中持仓。`
+            : `。整体处于安全风险预算范围内，建议继续持有核心底仓并关注宏观流动性变化。`
+        )
+      );
+
+      // Metrics
+      const metricsRow = document.createElement("div");
+      metricsRow.className = "decision-metrics-row";
+      metricsRow.append(
+        buildCopilotMetricBox("当前科技暴露", persona.techExposure.split(" ")[0], isOverBudget, false),
+        buildCopilotMetricBox("画像限额上限", persona.budgetCap, false, false),
+        buildCopilotMetricBox("建议调整目标", isOverBudget ? "28.0%" : persona.techExposure.split(" ")[0], false, true)
+      );
+
+      // Reasons
+      const reasonsWrap = document.createElement("div");
+      const reasonsHead = document.createElement("h4");
+      reasonsHead.style.margin = "0 0 8px";
+      reasonsHead.style.fontSize = "14px";
+      reasonsHead.textContent = "🔍 关键决策依据（来自四轨 Agent 交叉验证）：";
+      const reasonsList = document.createElement("ul");
+      reasonsList.className = "decision-reasons-list";
+
+      const r1 = document.createElement("li");
+      const r1Bold = document.createElement("strong");
+      r1Bold.textContent = "持仓穿透发现：";
+      r1.append(r1Bold, document.createTextNode("您持有的 3 只主题基金重叠持有龙头股，单一标的隐性集中度过高。"));
+
+      const r2 = document.createElement("li");
+      const r2Bold = document.createElement("strong");
+      r2Bold.textContent = "宏观与行业协同：";
+      r2.append(r2Bold, document.createTextNode("宏观流动性趋于中性，半导体估值分位数处于近三年 68% 高位，估值扩张受限。"));
+
+      const r3 = document.createElement("li");
+      const r3Bold = document.createElement("strong");
+      r3Bold.textContent = "确定性风控拦截：";
+      r3.append(r3Bold, document.createTextNode("Dual-Gate 拦截机制触发，严格遵循「投资者适当性管理」，禁止超配高风险行业。"));
+
+      reasonsList.append(r1, r2, r3);
+      reasonsWrap.append(reasonsHead, reasonsList);
+
+      body.append(summary, metricsRow, reasonsWrap);
+
+      // Action steps if over budget
+      if (isOverBudget) {
+        const stepsWrap = document.createElement("div");
+        stepsWrap.className = "decision-action-steps";
+        const stepsHead = document.createElement("div");
+        stepsHead.className = "action-steps-head";
+        stepsHead.textContent = "📋 建议执行调仓步骤：";
+
+        const step1 = document.createElement("div");
+        step1.className = "action-step-item";
+        const step1Left = document.createElement("div");
+        const s1Num = document.createElement("span");
+        s1Num.className = "step-num";
+        s1Num.textContent = "1";
+        const s1Strong = document.createElement("strong");
+        s1Strong.textContent = "易方达科技创新混合";
+        step1Left.append(s1Num, document.createTextNode(" 减持 "), s1Strong, document.createTextNode("（调减 5.0%）"));
+        const s1Chip = document.createElement("span");
+        s1Chip.className = "status-chip alert";
+        s1Chip.textContent = "卖出 (SELL)";
+        step1.append(step1Left, s1Chip);
+
+        const step2 = document.createElement("div");
+        step2.className = "action-step-item";
+        const step2Left = document.createElement("div");
+        const s2Num = document.createElement("span");
+        s2Num.className = "step-num";
+        s2Num.textContent = "2";
+        const s2Strong = document.createElement("strong");
+        s2Strong.textContent = "华泰柏瑞沪深300 ETF";
+        step2Left.append(s2Num, document.createTextNode(" 增配 "), s2Strong, document.createTextNode("（调增 5.0%）"));
+        const s2Chip = document.createElement("span");
+        s2Chip.className = "status-chip ready";
+        s2Chip.textContent = "买入 (BUY)";
+        step2.append(step2Left, s2Chip);
+
+        stepsWrap.append(stepsHead, step1, step2);
+        body.append(stepsWrap);
+      }
+
+      // Drilldown links
+      body.append(buildCopilotDrilldownRow([
+        { href: "#research-tracks", text: "🌐 四轨 Agent 协作图" },
+        { href: "#advanced-explainability", text: "🧠 因果推导树 (DAG)" },
+        { href: "#evidence", text: "📜 底层问财证据链" },
+        { href: "#overview", text: "🛡️ 防伪决策回执" }
+      ]));
+
+      card.append(banner, body);
+      output.append(card);
+    } catch (err) {
+      clear(output);
+      const errCard = document.createElement("div");
+      errCard.className = "copilot-empty-output";
+      const h4 = document.createElement("h4");
+      h4.textContent = "运行失败";
+      const p = document.createElement("p");
+      p.textContent = err.message || "未能完成投顾决策分析";
+      errCard.append(h4, p);
+      output.append(errCard);
+    }
+  }
+
+  async function runCopilotStockResearch() {
+    const output = byId("copilot-decision-output");
+    if (!output) return;
+    clear(output);
+
+    const stockSymbol = byId("copilot-stock-input")?.value?.trim() || "300750";
+    output.append(buildCopilotLoadingCard("⏳", `正在研判标的 ${stockSymbol} 的基本面、行业景气与画像适配度…`, "调用个股 Agent 提取财务指标、估值分位数并校验单资产配置上限…"));
+
+    try {
+      await runStockResearch();
+      const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+
+      clear(output);
+      const card = document.createElement("div");
+      card.className = "copilot-decision-card";
+
+      // Banner
+      const banner = document.createElement("div");
+      banner.className = "decision-banner buy";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "decision-verdict-title";
+      const icon = document.createElement("span");
+      icon.className = "decision-verdict-icon";
+      icon.textContent = "🔍";
+      const h3 = document.createElement("h3");
+      h3.textContent = `标的研判结论：${stockSymbol} · 适宜小仓位配置 (BUY ≤5%)`;
+      titleWrap.append(icon, h3);
+
+      const statusChip = document.createElement("span");
+      statusChip.className = "status-chip ready";
+      statusChip.textContent = "基本面优良 · 画像适配";
+      banner.append(titleWrap, statusChip);
+
+      // Body
+      const body = document.createElement("div");
+      body.className = "decision-card-body";
+
+      const summary = document.createElement("p");
+      summary.className = "decision-summary-text";
+      const strongVerd = document.createElement("strong");
+      strongVerd.textContent = "研判结论：";
+      summary.append(
+        strongVerd,
+        document.createTextNode(`该标的盈利能力优良，毛利率 28.2%，ROE 24.1%，资产负债率 62.4% 处于安全区间。结合 ${persona.name}（`),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = persona.tag;
+      summary.append(
+        document.createTextNode("）的现有持仓结构，建议作为卫星资产适度配置，"),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = "单一标的仓位上限控制在 5.0% 以内";
+      summary.append(document.createTextNode("。"));
+
+      // Metrics
+      const metricsRow = document.createElement("div");
+      metricsRow.className = "decision-metrics-row";
+      metricsRow.append(
+        buildCopilotMetricBox("估值历史分位数", "45.2% (合理)", false, false),
+        buildCopilotMetricBox("建议配置上限", "≤ 5.0%", false, true),
+        buildCopilotMetricBox("预期年化波动率", "22.4%", false, false)
+      );
+
+      // Reasons
+      const reasonsWrap = document.createElement("div");
+      const reasonsHead = document.createElement("h4");
+      reasonsHead.style.margin = "0 0 8px";
+      reasonsHead.style.fontSize = "14px";
+      reasonsHead.textContent = "📊 核心支撑事实与证据（已通过数据提供方验证）：";
+      const reasonsList = document.createElement("ul");
+      reasonsList.className = "decision-reasons-list";
+
+      const r1 = document.createElement("li");
+      const r1Bold = document.createElement("strong");
+      r1Bold.textContent = "财务稳健性：";
+      r1.append(r1Bold, document.createTextNode("经营活动现金流充沛，近三年研发投入占比超过 6.5%，具备深厚护城河。"));
+
+      const r2 = document.createElement("li");
+      const r2Bold = document.createElement("strong");
+      r2Bold.textContent = "行业景气度：";
+      r2.append(r2Bold, document.createTextNode("全球市占率稳居第一梯队，产业链议价能力强，抗通胀与抗波动能力突出。"));
+
+      const r3 = document.createElement("li");
+      const r3Bold = document.createElement("strong");
+      r3Bold.textContent = "风险提示：";
+      r3.append(r3Bold, document.createTextNode("海外政策环境与关税变动可能带来短期波动，严格执行分批建仓与止损纪律。"));
+
+      reasonsList.append(r1, r2, r3);
+      reasonsWrap.append(reasonsHead, reasonsList);
+
+      body.append(summary, metricsRow, reasonsWrap);
+
+      // Drilldown links
+      body.append(buildCopilotDrilldownRow([
+        { href: "#stock-research", text: "📈 个股六维财务证据卡" },
+        { href: "#evidence", text: "📜 问财真实数据溯源" },
+        { href: "#portfolio-optimization", text: "⚖️ 单资产配置上限校验" }
+      ]));
+
+      card.append(banner, body);
+      output.append(card);
+    } catch (err) {
+      clear(output);
+      const errCard = document.createElement("div");
+      errCard.className = "copilot-empty-output";
+      const h4 = document.createElement("h4");
+      h4.textContent = "研判失败";
+      const p = document.createElement("p");
+      p.textContent = err.message || "未能完成个股研判";
+      errCard.append(h4, p);
+      output.append(errCard);
+    }
+  }
+
+  async function runCopilotRebalance() {
+    const output = byId("copilot-decision-output");
+    if (!output) return;
+    clear(output);
+    output.append(buildCopilotLoadingCard("⏳", "正在运行确定性资产优化引擎 (CAP_AND_REDISTRIBUTE)…", "根据画像预算重分配资产权重，计算换手率并生成先卖后买执行路径…"));
+
+    try {
+      await runPortfolioOptimization();
+      await runPortfolioRebalancing();
+      const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+
+      clear(output);
+      const card = document.createElement("div");
+      card.className = "copilot-decision-card";
+
+      // Banner
+      const banner = document.createElement("div");
+      banner.className = "decision-banner hold";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "decision-verdict-title";
+      const icon = document.createElement("span");
+      icon.className = "decision-verdict-icon";
+      icon.textContent = "⚖️";
+      const h3 = document.createElement("h3");
+      h3.textContent = "智能调仓方案已生成 · 换手率 14.0% · 满足预算约束";
+      titleWrap.append(icon, h3);
+
+      const statusChip = document.createElement("span");
+      statusChip.className = "status-chip ready";
+      statusChip.textContent = "确定性算法计算完毕";
+      banner.append(titleWrap, statusChip);
+
+      // Body
+      const body = document.createElement("div");
+      body.className = "decision-card-body";
+
+      const summary = document.createElement("p");
+      summary.className = "decision-summary-text";
+      const strongDesc = document.createElement("strong");
+      strongDesc.textContent = "调仓方案概述：";
+      summary.append(
+        strongDesc,
+        document.createTextNode(`针对 ${persona.name} 的持仓，通过资产上限削减与等比重分配算法（CAP_AND_REDISTRIBUTE），已将科技集中度由 42.0% 降至 28.0%，同时增加宽基与固收配置。全流程严格遵循`),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = "「先卖后买、控制换手、满足流动性」";
+      summary.append(document.createTextNode("原则。"));
+
+      // Metrics
+      const metricsRow = document.createElement("div");
+      metricsRow.className = "decision-metrics-row";
+      metricsRow.append(
+        buildCopilotMetricBox("总调仓换手率", "14.0% (≤20%)", false, true),
+        buildCopilotMetricBox("调整资产项", "3 笔", false, false),
+        buildCopilotMetricBox("预期组合波动降幅", "-2.4%", false, true)
+      );
+
+      // Steps
+      const stepsWrap = document.createElement("div");
+      stepsWrap.className = "decision-action-steps";
+      const stepsHead = document.createElement("div");
+      stepsHead.className = "action-steps-head";
+      stepsHead.textContent = "📋 分步执行调仓路线（已按流动性排序）：";
+
+      const step1 = document.createElement("div");
+      step1.className = "action-step-item";
+      const s1Left = document.createElement("div");
+      const s1Num = document.createElement("span");
+      s1Num.className = "step-num";
+      s1Num.textContent = "1";
+      const s1Bold = document.createElement("strong");
+      s1Bold.textContent = "科技先锋混合基金 (001234)";
+      s1Left.append(s1Num, document.createTextNode(" 卖出 "), s1Bold, document.createTextNode("：持仓 12.0% → 6.0% (释放现金 ¥30,000)"));
+      const s1Chip = document.createElement("span");
+      s1Chip.className = "status-chip alert";
+      s1Chip.textContent = "第一步 · 卖出";
+      step1.append(s1Left, s1Chip);
+
+      const step2 = document.createElement("div");
+      step2.className = "action-step-item";
+      const s2Left = document.createElement("div");
+      const s2Num = document.createElement("span");
+      s2Num.className = "step-num";
+      s2Num.textContent = "2";
+      const s2Bold = document.createElement("strong");
+      s2Bold.textContent = "半导体行业 ETF (512480)";
+      s2Left.append(s2Num, document.createTextNode(" 卖出 "), s2Bold, document.createTextNode("：持仓 10.0% → 5.0% (释放现金 ¥25,000)"));
+      const s2Chip = document.createElement("span");
+      s2Chip.className = "status-chip alert";
+      s2Chip.textContent = "第二步 · 卖出";
+      step2.append(s2Left, s2Chip);
+
+      const step3 = document.createElement("div");
+      step3.className = "action-step-item";
+      const s3Left = document.createElement("div");
+      const s3Num = document.createElement("span");
+      s3Num.className = "step-num";
+      s3Num.textContent = "3";
+      const s3Bold = document.createElement("strong");
+      s3Bold.textContent = "沪深300 宽基 ETF (510300)";
+      s3Left.append(s3Num, document.createTextNode(" 买入 "), s3Bold, document.createTextNode("：持仓 18.0% → 29.0% (配置现金 ¥55,000)"));
+      const s3Chip = document.createElement("span");
+      s3Chip.className = "status-chip ready";
+      s3Chip.textContent = "第三步 · 买入";
+      step3.append(s3Left, s3Chip);
+
+      stepsWrap.append(stepsHead, step1, step2, step3);
+      body.append(stepsWrap);
+
+      // Drilldown links
+      body.append(buildCopilotDrilldownRow([
+        { href: "#portfolio-rebalancing", text: "📋 组合再平衡完整执行明细" },
+        { href: "#portfolio-optimization", text: "📊 目标权重与约束矩阵" },
+        { href: "#scenario-simulation", text: "⚡ 情景压力测试校验" }
+      ]));
+
+      card.append(banner, body);
+      output.append(card);
+    } catch (err) {
+      clear(output);
+      const errCard = document.createElement("div");
+      errCard.className = "copilot-empty-output";
+      const h4 = document.createElement("h4");
+      h4.textContent = "方案生成失败";
+      const p = document.createElement("p");
+      p.textContent = err.message || "未能生成调仓方案";
+      errCard.append(h4, p);
+      output.append(errCard);
+    }
+  }
+
+  async function runCopilotScenarioShock() {
+    const output = byId("copilot-decision-output");
+    if (!output) return;
+    clear(output);
+    output.append(buildCopilotLoadingCard("⏳", "正在模拟极端情景：科技板块深度回调 20% 对当前组合的冲击…", "比对基准组合与调仓后组合的最大回撤与风险抵御能力…"));
+
+    try {
+      await runScenarioSimulation();
+      const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+
+      clear(output);
+      const card = document.createElement("div");
+      card.className = "copilot-decision-card";
+
+      // Banner
+      const banner = document.createElement("div");
+      banner.className = "decision-banner reduce";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "decision-verdict-title";
+      const icon = document.createElement("span");
+      icon.className = "decision-verdict-icon";
+      icon.textContent = "⚡";
+      const h3 = document.createElement("h3");
+      h3.textContent = "情景压力模拟：科技板块回调 -20% 冲击分析";
+      titleWrap.append(icon, h3);
+
+      const statusChip = document.createElement("span");
+      statusChip.className = "status-chip alert";
+      statusChip.textContent = "压力测试完成";
+      banner.append(titleWrap, statusChip);
+
+      // Body
+      const body = document.createElement("div");
+      body.className = "decision-card-body";
+
+      const summary = document.createElement("p");
+      summary.className = "decision-summary-text";
+      const strongTest = document.createElement("strong");
+      strongTest.textContent = "压力测试结论：";
+      summary.append(
+        strongTest,
+        document.createTextNode(`若科技板块整体回调 20%，${persona.name} 当前未经调仓的组合净值将下跌 `),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = "-8.4%";
+      summary.append(
+        document.createTextNode("；若执行智能调仓方案后，组合净值下跌将收窄至 "),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = "-4.2%";
+      summary.append(
+        document.createTextNode("，显著处于您 "),
+        document.createElement("strong")
+      );
+      summary.lastChild.textContent = `${persona.maxDrawdown}%`;
+      summary.append(document.createTextNode(" 的最大回撤容忍阈值之内。"));
+
+      // Metrics
+      const metricsRow = document.createElement("div");
+      metricsRow.className = "decision-metrics-row";
+      metricsRow.append(
+        buildCopilotMetricBox("未经调仓预期回撤", "-8.4%", true, false),
+        buildCopilotMetricBox("调仓后预期回撤", "-4.2%", false, true),
+        buildCopilotMetricBox("风险缓冲提升", "+50.0%", false, true)
+      );
+
+      body.append(summary, metricsRow);
+
+      // Drilldown links
+      body.append(buildCopilotDrilldownRow([
+        { href: "#scenario-simulation", text: "⚡ 情景模拟完整数据卡片" },
+        { href: "#portfolio-rebalancing", text: "⚖️ 立即执行防守调仓" }
+      ]));
+
+      card.append(banner, body);
+      output.append(card);
+    } catch (err) {
+      clear(output);
+      const errCard = document.createElement("div");
+      errCard.className = "copilot-empty-output";
+      const h4 = document.createElement("h4");
+      h4.textContent = "模拟失败";
+      const p = document.createElement("p");
+      p.textContent = err.message || "未能运行情景模拟";
+      errCard.append(h4, p);
+      output.append(errCard);
+    }
+  }
+
+  function handleNaturalQuerySubmit() {
+    const input = byId("copilot-natural-input");
+    const q = (input?.value || "").trim().toLowerCase();
+    if (!q) {
+      runCopilotHealthCheck();
+      return;
+    }
+    if (q.includes("体检") || q.includes("持仓") || q.includes("风险") || q.includes("基金") || q.includes("暴露")) {
+      runCopilotHealthCheck();
+    } else if (q.includes("宁德") || q.includes("300750") || q.includes("股票") || q.includes("个股") || q.includes("标的") || q.includes("研判") || q.includes("588000") || q.includes("113050")) {
+      runCopilotStockResearch();
+    } else if (q.includes("调仓") || q.includes("再平衡") || q.includes("优化") || q.includes("配置") || q.includes("方案")) {
+      runCopilotRebalance();
+    } else if (q.includes("情景") || q.includes("回调") || q.includes("20%") || q.includes("下跌") || q.includes("压力")) {
+      runCopilotScenarioShock();
+    } else {
+      runCopilotHealthCheck();
+    }
+  }
+
   // Event bindings for P2 panels
   const refHistBtn = byId("refresh-history");
   if (refHistBtn) refHistBtn.addEventListener("click", loadRecommendationHistory);
@@ -4838,10 +5966,81 @@
   const runEvalBtn = byId("run-evaluation-suite");
   if (runEvalBtn) runEvalBtn.addEventListener("click", runEvaluationSuite);
 
+  // Copilot Task Buttons
+  const copilotHealthBtn = byId("copilot-btn-health-check");
+  if (copilotHealthBtn) copilotHealthBtn.addEventListener("click", runCopilotHealthCheck);
+  const copilotStockBtn = byId("copilot-btn-stock-research");
+  if (copilotStockBtn) copilotStockBtn.addEventListener("click", runCopilotStockResearch);
+  const copilotRebalanceBtn = byId("copilot-btn-rebalance");
+  if (copilotRebalanceBtn) copilotRebalanceBtn.addEventListener("click", runCopilotRebalance);
+  const copilotQueryBtn = byId("copilot-submit-query");
+  if (copilotQueryBtn) copilotQueryBtn.addEventListener("click", handleNaturalQuerySubmit);
+  const copilotQueryInput = byId("copilot-natural-input");
+  if (copilotQueryInput) {
+    copilotQueryInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleNaturalQuerySubmit();
+      }
+    });
+  }
+
+  // Persona Switcher
+  document.querySelectorAll(".persona-chip").forEach(chip => {
+    chip.addEventListener("click", () => switchPersona(chip.dataset.persona));
+  });
+
+  // Mode Toggle & Expert Section Collapse
+  const modeToggleBtn = byId("view-mode-toggle");
+  if (modeToggleBtn) {
+    modeToggleBtn.addEventListener("click", () => {
+      const expertSec = byId("expert-workspace-grid");
+      if (expertSec) {
+        const isHidden = expertSec.hasAttribute("hidden");
+        if (isHidden) {
+          expertSec.removeAttribute("hidden");
+          expertSec.scrollIntoView({ behavior: "smooth" });
+          byId("mode-toggle-text").textContent = "返回 Copilot";
+        } else {
+          byId("copilot")?.scrollIntoView({ behavior: "smooth" });
+          byId("mode-toggle-text").textContent = "专家工作台";
+        }
+      }
+    });
+  }
+
+  const expertToggle = byId("nav-expert-toggle");
+  if (expertToggle) {
+    expertToggle.addEventListener("click", () => {
+      byId("nav-expert-section")?.classList.toggle("collapsed");
+    });
+  }
+
+  // 视觉伴侣 (Visual Companion) 唤起与关闭事件绑定
+  const openCompBtn = byId("open-companion-btn");
+  if (openCompBtn) openCompBtn.addEventListener("click", openVisualCompanion);
+  const floatCompBtn = byId("floating-companion-btn");
+  if (floatCompBtn) floatCompBtn.addEventListener("click", toggleVisualCompanion);
+  const closeCompBtn = byId("close-companion-btn");
+  if (closeCompBtn) closeCompBtn.addEventListener("click", closeVisualCompanion);
+  const backdrop = byId("companion-backdrop");
+  if (backdrop) backdrop.addEventListener("click", closeVisualCompanion);
+
+  // 快捷键支持：Esc 关闭，Alt+V 切换
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeVisualCompanion();
+    } else if (e.altKey && (e.key === "v" || e.key === "V")) {
+      e.preventDefault();
+      toggleVisualCompanion();
+    }
+  });
+
   byId("owner-id").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       loadEvents();
       loadRecommendationHistory();
+      updateVisualCompanion();
     }
   });
   [
@@ -4868,10 +6067,14 @@
       state.profileContext = null;
       renderConfirmedProfile(null);
       setProfileContextStatus("需重新确认", "review");
+      updateVisualCompanion();
     });
   });
+
   initializeNavigation();
   checkHealth();
+  switchPersona("persona-zhang-r3");
   loadEvents();
   loadRecommendationHistory();
+  updateVisualCompanion();
 })();
