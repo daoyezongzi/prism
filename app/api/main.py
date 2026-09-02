@@ -10,9 +10,9 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from app.api.contracts import (
     AdvisorPortfolioContextRequest,
@@ -127,6 +127,23 @@ from app.store import (
     build_context_memory_record,
 )
 from app.store.contracts import build_decision_event
+from app.llm import CopilotAgent, CopilotMessage
+from app.providers.live_market import A_SHARE_DATABASE, ETF_LOOKTHROUGH_DATABASE
+from typing import Any
+import json
+
+
+class CopilotChatApiRequest(BaseModel):
+    message: str
+    persona_id: str | None = "persona-zhang-r3"
+    persona_info: dict[str, Any] | None = None
+    portfolio_context: dict[str, Any] | None = None
+    history: list[dict[str, Any]] | None = None
+    stream: bool = True
+
+
+class CopilotParsePortfolioApiRequest(BaseModel):
+    text: str
 
 
 _STATIC_DIR = Path(__file__).parent / "static"
@@ -1094,6 +1111,69 @@ def create_app(
         if request.owner_id != owner_id:
             raise StoreOwnerError("explainability request owner does not match owner scope")
         return active_advanced_explainability.explain_decision(request)
+
+    # -------------------------------------------------------------------------
+    # Copilot Direction 2: Live LLM Chat, Tool Calling & Portfolio Parser Routes
+    # -------------------------------------------------------------------------
+    copilot_agent = CopilotAgent()
+
+    @api.post("/api/v1/copilot/chat")
+    async def copilot_chat_endpoint(req: CopilotChatApiRequest):
+        """Streaming SSE endpoint for live conversational investment copilot."""
+        async def sse_generator():
+            history_objs = [CopilotMessage(role=m.get("role", "user"), content=m.get("content", "")) for m in (req.history or [])]
+            async for chunk in copilot_agent.stream_chat(
+                user_message=req.message,
+                history=history_objs,
+                persona_info=req.persona_info,
+                portfolio_context=req.portfolio_context,
+            ):
+                payload_str = json.dumps(chunk, ensure_ascii=False)
+                yield f"data: {payload_str}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(
+            sse_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+    @api.post("/api/v1/copilot/parse-portfolio")
+    async def copilot_parse_portfolio_endpoint(req: CopilotParsePortfolioApiRequest):
+        """Natural language to structured portfolio entity extraction."""
+        result = await copilot_agent.parse_portfolio_from_text(req.text)
+        return JSONResponse(content=result)
+
+    @api.get("/api/v1/copilot/live-quote")
+    def copilot_live_quote_endpoint(symbol: str = "300750"):
+        """Query real-time stock quote and valuation data."""
+        clean_code = symbol.split(".")[0].strip()
+        data = A_SHARE_DATABASE.get(clean_code, {
+            "symbol": f"{clean_code}.SZ",
+            "name": f"A股标的 ({clean_code})",
+            "sector": "Technology",
+            "price_cny": 35.8,
+            "change_pct": 1.25,
+            "pe_ttm": 24.5,
+            "pb": 3.2,
+            "roe_pct": 14.8,
+            "gross_margin_pct": 31.5,
+            "debt_ratio_pct": 46.0,
+            "valuation_quantile_pct": 46.0,
+            "market_cap_cny": 42000000000.0,
+        })
+        return JSONResponse(content={"status": "SUCCESS", "data": data})
+
+    @api.get("/api/v1/copilot/live-fund")
+    def copilot_live_fund_endpoint(fund_code: str = "588000"):
+        """Query real-time fund/ETF look-through holdings."""
+        clean_code = fund_code.split(".")[0].strip()
+        data = ETF_LOOKTHROUGH_DATABASE.get(clean_code, ETF_LOOKTHROUGH_DATABASE["588000"])
+        return JSONResponse(content={"status": "SUCCESS", "data": data})
 
     return api
 

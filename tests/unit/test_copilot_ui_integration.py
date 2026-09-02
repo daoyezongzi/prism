@@ -45,6 +45,10 @@ def test_copilot_markup_structure() -> None:
         "copilot-btn-stock-research",
         "copilot-btn-rebalance",
         "copilot-decision-output",
+        "copilot-chat-panel",
+        "copilot-chat-messages",
+        "portfolio-modal",
+        "btn-parse-portfolio",
     ):
         assert f'id="{element_id}"' in markup
 
@@ -69,6 +73,9 @@ def test_copilot_script_personas_and_workflows() -> None:
         "function runCopilotRebalance()",
         "function runCopilotScenarioShock()",
         "function handleNaturalQuerySubmit()",
+        "function handleStreamingChat(",
+        "function handleParsePortfolioSubmit(",
+        "function openPortfolioModal(",
         "function buildCopilotDrilldownRow(",
         "function buildCopilotMetricBox(",
         "function buildCopilotLoadingCard(",
@@ -117,6 +124,9 @@ def test_copilot_styles_and_responsive_rules() -> None:
         ".decision-metrics-row",
         ".decision-drilldown-row",
         ".drilldown-btn",
+        ".copilot-chat-stream-panel",
+        ".copilot-modal",
+        ".portfolio-textarea",
     ):
         assert selector in styles
 

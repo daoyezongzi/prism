@@ -5934,23 +5934,208 @@
     }
   }
 
+  const chatHistory = [];
+
+  async function handleStreamingChat(customQuery) {
+    const input = byId("copilot-natural-input");
+    const query = (customQuery || input?.value || "").trim();
+    if (!query) return;
+
+    if (input) input.value = "";
+
+    const chatPanel = byId("copilot-chat-panel");
+    const messagesContainer = byId("copilot-chat-messages");
+    if (chatPanel) chatPanel.style.display = "block";
+    if (!messagesContainer) return;
+
+    // User Message Bubble
+    const userMsgRow = document.createElement("div");
+    userMsgRow.className = "chat-msg user";
+    const userAvatar = document.createElement("div");
+    userAvatar.className = "chat-avatar";
+    userAvatar.textContent = "👤";
+    const userBubble = document.createElement("div");
+    userBubble.className = "chat-bubble";
+    userBubble.textContent = query;
+    userMsgRow.append(userAvatar, userBubble);
+    messagesContainer.append(userMsgRow);
+
+    // Assistant Message Bubble
+    const aiMsgRow = document.createElement("div");
+    aiMsgRow.className = "chat-msg assistant";
+    const aiAvatar = document.createElement("div");
+    aiAvatar.className = "chat-avatar";
+    aiAvatar.textContent = "🌟";
+    const aiBubble = document.createElement("div");
+    aiBubble.className = "chat-bubble";
+
+    const thinkingBox = document.createElement("div");
+    thinkingBox.className = "chat-thinking-tag";
+    thinkingBox.style.display = "none";
+    thinkingBox.textContent = "🧠 正在进行多智能体协同推理与事实校验…";
+
+    const toolsContainer = document.createElement("div");
+    toolsContainer.className = "chat-tools-container";
+
+    const contentBox = document.createElement("div");
+    contentBox.className = "chat-content-box";
+
+    const cursor = document.createElement("span");
+    cursor.className = "typing-cursor";
+    contentBox.append(cursor);
+
+    aiBubble.append(thinkingBox, toolsContainer, contentBox);
+    aiMsgRow.append(aiAvatar, aiBubble);
+    messagesContainer.append(aiMsgRow);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    chatHistory.push({ role: "user", content: query });
+
+    const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+
+    try {
+      const response = await fetch("/api/v1/copilot/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: query,
+          persona_id: state.selectedPersona || "persona-zhang-r3",
+          persona_info: {
+            name: persona.name,
+            tag: persona.tag,
+            max_drawdown: persona.maxDrawdown,
+            budget_cap: persona.budgetCap,
+          },
+          history: chatHistory.slice(-6),
+          stream: true,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        cursor.remove();
+        contentBox.textContent = "抱歉，投顾智能体服务响应异常，请稍后重试。";
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let fullText = "";
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+          const dataStr = trimmed.slice(5).trim();
+          if (dataStr === "[DONE]") {
+            break;
+          }
+          try {
+            const event = JSON.parse(dataStr);
+            if (event.type === "thinking") {
+              thinkingBox.style.display = "inline-flex";
+            } else if (event.type === "tool_start") {
+              const toolChip = document.createElement("span");
+              toolChip.className = "chat-tool-tag";
+              toolChip.textContent = `🔧 调度工具: ${event.tool}`;
+              toolsContainer.append(toolChip);
+            } else if (event.type === "token") {
+              fullText += event.delta;
+              cursor.remove();
+              contentBox.textContent = fullText;
+              contentBox.append(cursor);
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          } catch (e) {}
+        }
+      }
+
+      cursor.remove();
+      chatHistory.push({ role: "assistant", content: fullText });
+    } catch (err) {
+      cursor.remove();
+      contentBox.textContent = `请求失败: ${err.message || "网络异常"}`;
+    }
+  }
+
   function handleNaturalQuerySubmit() {
     const input = byId("copilot-natural-input");
-    const q = (input?.value || "").trim().toLowerCase();
+    const q = (input?.value || "").trim();
     if (!q) {
       runCopilotHealthCheck();
       return;
     }
-    if (q.includes("体检") || q.includes("持仓") || q.includes("风险") || q.includes("基金") || q.includes("暴露")) {
-      runCopilotHealthCheck();
-    } else if (q.includes("宁德") || q.includes("300750") || q.includes("股票") || q.includes("个股") || q.includes("标的") || q.includes("研判") || q.includes("588000") || q.includes("113050")) {
-      runCopilotStockResearch();
-    } else if (q.includes("调仓") || q.includes("再平衡") || q.includes("优化") || q.includes("配置") || q.includes("方案")) {
-      runCopilotRebalance();
-    } else if (q.includes("情景") || q.includes("回调") || q.includes("20%") || q.includes("下跌") || q.includes("压力")) {
-      runCopilotScenarioShock();
-    } else {
-      runCopilotHealthCheck();
+    handleStreamingChat(q);
+  }
+
+  // 自定义持仓弹窗交互
+  function openPortfolioModal() {
+    const modal = byId("portfolio-modal");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closePortfolioModal() {
+    const modal = byId("portfolio-modal");
+    if (modal) modal.style.display = "none";
+  }
+
+  async function handleParsePortfolioSubmit() {
+    const textarea = byId("portfolio-natural-textarea");
+    const statusBox = byId("parsed-portfolio-status");
+    const text = textarea?.value?.trim();
+    if (!text) return;
+
+    if (statusBox) {
+      statusBox.style.display = "block";
+      statusBox.textContent = "⏳ 正在调用大模型解析您的自然语言持仓文本…";
+    }
+
+    try {
+      const resp = await fetch("/api/v1/copilot/parse-portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await resp.json();
+
+      if (data.positions && data.positions.length > 0) {
+        if (statusBox) {
+          clear(statusBox);
+          const strong = document.createElement("strong");
+          strong.textContent = `✅ 成功识别 ${data.positions.length} 项资产（现金 ¥${data.cash_cny}，总估值 ¥${data.total_value_cny}）：`;
+          const list = document.createElement("ul");
+          list.style.margin = "6px 0 0";
+          list.style.paddingLeft = "16px";
+          data.positions.forEach(p => {
+            const li = document.createElement("li");
+            li.textContent = `${p.name} (${p.asset_id})：${p.quantity}股/份 · 估值 ¥${p.market_value_cny}`;
+            list.append(li);
+          });
+          statusBox.append(strong, list);
+        }
+
+        // Update hero numbers
+        const aumEl = byId("copilot-stat-aum");
+        if (aumEl) aumEl.textContent = `¥ ${data.total_value_cny.toLocaleString()}`;
+        const pTag = byId("copilot-hero-portfolio-tag");
+        if (pTag) pTag.textContent = `自定义持仓 (${data.positions.length} 项)`;
+
+        setTimeout(() => {
+          closePortfolioModal();
+          handleStreamingChat("我已更新了我的持仓，请帮我做一次持仓体检并分析潜在风险");
+        }, 1200);
+      } else {
+        if (statusBox) statusBox.textContent = "未能识别出有效资产，请检查输入格式。";
+      }
+    } catch (err) {
+      if (statusBox) statusBox.textContent = `解析出错: ${err.message || "请求异常"}`;
     }
   }
 
@@ -5985,8 +6170,27 @@
     });
   }
 
+  // Direction 2 Chat and Portfolio Modal Events
+  const clearChatBtn = byId("btn-clear-chat");
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener("click", () => {
+      chatHistory.length = 0;
+      const msgs = byId("copilot-chat-messages");
+      if (msgs) clear(msgs);
+      const panel = byId("copilot-chat-panel");
+      if (panel) panel.style.display = "none";
+    });
+  }
+
+  const openPortBtn = byId("open-portfolio-modal-btn");
+  if (openPortBtn) openPortBtn.addEventListener("click", openPortfolioModal);
+  const closePortBtn = byId("close-portfolio-modal-btn");
+  if (closePortBtn) closePortBtn.addEventListener("click", closePortfolioModal);
+  const parsePortBtn = byId("btn-parse-portfolio");
+  if (parsePortBtn) parsePortBtn.addEventListener("click", handleParsePortfolioSubmit);
+
   // Persona Switcher
-  document.querySelectorAll(".persona-chip").forEach(chip => {
+  document.querySelectorAll(".persona-chip[data-persona]").forEach(chip => {
     chip.addEventListener("click", () => switchPersona(chip.dataset.persona));
   });
 

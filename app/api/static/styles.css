@@ -1989,6 +1989,295 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   Direction 2: 实时流式对话与自定义持仓弹窗样式
+   ========================================================================== */
+.custom-portfolio-chip {
+  background: #fdf2f8 !important;
+  border-color: #fbcfe8 !important;
+  color: #9d174d !important;
+}
+
+.custom-portfolio-chip:hover {
+  background: #fce7f3 !important;
+}
+
+.copilot-chat-stream-panel {
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.3s ease;
+}
+
+.chat-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--outline);
+}
+
+.chat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.chat-live-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  display: inline-block;
+}
+
+.chat-model-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  color: var(--ink-subtle);
+}
+
+.clear-chat-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.clear-chat-btn:hover {
+  color: var(--alert);
+  background: var(--surface-hover);
+}
+
+.copilot-chat-messages {
+  padding: 20px;
+  max-height: 480px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chat-msg {
+  display: flex;
+  gap: 12px;
+  max-width: 90%;
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+}
+
+.chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--outline);
+  flex-shrink: 0;
+}
+
+.chat-msg.user .chat-bubble {
+  background: var(--clay);
+  color: #fff;
+  border-radius: 14px 14px 2px 14px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.chat-msg.assistant .chat-bubble {
+  background: var(--surface-soft);
+  border: 1px solid var(--outline);
+  color: var(--ink);
+  border-radius: 14px 14px 14px 2px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.chat-msg.assistant .chat-bubble h3 {
+  margin: 4px 0 10px;
+  font-size: 14.5px;
+  color: var(--clay);
+}
+
+.chat-msg.assistant .chat-bubble p {
+  margin: 0 0 8px;
+}
+
+.chat-msg.assistant .chat-bubble ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.chat-msg.assistant .chat-bubble li {
+  margin-bottom: 4px;
+}
+
+.chat-thinking-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.chat-tool-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  margin: 4px 4px 8px 0;
+  border-radius: 4px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  font-size: 11.5px;
+  color: #1d4ed8;
+  font-family: var(--mono);
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 14px;
+  background: var(--clay);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 弹窗样式 */
+.copilot-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.copilot-modal-content {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 540px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.copilot-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--outline);
+}
+
+.copilot-modal-header h3 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.copilot-modal-body {
+  padding: 20px;
+}
+
+.modal-hint {
+  font-size: 13px;
+  color: var(--ink-subtle);
+  margin: 0 0 10px;
+}
+
+.portfolio-textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--outline);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  background: var(--surface-soft);
+  box-sizing: border-box;
+}
+
+.portfolio-textarea:focus {
+  outline: none;
+  border-color: var(--clay);
+  background: var(--surface);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.parsed-portfolio-status {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: var(--surface-soft);
+  border: 1px solid var(--outline);
+}
+
 /* 响应式调整 */
 @media (max-width: 900px) {
   .app-shell { display: block; }

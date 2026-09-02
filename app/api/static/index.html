@@ -92,6 +92,10 @@
               <span class="persona-avatar">🧑‍💻</span>
               <span class="persona-name">王同学 (R4 进取)</span>
             </button>
+            <button class="persona-chip custom-portfolio-chip" id="open-portfolio-modal-btn" type="button" title="输入您自己的真实持仓进行个性化诊断">
+              <span class="persona-avatar">📥</span>
+              <span class="persona-name">自定义真实持仓</span>
+            </button>
           </div>
           <div class="topbar-actions">
             <button id="view-mode-toggle" class="mode-toggle-btn" type="button" title="切换 Copilot 任务模式 / 专家控制台模式">
@@ -232,12 +236,45 @@
             </div>
           </div>
 
+          <!-- 实时流式对话展示区域 (Direction 2: Live LLM Chat & Multi-Agent Streaming) -->
+          <div class="copilot-chat-stream-panel" id="copilot-chat-panel" style="display:none;">
+            <div class="chat-panel-header">
+              <div class="chat-panel-title">
+                <span class="chat-live-pulse" aria-hidden="true"></span>
+                <strong>💬 智能投顾对话流</strong>
+                <span class="chat-model-badge" id="chat-model-badge">DeepSeek-V3 / 问财实时数据</span>
+              </div>
+              <button id="btn-clear-chat" class="clear-chat-btn" type="button">清空对话</button>
+            </div>
+            <div class="copilot-chat-messages" id="copilot-chat-messages" aria-live="polite"></div>
+          </div>
+
           <!-- L2 决策建议输出区域 -->
           <div class="copilot-output-container" id="copilot-decision-output" aria-live="polite">
             <div class="copilot-empty-output">
               <span class="empty-icon">💡</span>
               <h4>点击上方任务卡片或输入问题，Prism 投顾智能体将为您生成个性化决策建议</h4>
               <p>所有建议均基于同花顺问财实时数据与四轨 Agent 交叉验证，杜绝模型幻觉。</p>
+            </div>
+          </div>
+
+          <!-- 自定义真实持仓录入弹窗 -->
+          <div id="portfolio-modal" class="copilot-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="portfolio-modal-title">
+            <div class="copilot-modal-content">
+              <div class="copilot-modal-header">
+                <h3 id="portfolio-modal-title">📥 录入/识别真实投资持仓</h3>
+                <button id="close-portfolio-modal-btn" class="modal-close-btn" type="button" aria-label="关闭">×</button>
+              </div>
+              <div class="copilot-modal-body">
+                <p class="modal-hint">支持自然语言录入持仓，大模型将自动解析资产代码、数量与价格：</p>
+                <textarea id="portfolio-natural-textarea" class="portfolio-textarea" rows="4" placeholder="例如：我持有1000股宁德时代，买入均价240元；还有2万份科创50ETF (588000)，以及5万元现金"></textarea>
+                <div class="modal-actions">
+                  <button id="btn-parse-portfolio" class="copilot-action-btn primary" type="button">
+                    <span>✨ 智能解析并载入画像</span>
+                  </button>
+                </div>
+                <div id="parsed-portfolio-status" class="parsed-portfolio-status" style="display:none;"></div>
+              </div>
             </div>
           </div>
         </section>
