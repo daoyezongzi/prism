@@ -9,6 +9,11 @@
 > Active phase: P2 Milestones (Phase 34 Recommendation History, Phase 35 Portfolio Rebalancing, Phase 36 Evaluation Dashboard, Phase 37 Advanced Explainability) have been implemented, verified, and accepted.
 > Next phase: External integrations / evaluation hardening.
 
+## Product UX
+
+- [x] Reorganize the default frontend around user tasks, with detailed research and audit modules available through explicit progressive disclosure.
+- [x] Validate the task-first home, detailed-workbench toggle, analysis view, health-check flow, and responsive layout in a real browser.
+
 ## P0 — Foundation
 
 - [x] Initialize the independent `main` Git repository.

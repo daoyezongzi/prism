@@ -1,5 +1,24 @@
 # LOG
 
+## 2026-09-02 — Frontend product UX pass completed
+
+### Decisions & Accomplishments
+
+- Reframed the default workbench around three user tasks: portfolio health check, asset research, and rebalancing plan generation.
+- Moved detailed research, evidence, history, evaluation, and local owner controls behind an explicit “更多工具” path while preserving their existing IDs and API flows.
+- Replaced internal-first labels in the primary task flow with user-facing explanations of inputs, outputs, boundaries, and next actions; kept technical identifiers available in the detailed workbench for audit use.
+- Added responsive topbar and detailed-workbench rules, including mobile wrapping for long evidence and receipt identifiers; no horizontal overflow remains at the tested 390px viewport.
+
+### Verification
+
+```text
+python -m pytest
+# 472 passed, 1 warning
+node --check app/api/static/app.js
+git diff --check
+Browser: default and 390px viewport; default expert workspace hidden, explicit expand/return path, health-check task, analysis drawer, and no console errors.
+```
+
 ## 2026-09-02 — P2 Milestones (Phase 34, 35, 36, 37) Completed & Accepted
 
 ### Decisions & Accomplishments
