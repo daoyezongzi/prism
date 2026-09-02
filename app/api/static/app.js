@@ -675,8 +675,8 @@
         state.contextMemorySelected = null;
         setContextMemoryStatus("未保存", "blocked");
         renderContextMemory();
+        setError(error.message || "保存上下文记忆失败");
       }
-      setError(error.message || "保存上下文记忆失败");
     } finally {
       submit.disabled = false;
     }
@@ -710,8 +710,8 @@
         state.contextMemorySelected = null;
         setContextMemoryStatus("读取失败", "blocked");
         renderContextMemory([]);
+        setError(error.message || "读取上下文记忆失败");
       }
-      setError(error.message || "读取上下文记忆失败");
     }
   }
 
@@ -3213,7 +3213,13 @@
   });
   byId("run-portfolio-optimization").addEventListener("click", runPortfolioOptimization);
   byId("save-context-memory").addEventListener("click", saveContextMemory);
-  byId("load-context-memory").addEventListener("click", () => loadContextMemory(state.ownerId));
+  byId("load-context-memory").addEventListener("click", () => {
+    const nextOwnerId = byId("owner-id").value.trim();
+    const ownerChanged = nextOwnerId !== state.ownerId;
+    state.ownerId = nextOwnerId;
+    if (ownerChanged || !state.ownerId) resetOwnerScopedViews();
+    loadContextMemory(state.ownerId);
+  });
   byId("portfolio-optimization-scenario").addEventListener("change", () => {
     state.portfolioOptimizationRun = null;
     state.portfolioOptimizationSequence += 1;
