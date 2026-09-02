@@ -2163,12 +2163,111 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   margin-bottom: 4px;
 }
 
+.switcher-divider {
+  color: var(--outline);
+  font-size: 14px;
+  user-select: none;
+  margin: 0 2px;
+}
+
+.edit-profile-chip {
+  background: var(--surface-soft) !important;
+  border-color: var(--outline) !important;
+  color: var(--ink-secondary) !important;
+  cursor: pointer;
+}
+
+.edit-profile-chip:hover {
+  background: var(--clay-soft) !important;
+  border-color: var(--clay-border) !important;
+  color: var(--clay) !important;
+}
+
+/* 智能体多阶段协同流水线进度卡片 */
+.chat-pipeline-box {
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--ink-subtle);
+  font-weight: 600;
+  border-bottom: 1px solid var(--outline-light);
+  padding-bottom: 6px;
+}
+
+.pipeline-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--surface-soft);
+  border: 1px solid var(--outline-light);
+  font-size: 11px;
+  color: var(--ink-subtle);
+  transition: all 0.25s ease;
+}
+
+.pipeline-step.active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+
+.pipeline-step.completed {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  font-weight: 500;
+}
+
+.pipeline-step .step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.pipeline-step.active .step-dot {
+  background: #3b82f6;
+  animation: pulseDot 1s infinite;
+}
+
+.pipeline-step.completed .step-dot {
+  background: #22c55e;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
 .chat-thinking-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   border-radius: 6px;
   background: #f8fafc;
   border: 1px dashed #cbd5e1;

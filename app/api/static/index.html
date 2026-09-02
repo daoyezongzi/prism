@@ -78,23 +78,32 @@
             <span class="eyebrow">个性化证券投顾智能体</span>
             <h1>Prism Copilot</h1>
           </div>
-          <div class="persona-switcher-bar" id="persona-switcher-bar" aria-label="投资者预设画像切换">
-            <span class="switcher-label">投资者画像：</span>
-            <button class="persona-chip active" type="button" data-persona="persona-zhang-r3" title="张先生：35岁白领，R3平衡型，科技重仓">
+          <div class="persona-switcher-bar" id="persona-switcher-bar" aria-label="投资者画像管理">
+            <span class="switcher-label">当前画像：</span>
+            <button class="persona-chip active" id="btn-custom-profile-chip" type="button" data-persona="custom-user" title="我的专属投资画像（支持自由定制）">
+              <span class="persona-avatar" id="custom-profile-chip-avatar">👤</span>
+              <span class="persona-name" id="custom-profile-chip-name">我的专属画像 (R3 平衡)</span>
+            </button>
+            <button class="persona-chip edit-profile-chip" id="open-profile-modal-btn" type="button" title="点击自定义/编辑您的专属投资画像与约束">
+              <span class="persona-avatar">✏️</span>
+              <span class="persona-name">定制画像</span>
+            </button>
+            <span class="switcher-divider">|</span>
+            <button class="persona-chip" type="button" data-persona="persona-zhang-r3" title="张先生：35岁白领，R3平衡型，科技重仓">
               <span class="persona-avatar">👨‍💼</span>
-              <span class="persona-name">张先生 (R3 平衡)</span>
+              <span class="persona-name">张先生 (R3)</span>
             </button>
             <button class="persona-chip" type="button" data-persona="persona-li-r2" title="李阿姨：58岁退休，R2稳健型，注重本金安全">
               <span class="persona-avatar">👵</span>
-              <span class="persona-name">李阿姨 (R2 稳健)</span>
+              <span class="persona-name">李阿姨 (R2)</span>
             </button>
             <button class="persona-chip" type="button" data-persona="persona-wang-r4" title="王同学：28岁进取，R4高弹性，偏好成长ETF">
               <span class="persona-avatar">🧑‍💻</span>
-              <span class="persona-name">王同学 (R4 进取)</span>
+              <span class="persona-name">王同学 (R4)</span>
             </button>
             <button class="persona-chip custom-portfolio-chip" id="open-portfolio-modal-btn" type="button" title="输入您自己的真实持仓进行个性化诊断">
               <span class="persona-avatar">📥</span>
-              <span class="persona-name">自定义真实持仓</span>
+              <span class="persona-name">真实持仓</span>
             </button>
           </div>
           <div class="topbar-actions">
@@ -326,6 +335,72 @@
                   </button>
                 </div>
                 <div id="llm-config-status" class="parsed-portfolio-status" style="display:none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户专属画像配置与编辑弹窗 -->
+          <div id="profile-edit-modal" class="copilot-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+            <div class="copilot-modal-content">
+              <div class="copilot-modal-header">
+                <h3 id="profile-modal-title">👤 自定义我的投资画像与风控约束</h3>
+                <button id="close-profile-modal-btn" class="modal-close-btn" type="button" aria-label="关闭">×</button>
+              </div>
+              <div class="copilot-modal-body">
+                <p class="modal-hint">设定您的投资画像与风控底线，智能投顾将严格按照您的约束生成决策建议：</p>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                  <div>
+                    <label for="profile-name-input" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">投资者昵称：</label>
+                    <input type="text" id="profile-name-input" class="portfolio-textarea" style="height:36px; padding:6px 10px;" value="我的专属账户" autocomplete="off">
+                  </div>
+                  <div>
+                    <label for="profile-risk-select" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">风险承受能力等级：</label>
+                    <select id="profile-risk-select" class="portfolio-textarea" style="height:36px; padding:6px 10px;">
+                      <option value="R1">R1 保守型 (极低风险)</option>
+                      <option value="R2">R2 稳健型 (低风险)</option>
+                      <option value="R3" selected>R3 平衡型 (中等风险)</option>
+                      <option value="R4">R4 进取型 (中高风险)</option>
+                      <option value="R5">R5 激进型 (高风险)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                  <div>
+                    <label for="profile-drawdown-input" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">最大回撤容忍阈值 (%)：</label>
+                    <input type="number" id="profile-drawdown-input" class="portfolio-textarea" style="height:36px; padding:6px 10px;" value="15" min="3" max="50">
+                  </div>
+                  <div>
+                    <label for="profile-budget-input" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">单一行业预算上限 (%)：</label>
+                    <input type="number" id="profile-budget-input" class="portfolio-textarea" style="height:36px; padding:6px 10px;" value="30" min="10" max="80">
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                  <div>
+                    <label for="profile-horizon-select" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">投资规划期限：</label>
+                    <select id="profile-horizon-select" class="portfolio-textarea" style="height:36px; padding:6px 10px;">
+                      <option value="SHORT">短期 (3-6 个月)</option>
+                      <option value="MEDIUM" selected>中期 (1-3 年)</option>
+                      <option value="LONG">长期 (3 年以上)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="profile-aum-input" style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">资产总额估值 (元)：</label>
+                    <input type="text" id="profile-aum-input" class="portfolio-textarea" style="height:36px; padding:6px 10px;" value="500,000" autocomplete="off">
+                  </div>
+                </div>
+
+                <div class="modal-actions" style="gap:8px;">
+                  <button id="btn-reset-profile" class="copilot-action-btn secondary" type="button">
+                    <span>重置默认</span>
+                  </button>
+                  <button id="btn-save-profile" class="copilot-action-btn primary" type="button">
+                    <span>💾 保存我的画像</span>
+                  </button>
+                </div>
+                <div id="profile-save-status" class="parsed-portfolio-status" style="display:none;"></div>
               </div>
             </div>
           </div>

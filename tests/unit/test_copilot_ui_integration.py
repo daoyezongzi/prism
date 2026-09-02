@@ -53,6 +53,11 @@ def test_copilot_markup_structure() -> None:
         "llm-config-modal",
         "btn-save-llm-config",
         "btn-clear-llm-config",
+        "btn-custom-profile-chip",
+        "open-profile-modal-btn",
+        "profile-edit-modal",
+        "btn-save-profile",
+        "btn-reset-profile",
     ):
         assert f'id="{element_id}"' in markup
 
@@ -67,10 +72,21 @@ def test_copilot_script_personas_and_workflows() -> None:
 
     # Personas definition and switching
     for token in (
+        "custom-user",
         "persona-zhang-r3",
         "persona-li-r2",
         "persona-wang-r4",
         "function switchPersona(",
+        "function loadUserProfile()",
+        "function saveUserProfile(",
+        "function openProfileModal()",
+        "function closeProfileModal()",
+        "function handleSaveProfile()",
+        "function handleResetProfile()",
+        "function loadCopilotChatHistory()",
+        "function saveCopilotChatHistory()",
+        "function buildPipelineStepItem(",
+        "function setPipelineStepState(",
         "function handleCopilotIntent(",
         "function runCopilotHealthCheck()",
         "function runCopilotStockResearch()",
@@ -136,6 +152,10 @@ def test_copilot_styles_and_responsive_rules() -> None:
         ".copilot-modal",
         ".portfolio-textarea",
         ".llm-config-trigger-btn",
+        ".chat-pipeline-box",
+        ".pipeline-step",
+        ".pipeline-step.active",
+        ".edit-profile-chip",
     ):
         assert selector in styles
 

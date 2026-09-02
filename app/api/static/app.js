@@ -5191,10 +5191,39 @@
   }
 
   // =========================================================================
-  // Copilot 任务中心与预设画像体系 (Optimization Direction 1)
+  // Copilot 任务中心与预设画像体系 (Optimization Direction 1 & 2)
   // =========================================================================
 
-  const PERSONAS = Object.freeze({
+  const DEFAULT_USER_PROFILE = {
+    id: "custom-user",
+    ownerId: "demo-owner",
+    name: "我的专属账户",
+    tag: "R3 平衡型",
+    riskLevel: "R3",
+    portfolioTag: "动态自选持仓",
+    avatar: "👤",
+    desc: "个性化专属画像 · 追求在控制最大回撤的前提下实现资产稳健复利增长。",
+    aum: "¥ 500,000",
+    techExposure: "28.0%",
+    budgetCap: "30.0%",
+    evidenceStatus: "100% 有据可查",
+    lossToleranceScore: "3",
+    investmentHorizon: "MEDIUM",
+    liquidityNeed: "MEDIUM",
+    experienceLevel: "INTERMEDIATE",
+    returnExpectation: "MODERATE",
+    maxDrawdown: "15",
+    defaultStock: "300750",
+    quickTags: [
+      { label: "🩺 一键体检我的持仓", intent: "CHECK_PORTFOLIO" },
+      { label: "🔍 研判 300750 宁德时代", intent: "RESEARCH_STOCK", target: "300750" },
+      { label: "⚖️ 生成我的专属调仓方案", intent: "REBALANCE_PORTFOLIO" },
+      { label: "⚡ 极端情景压力测试", intent: "SCENARIO_SHOCK" }
+    ]
+  };
+
+  const PERSONAS = {
+    "custom-user": { ...DEFAULT_USER_PROFILE },
     "persona-zhang-r3": {
       id: "persona-zhang-r3",
       ownerId: "demo-owner",
@@ -5273,7 +5302,113 @@
         { label: "⚡ 大盘放量突破时如何加仓", intent: "SCENARIO_SHOCK" }
       ]
     }
-  });
+  };
+
+  function loadUserProfile() {
+    try {
+      const saved = localStorage.getItem("prism_custom_user_profile_v2");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        PERSONAS["custom-user"] = { ...DEFAULT_USER_PROFILE, ...parsed };
+      }
+    } catch (e) {}
+
+    const profile = PERSONAS["custom-user"];
+    const chipName = byId("custom-profile-chip-name");
+    if (chipName) chipName.textContent = `${profile.name} (${profile.tag})`;
+  }
+
+  function saveUserProfile(updated) {
+    PERSONAS["custom-user"] = { ...PERSONAS["custom-user"], ...updated };
+    try {
+      localStorage.setItem("prism_custom_user_profile_v2", JSON.stringify(PERSONAS["custom-user"]));
+    } catch (e) {}
+
+    const profile = PERSONAS["custom-user"];
+    const chipName = byId("custom-profile-chip-name");
+    if (chipName) chipName.textContent = `${profile.name} (${profile.tag})`;
+
+    if (state.selectedPersona === "custom-user") {
+      switchPersona("custom-user");
+    }
+  }
+
+  function openProfileModal() {
+    const profile = PERSONAS["custom-user"] || DEFAULT_USER_PROFILE;
+    const nameInput = byId("profile-name-input");
+    if (nameInput) nameInput.value = profile.name;
+    const riskSelect = byId("profile-risk-select");
+    if (riskSelect) riskSelect.value = profile.riskLevel || "R3";
+    const ddInput = byId("profile-drawdown-input");
+    if (ddInput) ddInput.value = profile.maxDrawdown || "15";
+    const budInput = byId("profile-budget-input");
+    if (budInput) budInput.value = parseInt(profile.budgetCap, 10) || 30;
+    const horizSelect = byId("profile-horizon-select");
+    if (horizSelect) horizSelect.value = profile.investmentHorizon || "MEDIUM";
+    const aumInput = byId("profile-aum-input");
+    if (aumInput) aumInput.value = profile.aum.replace("¥ ", "").trim();
+
+    const statusBox = byId("profile-save-status");
+    if (statusBox) statusBox.style.display = "none";
+
+    const modal = byId("profile-edit-modal");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function closeProfileModal() {
+    const modal = byId("profile-edit-modal");
+    if (modal) modal.style.display = "none";
+  }
+
+  function handleSaveProfile() {
+    const nameInput = byId("profile-name-input");
+    const riskSelect = byId("profile-risk-select");
+    const ddInput = byId("profile-drawdown-input");
+    const budInput = byId("profile-budget-input");
+    const horizSelect = byId("profile-horizon-select");
+    const aumInput = byId("profile-aum-input");
+
+    const riskVal = riskSelect?.value || "R3";
+    const riskMap = {
+      R1: "R1 保守型",
+      R2: "R2 稳健型",
+      R3: "R3 平衡型",
+      R4: "R4 进取型",
+      R5: "R5 激进型"
+    };
+
+    const scoreMap = { R1: "1", R2: "2", R3: "3", R4: "4", R5: "5" };
+    const maxDd = (ddInput?.value || "15").trim();
+    const budget = (budInput?.value || "30").trim();
+    const aumVal = (aumInput?.value || "500,000").trim();
+
+    saveUserProfile({
+      name: (nameInput?.value || "我的专属账户").trim(),
+      riskLevel: riskVal,
+      tag: riskMap[riskVal] || "R3 平衡型",
+      lossToleranceScore: scoreMap[riskVal] || "3",
+      maxDrawdown: maxDd,
+      budgetCap: `${budget}.0%`,
+      investmentHorizon: horizSelect?.value || "MEDIUM",
+      aum: aumVal.startsWith("¥") ? aumVal : `¥ ${aumVal}`,
+      desc: `自定义专属画像 · 投资期限 ${horizSelect?.value || "中期"} · 回撤容忍 ≤${maxDd}% · 行业预算上限 ${budget}%。`,
+    });
+
+    const statusBox = byId("profile-save-status");
+    if (statusBox) {
+      statusBox.style.display = "block";
+      statusBox.textContent = "✅ 画像已成功保存并持久化！已同步更新主页风控约束。";
+    }
+
+    setTimeout(() => {
+      closeProfileModal();
+    }, 800);
+  }
+
+  function handleResetProfile() {
+    saveUserProfile({ ...DEFAULT_USER_PROFILE });
+    openProfileModal();
+  }
 
   function switchPersona(personaId) {
     const persona = PERSONAS[personaId];
@@ -5929,6 +6064,61 @@
 
   const chatHistory = [];
 
+  function loadCopilotChatHistory() {
+    try {
+      const saved = localStorage.getItem("prism_copilot_chat_history_v2");
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed) || parsed.length === 0) return;
+
+      const chatPanel = byId("copilot-chat-panel");
+      const messagesContainer = byId("copilot-chat-messages");
+      if (!messagesContainer) return;
+      clear(messagesContainer);
+
+      chatHistory.length = 0;
+      parsed.forEach(msg => {
+        chatHistory.push(msg);
+        const row = document.createElement("div");
+        row.className = `chat-msg ${msg.role}`;
+        const avatar = document.createElement("div");
+        avatar.className = "chat-avatar";
+        avatar.textContent = msg.role === "user" ? "👤" : "🌟";
+        const bubble = document.createElement("div");
+        bubble.className = "chat-bubble";
+        bubble.textContent = msg.content;
+        row.append(avatar, bubble);
+        messagesContainer.append(row);
+      });
+
+      if (chatPanel) chatPanel.style.display = "block";
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    } catch (e) {}
+  }
+
+  function saveCopilotChatHistory() {
+    try {
+      localStorage.setItem("prism_copilot_chat_history_v2", JSON.stringify(chatHistory.slice(-20)));
+    } catch (e) {}
+  }
+
+  function buildPipelineStepItem(num, label, status) {
+    const step = document.createElement("div");
+    step.className = `pipeline-step ${status}`;
+    const dot = document.createElement("span");
+    dot.className = "step-dot";
+    const txt = document.createElement("span");
+    txt.textContent = `${num}.${label}`;
+    step.append(dot, txt);
+    return step;
+  }
+
+  function setPipelineStepState(stepEl, status) {
+    if (!stepEl) return;
+    stepEl.classList.remove("pending", "active", "completed");
+    stepEl.classList.add(status);
+  }
+
   async function handleStreamingChat(customQuery) {
     const input = byId("copilot-natural-input");
     const query = (customQuery || input?.value || "").trim();
@@ -5953,7 +6143,7 @@
     userMsgRow.append(userAvatar, userBubble);
     messagesContainer.append(userMsgRow);
 
-    // Assistant Message Bubble
+    // Assistant Message Bubble with Progress Pipeline
     const aiMsgRow = document.createElement("div");
     aiMsgRow.className = "chat-msg assistant";
     const aiAvatar = document.createElement("div");
@@ -5961,6 +6151,22 @@
     aiAvatar.textContent = "🌟";
     const aiBubble = document.createElement("div");
     aiBubble.className = "chat-bubble";
+
+    // Pipeline Box
+    const pipelineBox = document.createElement("div");
+    pipelineBox.className = "chat-pipeline-box";
+    const pipeHead = document.createElement("div");
+    pipeHead.className = "pipeline-header";
+    pipeHead.textContent = "⚙️ 智能投顾多阶段协同执行中…";
+
+    const stepsGrid = document.createElement("div");
+    stepsGrid.className = "pipeline-steps-grid";
+    const s1 = buildPipelineStepItem("1", "意图识别", "active");
+    const s2 = buildPipelineStepItem("2", "问财/行情", "pending");
+    const s3 = buildPipelineStepItem("3", "画像校验", "pending");
+    const s4 = buildPipelineStepItem("4", "研报生成", "pending");
+    stepsGrid.append(s1, s2, s3, s4);
+    pipelineBox.append(pipeHead, stepsGrid);
 
     const thinkingBox = document.createElement("div");
     thinkingBox.className = "chat-thinking-tag";
@@ -5977,14 +6183,15 @@
     cursor.className = "typing-cursor";
     contentBox.append(cursor);
 
-    aiBubble.append(thinkingBox, toolsContainer, contentBox);
+    aiBubble.append(pipelineBox, thinkingBox, toolsContainer, contentBox);
     aiMsgRow.append(aiAvatar, aiBubble);
     messagesContainer.append(aiMsgRow);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     chatHistory.push({ role: "user", content: query });
+    saveCopilotChatHistory();
 
-    const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
+    const persona = PERSONAS[state.selectedPersona || "custom-user"] || DEFAULT_USER_PROFILE;
 
     try {
       const response = await fetch("/api/v1/copilot/chat", {
@@ -5992,7 +6199,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: query,
-          persona_id: state.selectedPersona || "persona-zhang-r3",
+          persona_id: state.selectedPersona || "custom-user",
           persona_info: {
             name: persona.name,
             tag: persona.tag,
@@ -6011,6 +6218,7 @@
 
       if (!response.ok || !response.body) {
         cursor.remove();
+        pipeHead.textContent = "❌ 服务响应异常";
         contentBox.textContent = "抱歉，投顾智能体服务响应异常，请稍后重试。";
         return;
       }
@@ -6033,18 +6241,29 @@
           if (!trimmed || !trimmed.startsWith("data:")) continue;
           const dataStr = trimmed.slice(5).trim();
           if (dataStr === "[DONE]") {
+            setPipelineStepState(s4, "completed");
+            pipeHead.textContent = "✅ 投顾决策研报生成完毕";
             break;
           }
           try {
             const event = JSON.parse(dataStr);
             if (event.type === "thinking") {
+              setPipelineStepState(s1, "completed");
+              setPipelineStepState(s2, "active");
+              pipeHead.textContent = "🧠 正在调度工具与事实检索…";
               thinkingBox.style.display = "inline-flex";
             } else if (event.type === "tool_start") {
+              setPipelineStepState(s2, "completed");
+              setPipelineStepState(s3, "active");
+              pipeHead.textContent = `🔧 正在调用金融工具: ${event.tool}…`;
               const toolChip = document.createElement("span");
               toolChip.className = "chat-tool-tag";
               toolChip.textContent = `🔧 调度工具: ${event.tool}`;
               toolsContainer.append(toolChip);
             } else if (event.type === "token") {
+              setPipelineStepState(s3, "completed");
+              setPipelineStepState(s4, "active");
+              pipeHead.textContent = "✍️ 正在流式生成投资决策建议…";
               fullText += event.delta;
               cursor.remove();
               contentBox.textContent = fullText;
@@ -6057,8 +6276,10 @@
 
       cursor.remove();
       chatHistory.push({ role: "assistant", content: fullText });
+      saveCopilotChatHistory();
     } catch (err) {
       cursor.remove();
+      pipeHead.textContent = "❌ 连接异常";
       contentBox.textContent = `请求失败: ${err.message || "网络异常"}`;
     }
   }
@@ -6246,6 +6467,11 @@
         const pTag = byId("copilot-hero-portfolio-tag");
         if (pTag) pTag.textContent = `自定义持仓 (${data.positions.length} 项)`;
 
+        saveUserProfile({
+          aum: `¥ ${data.total_value_cny.toLocaleString()}`,
+          portfolioTag: `真实持仓 (${data.positions.length} 项)`
+        });
+
         setTimeout(() => {
           closePortfolioModal();
           handleStreamingChat("我已更新了我的持仓，请帮我做一次持仓体检并分析潜在风险");
@@ -6294,6 +6520,7 @@
   if (clearChatBtn) {
     clearChatBtn.addEventListener("click", () => {
       chatHistory.length = 0;
+      localStorage.removeItem("prism_copilot_chat_history_v2");
       const msgs = byId("copilot-chat-messages");
       if (msgs) clear(msgs);
       const panel = byId("copilot-chat-panel");
@@ -6317,6 +6544,16 @@
   if (saveLLMBtn) saveLLMBtn.addEventListener("click", handleSaveLLMConfig);
   const clearLLMBtn = byId("btn-clear-llm-config");
   if (clearLLMBtn) clearLLMBtn.addEventListener("click", handleClearLLMConfig);
+
+  // User Profile Modal Events
+  const openProfBtn = byId("open-profile-modal-btn");
+  if (openProfBtn) openProfBtn.addEventListener("click", openProfileModal);
+  const closeProfBtn = byId("close-profile-modal-btn");
+  if (closeProfBtn) closeProfBtn.addEventListener("click", closeProfileModal);
+  const saveProfBtn = byId("btn-save-profile");
+  if (saveProfBtn) saveProfBtn.addEventListener("click", handleSaveProfile);
+  const resetProfBtn = byId("btn-reset-profile");
+  if (resetProfBtn) resetProfBtn.addEventListener("click", handleResetProfile);
 
   const provSel = byId("llm-provider-select");
   if (provSel) {
@@ -6393,6 +6630,7 @@
       closeVisualCompanion();
       closePortfolioModal();
       closeLLMConfigModal();
+      closeProfileModal();
     } else if (e.altKey && (e.key === "v" || e.key === "V")) {
       e.preventDefault();
       toggleVisualCompanion();
@@ -6437,7 +6675,9 @@
   initializeNavigation();
   checkHealth();
   updateLLMConfigUI();
-  switchPersona("persona-zhang-r3");
+  loadUserProfile();
+  switchPersona("custom-user");
+  loadCopilotChatHistory();
   loadEvents();
   loadRecommendationHistory();
   updateVisualCompanion();
