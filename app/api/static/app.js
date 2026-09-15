@@ -4151,6 +4151,18 @@
     updateVisualCompanion();
   }
 
+  function renderPortfolioOptimizationBlocked(message, readiness = portfolioAnalysisReadiness()) {
+    const panel = byId("portfolio-optimization-content");
+    if (!panel) return;
+    clear(panel);
+    const empty = document.createElement("div");
+    empty.className = "empty-state portfolio-optimization-blocked";
+    const description = document.createElement("p");
+    description.textContent = message;
+    empty.append(description, buildPortfolioActionRow(readiness));
+    panel.append(empty);
+  }
+
   function clearPortfolioOptimizationRun(status = "待运行", className = "") {
     state.portfolioOptimizationRun = null;
     state.portfolioOptimizationSequence += 1;
@@ -5388,20 +5400,35 @@
     }
     if (!state.profile || !state.profile.profile) {
       setPortfolioOptimizationStatus("需先确认画像", "review");
-      setError("请先确认风险画像，再生成组合目标结构。");
-      return;
+      const message = "请先确认风险画像，再生成组合目标结构。";
+      renderPortfolioOptimizationBlocked(message, portfolioAnalysisReadiness());
+      setError(message);
+      return null;
     }
     await ensureDependency("PORTFOLIO_CONTEXT");
     if (!state.portfolio) {
-      setError("请先添加并确认持仓，再生成组合目标结构。");
+      const message = "请先添加并确认持仓，再生成组合目标结构。";
+      renderPortfolioOptimizationBlocked(message, portfolioAnalysisReadiness());
+      setError(message);
       return null;
     }
     if (state.dataMode === "LIVE" && state.portfolioRefreshRun?.status !== "COMPLETE") {
       setPortfolioOptimizationStatus("正在刷新真实行情…", "review");
-      const health = await refreshPortfolioHealth();
-      if (!health || state.portfolioRefreshRun?.status !== "COMPLETE") {
+      let health = null;
+      try {
+        health = await refreshPortfolioHealth();
+      } catch (error) {
+        const message = "真实行情刷新尚未完成，不能基于旧价格生成目标权重。";
         setPortfolioOptimizationStatus("行情待复核", "review");
-        setError("真实行情刷新尚未完成，不能基于旧价格生成目标权重。");
+        renderPortfolioOptimizationBlocked(message, portfolioAnalysisReadiness());
+        setError(message);
+        return null;
+      }
+      if (!health || state.portfolioRefreshRun?.status !== "COMPLETE") {
+        const message = "真实行情刷新尚未完成，不能基于旧价格生成目标权重。";
+        setPortfolioOptimizationStatus("行情待复核", "review");
+        renderPortfolioOptimizationBlocked(message, portfolioAnalysisReadiness());
+        setError(message);
         return null;
       }
     }
@@ -5450,9 +5477,14 @@
       if (error.errorCode === "LIVE_PORTFOLIO_REFRESH_REQUIRED") {
         state.portfolioRefreshRun = null;
         renderPortfolioRefreshStatus(null);
+        renderPortfolioOptimizationBlocked(
+          error.message || "真实行情刷新尚未完成，不能基于旧价格生成目标权重。",
+          portfolioAnalysisReadiness(),
+        );
+      } else {
+        renderPortfolioOptimization(null);
       }
       state.portfolioOptimizationRun = null;
-      renderPortfolioOptimization(null);
       setPortfolioOptimizationStatus("未运行", "blocked");
       setError(error.message || "生成组合目标结构失败");
     } finally {
@@ -6463,7 +6495,15 @@
         await runPortfolioOptimization();
       }
       if (!state.portfolioOptimizationRun?.targets?.length) {
-        throw new Error("缺少已计算的目标权重，请先生成组合目标结构");
+        const error = new Error(
+          state.dataMode === "LIVE" && state.portfolioRefreshRun?.status !== "COMPLETE"
+            ? "真实行情刷新尚未完成，不能基于旧价格生成目标权重。"
+            : "缺少已计算的目标权重，请先生成组合目标结构"
+        );
+        if (state.dataMode === "LIVE" && state.portfolioRefreshRun?.status !== "COMPLETE") {
+          error.errorCode = "LIVE_PORTFOLIO_REFRESH_REQUIRED";
+        }
+        throw error;
       }
       await ensureDependency("PORTFOLIO_CONTEXT");
       if (!state.portfolio) throw new Error("缺少结构化持仓，无法生成调仓计划");
@@ -6576,12 +6616,23 @@
       return data;
     } catch (err) {
       if (err.errorCode === "LIVE_PORTFOLIO_REFRESH_REQUIRED") {
+        const readiness = portfolioAnalysisReadiness();
         state.portfolioRefreshRun = null;
         state.portfolioOptimizationRun = null;
         renderPortfolioRefreshStatus(null);
-        renderPortfolioOptimization(null);
+        renderPortfolioOptimizationBlocked(err.message, readiness);
+        const stepsPanel = byId("rebalancing-steps-content");
+        if (stepsPanel) {
+          clear(stepsPanel);
+          const empty = document.createElement("div");
+          empty.className = "empty-state portfolio-optimization-blocked";
+          const message = document.createElement("p");
+          message.textContent = err.message;
+          empty.append(message, buildPortfolioActionRow(readiness));
+          stepsPanel.append(empty);
+        }
       }
-      setError(err.message);
+      setError(err.message || "调仓测算失败");
       return null;
     }
   }
@@ -7601,12 +7652,12 @@
     return box;
   }
 
-  function buildCopilotDrilldownRow(links) {
+  function buildCopilotDrilldownRow(links, labelText = "想了解更多依据？") {
     const row = document.createElement("div");
     row.className = "decision-drilldown-row";
     const label = document.createElement("span");
     label.className = "drilldown-label";
-    label.textContent = "想了解更多依据？";
+    label.textContent = labelText;
     row.append(label);
     links.forEach(l => {
       const a = document.createElement("a");
@@ -7618,6 +7669,105 @@
       row.append(a);
     });
     return row;
+  }
+
+  function portfolioAnalysisReadiness() {
+    const hasProfile = Boolean(state.profile?.profile);
+    const hasPortfolio = Boolean(state.portfolio);
+    if (!hasProfile && !hasPortfolio) {
+      return {
+        message: "还缺少风险设置和持仓；完成后更新分析即可查看行业占比。",
+        hint: "完成风险设置与持仓后更新分析。",
+        action: "profile",
+        actionLabel: "填写风险设置",
+      };
+    }
+    if (!hasProfile) {
+      return {
+        message: "已检测到持仓；完成风险设置后更新分析即可查看行业占比。",
+        hint: "完成风险设置后更新分析。",
+        action: "profile",
+        actionLabel: "填写风险设置",
+      };
+    }
+    if (!hasPortfolio) {
+      return {
+        message: "已完成风险设置；添加并确认持仓后更新分析即可查看行业占比。",
+        hint: "添加并确认持仓后更新分析。",
+        action: "portfolio",
+        actionLabel: "添加并确认持仓",
+      };
+    }
+
+    const refresh = state.portfolioRefreshRun;
+    const issues = [
+      ...(Array.isArray(refresh?.issues) ? refresh.issues : []),
+      ...(Array.isArray(refresh?.missing_fields) ? refresh.missing_fields : []),
+    ].map((value) => String(value || "").toLowerCase());
+    const sectorMissing = issues.some((value) => /sector|行业|未分类|分类/.test(value));
+    if (state.dataMode === "LIVE" && refresh?.status === "REVIEW_REQUIRED" && sectorMissing) {
+      return {
+        message: "已检测到风险设置和持仓，但部分持仓行业分类仍待补充；补充后重新更新分析。",
+        hint: "补充行业分类后重新更新分析。",
+        action: "portfolio",
+        actionLabel: "补充持仓信息",
+      };
+    }
+    if (state.dataMode === "LIVE" && refresh?.status && refresh.status !== "COMPLETE") {
+      return {
+        message: "已检测到风险设置和持仓，但实时行情仍待复核；点击重试以获取最新真实数据。",
+        hint: "实时行情待复核，点击重试。",
+        action: "health",
+        actionLabel: "重新更新行情",
+      };
+    }
+    return {
+      message: "已检测到风险设置和持仓，点击“更新分析”后查看行业占比。",
+      hint: "点击更新分析查看行业占比。",
+      action: "health",
+      actionLabel: "更新分析",
+    };
+  }
+
+  function activatePortfolioReadinessAction(action) {
+    if (action === "profile") {
+      window.location.hash = "#profile";
+      return;
+    }
+    if (action === "portfolio") {
+      window.location.hash = "#portfolio";
+      if (typeof openPortfolioModal === "function") openPortfolioModal();
+      return;
+    }
+    void runCopilotHealthCheck();
+  }
+
+  function buildPortfolioReadinessAction(readiness) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "drilldown-btn donut-cause-action";
+    button.textContent = readiness.actionLabel;
+    button.addEventListener("click", () => activatePortfolioReadinessAction(readiness.action));
+    return button;
+  }
+
+  function buildPortfolioActionRow(readiness = portfolioAnalysisReadiness()) {
+    const row = document.createElement("div");
+    row.className = "decision-drilldown-row portfolio-readiness-actions";
+    const label = document.createElement("span");
+    label.className = "drilldown-label";
+    label.textContent = "下一步";
+    row.append(label, buildPortfolioReadinessAction(readiness));
+    return row;
+  }
+
+  function buildPortfolioReadinessPrompt(readiness = portfolioAnalysisReadiness()) {
+    const prompt = document.createElement("div");
+    prompt.className = "portfolio-readiness-prompt";
+    const message = document.createElement("p");
+    message.textContent = readiness.message;
+    prompt.append(message, buildPortfolioActionRow(readiness));
+    return prompt;
   }
 
   function getSectorVerdict(s) {
@@ -7723,7 +7873,8 @@
         || liveCapabilities.fund_lookthrough === true);
     const shouldRefresh = state.dataMode !== "LIVE"
       || liveCapabilities.portfolio_refresh === true
-      || (liveCapabilities.stock_quote === true && state.wencaiConfigured === true);
+      || liveCapabilities.stock_quote === true
+      || liveCapabilities.fund_lookthrough === true;
     if (shouldRefresh) {
       const refreshResponse = await fetch("/api/v1/advisor/portfolio/refresh", {
         method: "POST",
@@ -8195,9 +8346,15 @@
     const health = state.portfolioHealthRun;
     const sectors = health?.sectors || [];
     if (!health || !sectors.length) {
-      if (hintEl) hintEl.textContent = !state.profile?.profile ? "请先完成风险设置。" : !state.portfolio ? "请先添加持仓。" : "请更新组合分析。";
+      const readiness = portfolioAnalysisReadiness();
+      if (hintEl) hintEl.textContent = readiness.hint;
       if (verdictBadge) verdictBadge.textContent = "等待分析";
-      if (causeCallout) causeCallout.textContent = "添加风险设置与持仓后，可查看行业占比。";
+      if (causeCallout) {
+        causeCallout.className = "donut-cause-callout pass";
+        clear(causeCallout);
+        causeCallout.append(document.createTextNode(readiness.message));
+        causeCallout.append(document.createTextNode(" "), buildPortfolioReadinessAction(readiness));
+      }
       return;
     }
     const overboundList = sectors
@@ -8428,8 +8585,9 @@
 
     const health = state.portfolioHealthRun;
     if (!health) {
-      tableBody.textContent = "确认风险设置与持仓并更新分析后，可查看穿透行业分布。";
-      metricsBody.textContent = "添加风险设置与持仓后，可查看组合指标。";
+      const readiness = portfolioAnalysisReadiness();
+      tableBody.append(buildPortfolioReadinessPrompt(readiness));
+      metricsBody.textContent = readiness.message;
       return;
     }
     const sectors = health.sectors;
@@ -8621,6 +8779,9 @@
       const p = document.createElement("p");
       p.textContent = err.message || "未能完成投顾决策分析";
       errCard.append(h4, p);
+      if (!state.profile?.profile || !state.portfolio || state.portfolioRefreshRun?.status !== "COMPLETE") {
+        errCard.append(buildPortfolioActionRow(portfolioAnalysisReadiness()));
+      }
       output.append(errCard);
     }
   }
@@ -9119,7 +9280,17 @@
       const health = state.portfolioHealthRun || await refreshPortfolioHealth();
       if (!health) throw new Error("当前持仓体检未完成，不能确认调仓约束。");
       const optimization = await runPortfolioOptimization();
-      if (!optimization?.targets?.length) throw new Error(optimization?.summary || "未能生成目标权重，请检查画像、持仓和缺失数据。");
+      if (!optimization?.targets?.length) {
+        const error = new Error(
+          state.dataMode === "LIVE" && state.portfolioRefreshRun?.status !== "COMPLETE"
+            ? "真实行情刷新尚未完成，不能基于旧价格生成目标权重。"
+            : (optimization?.summary || "未能生成目标权重，请检查画像、持仓和缺失数据。")
+        );
+        if (state.dataMode === "LIVE" && state.portfolioRefreshRun?.status !== "COMPLETE") {
+          error.errorCode = "LIVE_PORTFOLIO_REFRESH_REQUIRED";
+        }
+        throw error;
+      }
       const plan = await runPortfolioRebalancing();
       if (!plan) throw new Error("调仓测算未完成，请检查目标权重和持仓输入。");
       const persona = PERSONAS[state.selectedPersona || "persona-zhang-r3"];
@@ -9222,6 +9393,11 @@
       const p = document.createElement("p");
       p.textContent = err.message || "未能生成调仓方案";
       errCard.append(h4, p);
+      const liveRefreshBlocked = state.dataMode === "LIVE"
+        && state.portfolioRefreshRun?.status !== "COMPLETE";
+      if (liveRefreshBlocked || !state.profile?.profile || !state.portfolio) {
+        errCard.append(buildPortfolioActionRow(portfolioAnalysisReadiness()));
+      }
       output.append(errCard);
     }
   }
@@ -10287,7 +10463,7 @@
 
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    ["代码", "名称", "持股/份额", "成本价", "当前市价", "持仓市值", "置信度", "审核裁决"].forEach(h => {
+    ["代码", "名称", "行业分类", "持股/份额", "成本价", "当前市价", "持仓市值", "置信度", "审核裁决"].forEach(h => {
       const th = document.createElement("th");
       th.textContent = h;
       headerRow.append(th);
@@ -10309,6 +10485,15 @@
 
       const tdName = document.createElement("td");
       tdName.textContent = pos.name;
+
+      const tdSector = document.createElement("td");
+      const sectorInput = document.createElement("input");
+      sectorInput.type = "text";
+      sectorInput.className = "ocr-edit-input ocr-sector-input";
+      sectorInput.value = ["Unclassified", "Unknown"].includes(String(pos.sector || "")) ? "" : (pos.sector || "");
+      sectorInput.placeholder = "如 Industrials";
+      sectorInput.title = "可填写已核对的行业分类；留空则保留待复核状态";
+      tdSector.append(sectorInput);
 
       const tdQty = document.createElement("td");
       const qtyInput = document.createElement("input");
@@ -10346,10 +10531,10 @@
       }
       tdVerdict.append(vTag);
 
-      tr.append(tdCode, tdName, tdQty, tdCost, tdPrice, tdVal, tdConf, tdVerdict);
+      tr.append(tdCode, tdName, tdSector, tdQty, tdCost, tdPrice, tdVal, tdConf, tdVerdict);
       tbody.append(tr);
 
-      inputControls.push({ pos, qtyInput });
+      inputControls.push({ pos, qtyInput, sectorInput });
     });
     table.append(tbody);
     tableWrapper.append(table);
@@ -10368,9 +10553,9 @@
       ? "置信度核验提示：部分单元格低于 85.0% 阈值"
       : "RapidOCR 本地核验完成：全量置信度 ≥ 85.0%";
     const cP = document.createElement("p");
-    cP.textContent = data.has_low_confidence_items
-      ? "黄色标记项置信度偏低，请核对并可直接在上方表格输入框修正持股数量，确认无误后点击下方按钮导入。"
-      : "文字识别已完成，请核对证券代码、数量与价格，确认无误后点击下方按钮导入。";
+      cP.textContent = data.has_low_confidence_items
+      ? "黄色标记项置信度偏低，请核对并可直接修正行业分类、持股数量与价格，确认无误后点击下方按钮导入。"
+      : "文字识别已完成，请核对证券代码、行业分类、数量与价格；如需补充行业分类，可直接在上方表格填写。";
     cContent.append(cTitle, cP);
     callout.append(cIcon, cContent);
 
@@ -10384,10 +10569,10 @@
     confirmBtn.addEventListener("click", async () => {
       confirmBtn.disabled = true;
       try {
-        const editedPositions = inputControls.map(({ pos, qtyInput }) => {
+        const editedPositions = inputControls.map(({ pos, qtyInput, sectorInput }) => {
           const val = Number(qtyInput.value);
           if (!Number.isInteger(val) || val <= 0) throw new Error("持仓数量必须为正整数");
-          return { ...pos, quantity: val };
+          return { ...pos, quantity: val, sector: sectorInput.value.trim() || null };
         });
         const validated = await validateAndActivatePortfolio(data, editedPositions);
         if (!validated) return;
@@ -10699,6 +10884,62 @@
 
   let portfolioSummarySequence = 0;
   let displayedPortfolioSummary = null;
+
+  function mergeLivePortfolioSummary(summary) {
+    const livePositions = state.portfolioHealthRun && state.portfolio?.position_snapshot?.positions;
+    if (state.dataMode !== "LIVE" || !Array.isArray(livePositions) || !livePositions.length) {
+      return summary;
+    }
+    const liveById = new Map(livePositions.map((position) => [position.asset_id, position]));
+    const positions = (summary.positions || []).map((row) => {
+      const live = liveById.get(row.asset_id);
+      const quantity = Number(live?.quantity);
+      const marketValue = Number(live?.market_value);
+      if (!live || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(marketValue)) {
+        return row;
+      }
+      const price = marketValue / quantity;
+      const costPrice = Number(row.cost_price);
+      const pnl = Number.isFinite(costPrice) && costPrice > 0
+        ? marketValue - quantity * costPrice
+        : null;
+      return {
+        ...row,
+        name: live.asset_name || row.name,
+        quantity,
+        price: Number(price.toFixed(3)),
+        market_value_cny: marketValue.toFixed(2),
+        pnl_cny: pnl == null ? null : pnl.toFixed(2),
+      };
+    });
+    const holdingsValue = positions.reduce((total, row) => total + Number(row.market_value_cny || 0), 0);
+    const cash = Number(summary.cash_cny || 0);
+    const totalValue = holdingsValue + cash;
+    const costsComplete = positions.length > 0 && positions.every((row) => {
+      const costPrice = Number(row.cost_price);
+      return Number.isFinite(costPrice) && costPrice > 0;
+    });
+    const totalCost = costsComplete
+      ? positions.reduce((total, row) => total + Number(row.quantity) * Number(row.cost_price), 0)
+      : 0;
+    positions.forEach((row) => {
+      row.weight_pct = holdingsValue > 0
+        ? (Number(row.market_value_cny) / holdingsValue * 100).toFixed(2)
+        : "0.00";
+    });
+    return {
+      ...summary,
+      positions,
+      holdings_value_cny: holdingsValue.toFixed(2),
+      total_value_cny: totalValue.toFixed(2),
+      pnl_cny: costsComplete ? (holdingsValue - totalCost).toFixed(2) : null,
+      pnl_pct: costsComplete && totalCost > 0 ? ((holdingsValue / totalCost - 1) * 100).toFixed(2) : null,
+      // The refresh contract currently exposes the observed price/time but
+      // not a verified previous-close field; do not retain a stale daily PnL.
+      daily_pnl_cny: null,
+    };
+  }
+
   async function refreshPortfolioSummary() {
     if (!state.ownerId) return;
     displayedPortfolioSummary = null;
@@ -10707,8 +10948,9 @@
     const mode = state.dataMode;
     const response = await fetch("/api/v1/advisor/portfolio/summary", {headers: {"X-Owner-ID": owner}});
     if (!response.ok) throw await apiError(response);
-    const summary = await response.json();
+    let summary = await response.json();
     if (sequence !== portfolioSummarySequence || owner !== state.ownerId || mode !== state.dataMode || mode !== summary.data_mode) return;
+    summary = mergeLivePortfolioSummary(summary);
     displayedPortfolioSummary = summary;
     renderCompanionAllocation();
     const amount = value => value == null ? "待补充数据" : `¥ ${Number(value).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -10722,7 +10964,9 @@
     byId("overview-benchmark-sub").textContent = summary.daily_pnl_cny == null ? "需取得可核验昨收价" : "基于昨收与当前持仓计算";
     byId("portfolio-empty").hidden = summary.position_count > 0;
     byId("portfolio-data-label").textContent = !summary.position_count ? "未导入" : mode === "MOCK" ? "演示数据" : "已确认持仓";
-    byId("portfolio-summary-note").textContent = `${summary.position_count} 项持仓 · 当前记录价格；仅供参考，不构成投资建议。`;
+    byId("portfolio-summary-note").textContent = state.portfolioHealthRun
+      ? `${summary.position_count} 项持仓 · 本次已同步真实行情；仅供参考，不构成投资建议。`
+      : `${summary.position_count} 项持仓 · 当前记录价格；仅供参考，不构成投资建议。`;
     const body = byId("portfolio-position-rows"); body.replaceChildren();
     summary.positions.forEach(row => {
       const tr = document.createElement("tr");

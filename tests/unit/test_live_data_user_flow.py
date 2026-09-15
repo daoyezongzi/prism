@@ -242,7 +242,9 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
              "requirePortfolioAnalysisContext", "renderPortfolioReadiness",
              "ensureDependency", "confirmProfileContext", "renderCompanionRisk",
              "runCopilotHealthCheck", "runCopilotRebalance", "runCopilotScenarioShock",
-             "getSectorVerdict", "renderHeroDonutChart", "runPortfolioRebalancing",
+             "getSectorVerdict", "portfolioAnalysisReadiness", "activatePortfolioReadinessAction",
+             "buildPortfolioReadinessAction", "buildPortfolioActionRow", "buildPortfolioReadinessPrompt",
+             "renderHeroDonutChart", "runPortfolioRebalancing",
              "loadSavedPortfolio", "openPortfolioModal", "buildRebalancingNotice",
              "profileLevelText", "currentProfileTag", "activeProfileTag"]
     functions = []

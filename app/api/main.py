@@ -2615,9 +2615,16 @@ def create_app(
                 "LIVE 持仓存在未核验价格；请重新识别并取得真实报价后再确认",
             )
         try:
-            confirmed_positions = [
-                item.model_dump(mode="json") for item in req.positions
-            ]
+            confirmed_positions = []
+            for item in req.positions:
+                payload = item.model_dump(mode="json")
+                sector = str(payload.get("sector") or "").strip()
+                if sector and sector.casefold() not in {"unknown", "unclassified"}:
+                    payload["_sector_confirmed"] = True
+                    price_source = str(payload.get("price_source") or "user-confirmed OCR import")
+                    if "user-confirmed sector" not in price_source.casefold():
+                        payload["price_source"] = f"{price_source} + user-confirmed sector"
+                confirmed_positions.append(payload)
             calculated = recalculate_portfolio_values(
                 confirmed_positions, req.cash_cny, owner_id,
                 allow_synthetic_lookthrough=mode == DataMode.MOCK,

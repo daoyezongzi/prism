@@ -64,6 +64,60 @@ class LivePortfolioProviderAdapter:
         self._wencai_available = wencai_available
         self.wencai_failure_codes: set[str] = set()
         self.wencai_metadata_succeeded = False
+        self._prefetched_quotes: dict[str, dict[str, Any] | None] = {}
+
+    async def prefetch_quotes(self, asset_ids: list[str]) -> None:
+        """Use a provider batch endpoint when available to avoid rate bursts."""
+        self._prefetched_quotes = {}
+        getter = getattr(self._finance_provider, "get_quotes", None)
+        if not callable(getter) or not asset_ids:
+            return
+        requested = tuple(dict.fromkeys(str(asset_id).strip().upper() for asset_id in asset_ids))
+        try:
+            result = await getter(requested)
+        except Exception:
+            # Do not turn one failed batch into a burst of per-position calls;
+            # the caller can retry the complete refresh.  This is especially
+            # important for a rate-limited live provider.
+            self._prefetched_quotes = {asset_id: None for asset_id in requested}
+            return
+        if isinstance(result, dict):
+            prefetched: dict[str, dict[str, Any] | None] = {}
+            for asset_id, quote in result.items():
+                if quote is None or isinstance(quote, dict):
+                    prefetched[str(asset_id).strip().upper()] = quote
+                    if isinstance(quote, dict) and quote.get("symbol"):
+                        prefetched[str(quote["symbol"]).strip().upper()] = quote
+            # A batch response is authoritative for every requested key.  A
+            # missing row is a reviewable missing quote, not permission to
+            # silently fan out into old per-position calls.
+            self._prefetched_quotes = {}
+            for asset_id in requested:
+                alias = next(
+                    (key for key in prefetched if key.startswith(f"{asset_id}.")),
+                    None,
+                )
+                self._prefetched_quotes[asset_id] = prefetched.get(
+                    asset_id if asset_id in prefetched else alias
+                )
+            self._prefetched_quotes.update(prefetched)
+
+    @staticmethod
+    def _confirmed_sector(request: ProviderRequest) -> str | None:
+        """Return only an explicitly user-confirmed sector for this position.
+
+        A failed industry enrichment must not turn a confirmed portfolio row
+        into a fabricated classification.  The persisted OCR/import flow
+        records the user's confirmation in ``source``; rows without that
+        provenance remain fail-closed and still require live metadata.
+        """
+        sector = str(request.parameters.get("existing_sector") or "").strip()
+        source = str(request.parameters.get("existing_sector_source") or "").casefold()
+        if not sector or "user-confirmed" not in source:
+            return None
+        if sector.casefold() in {"unknown", "unclassified"}:
+            return None
+        return sector
 
     @staticmethod
     def _failed(request: ProviderRequest, error: BaseException) -> ProviderResult:
@@ -179,7 +233,10 @@ class LivePortfolioProviderAdapter:
     async def _execute_fuyao(self, request: ProviderRequest) -> ProviderResult | None:
         asset_id = str(request.parameters.get("asset_id") or request.subject).split()[0]
         if request.operation == ProviderOperation.MARKET_DATA and self._stock_quote_available:
-            quote = await self._finance_provider.get_quote(asset_id)
+            if asset_id in self._prefetched_quotes:
+                quote = self._prefetched_quotes[asset_id]
+            else:
+                quote = await self._finance_provider.get_quote(asset_id)
             if quote is None:
                 return self._empty(request, "fuyao_finance_api")
             if quote.get("is_synthetic") is not False:
@@ -201,6 +258,17 @@ class LivePortfolioProviderAdapter:
                 timeout_ms=request.timeout_ms,
                 stage="portfolio_industry_enrichment",
             )
+            confirmed_sector = self._confirmed_sector(request)
+            if not sector and confirmed_sector:
+                # The quote remains externally observed and non-synthetic;
+                # only the missing enrichment field is retained from the
+                # user's explicitly confirmed portfolio classification.  The
+                # failed Wencai request is still recorded in
+                # ``wencai_failure_codes`` by ``_query_industry`` so runtime
+                # capability status does not falsely become READY.
+                sector = confirmed_sector
+                enrichment_source = "user-confirmed sector"
+                industry_issues = ()
             enrichment_issues.extend(industry_issues)
             self.wencai_metadata_succeeded = self.wencai_metadata_succeeded or metadata_succeeded
             fields = {
@@ -489,6 +557,8 @@ async def _refresh_position(
         parameters={
             "asset_id": position.asset_id,
             "asset_type": position.asset_type.value,
+            "existing_sector": position.sector,
+            "existing_sector_source": position.source,
         },
         timeout_ms=2000,
     )
@@ -614,6 +684,12 @@ async def refresh_portfolio_live(
 ) -> PortfolioRefreshResponse:
     positions = request.portfolio.position_snapshot.positions
     non_cash = [position for position in positions if position.asset_type != AssetType.CASH]
+    if isinstance(provider, LivePortfolioProviderAdapter):
+        await provider.prefetch_quotes([
+            position.asset_id
+            for position in non_cash
+            if position.asset_type == AssetType.STOCK
+        ])
     results = await asyncio.gather(
         *(_refresh_position(request, position, provider) for position in non_cash)
     )

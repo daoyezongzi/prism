@@ -124,6 +124,44 @@ def test_live_ocr_confirmation_rejects_unverified_static_price() -> None:
     reset_runtime_mode_controller(DataMode.MOCK)
 
 
+def test_live_ocr_confirmation_persists_explicit_sector_provenance(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "app.llm.ocr_portfolio_parser.OCRPortfolioParser.get_instance",
+        lambda: FakeOcrParser(),
+    )
+    reset_runtime_mode_controller(DataMode.LIVE)
+    store = SQLiteDecisionEventStore(":memory:")
+    client = TestClient(create_app(store, live_finance_provider=FakeLiveFinance()))
+    headers = {"X-Owner-ID": "live-ocr-sector-owner"}
+
+    parsed = client.post(
+        "/api/v1/advisor/portfolio/ocr",
+        headers=headers,
+        files={"file": ("holding.png", b"bounded-image", "image/png")},
+    )
+    assert parsed.status_code == 200
+    draft = parsed.json()
+    draft["positions"][0]["sector"] = "Industrials"
+
+    confirmed = client.post(
+        "/api/v1/advisor/portfolio/ocr/confirm",
+        headers=headers,
+        json={
+            "owner_id": "live-ocr-sector-owner",
+            "image_digest": draft["image_digest"],
+            "positions": draft["positions"],
+            "cash_cny": 0,
+        },
+    )
+
+    assert confirmed.status_code == 200
+    saved = confirmed.json()["portfolio"]["position_snapshot"]["positions"][0]
+    assert saved["sector"] == "Industrials"
+    assert saved["source"] == "verified-live-test-provider + user-confirmed sector"
+    store.close()
+    reset_runtime_mode_controller(DataMode.MOCK)
+
+
 def test_live_validation_does_not_trust_packaged_or_client_stock_sector() -> None:
     reset_runtime_mode_controller(DataMode.LIVE)
     store = SQLiteDecisionEventStore(":memory:")

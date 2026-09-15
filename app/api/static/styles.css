@@ -3146,6 +3146,20 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   transform: translateY(-1px);
 }
 
+.donut-cause-action {
+  margin-left: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.portfolio-readiness-prompt p {
+  margin: 0 0 10px;
+}
+
+.portfolio-readiness-actions {
+  margin-top: 8px;
+}
+
 /* ==========================================================================
    Direction 2: 实时流式对话与自定义持仓弹窗样式
    ========================================================================== */

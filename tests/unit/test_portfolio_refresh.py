@@ -153,6 +153,29 @@ class _SyntheticFuyaoFinanceProvider(_LiveFuyaoFinanceProvider):
         return quote
 
 
+class _BatchedLiveFuyaoFinanceProvider(_LiveFuyaoFinanceProvider):
+    def __init__(self) -> None:
+        self.batch_calls = 0
+        self.single_calls = 0
+
+    async def get_quotes(self, codes):
+        self.batch_calls += 1
+        return {
+            "300750.SZ": {
+                "symbol": "300750.SZ",
+                "name": "宁德时代",
+                "price_cny": 338.25,
+                "observed_at": "2026-09-15T10:30:00+08:00",
+                "source": "Fuyao structured financial data API",
+                "is_synthetic": False,
+            }
+        }
+
+    async def get_quote(self, code: str):
+        self.single_calls += 1
+        return await super().get_quote(code)
+
+
 class _LiveFundFinanceProvider:
     async def get_quote(self, code: str):
         return None
@@ -330,6 +353,57 @@ def test_live_refresh_keeps_fuyao_quote_in_review_without_real_sector_source():
     assert body.is_synthetic is False
     assert body.portfolio is None
     assert "sector" in body.missing_fields
+
+
+def test_live_refresh_uses_one_batch_quote_request_when_provider_supports_it():
+    portfolio = _portfolio()
+    request = PortfolioRefreshRequest.model_validate(_request(portfolio))
+    finance = _BatchedLiveFuyaoFinanceProvider()
+    adapter = LivePortfolioProviderAdapter(
+        finance,
+        stock_quote_available=True,
+        wencai_available=False,
+    )
+
+    body = asyncio.run(refresh_portfolio_live(request, adapter))
+
+    assert body.status == "REVIEW_REQUIRED"
+    assert finance.batch_calls == 1
+    assert finance.single_calls == 0
+
+
+def test_live_refresh_uses_real_quote_with_confirmed_sector_when_wencai_fails():
+    portfolio = _portfolio()
+    confirmed_position = portfolio.position_snapshot.positions[0].model_copy(
+        update={"source": "user-confirmed OCR import"}
+    )
+    portfolio = portfolio.model_copy(update={
+        "position_snapshot": portfolio.position_snapshot.model_copy(
+            update={"positions": (confirmed_position,)}
+        )
+    })
+    request = PortfolioRefreshRequest.model_validate(_request(portfolio))
+    adapter = LivePortfolioProviderAdapter(
+        _LiveFuyaoFinanceProvider(),
+        stock_quote_available=True,
+        wencai_provider=_FailedPortfolioProvider(),
+        wencai_available=True,
+    )
+
+    body = asyncio.run(refresh_portfolio_live(request, adapter))
+
+    assert body.status == "COMPLETE"
+    assert body.is_synthetic is False
+    assert adapter.wencai_metadata_succeeded is False
+    assert ProviderIssueCode.AUTH_FAILED.value in adapter.wencai_failure_codes
+    refreshed = body.portfolio.position_snapshot.positions[0]
+    assert refreshed.market_value == Decimal("33825.00")
+    assert refreshed.sector == "Industrials"
+    assert "user-confirmed sector" in refreshed.source
+    row = next(item for item in body.positions if item.asset_id == "300750.SZ")
+    assert row.status == "REFRESHED"
+    assert row.price_cny == Decimal("338.25")
+    assert row.missing_fields == ()
 
 
 def test_live_refresh_combines_fuyao_quote_with_real_wencai_industry():
