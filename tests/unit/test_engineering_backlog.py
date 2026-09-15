@@ -297,7 +297,8 @@ def test_frontend_keeps_safe_dom_and_renders_sector_result_below_chart():
     assert 'store.portfolioHealthRun = null;' in script
     assert 'byId("donut-sector-detail")' in script
     assert "renderSectorDetail(s);" in script
-    assert 'quote.staleness_seconds == null ? "未提供"' in script
+    assert "function submitCopilotSecurityQuery(target)" in script
+    assert 'query_stock_quote: "查询实时行情"' in script
     assert 'risk_score: "35.00"' not in script
     assert 'tech_exposure_pct: "38.50"' not in script
     assert 'await refreshPortfolioHealth()' in script
@@ -313,6 +314,7 @@ def test_frontend_keeps_safe_dom_and_renders_sector_result_below_chart():
     assert "当前真实持仓 · Python 确定性计算" in script
     assert '["fuyao_finance_api", "wencai_skillhub_provider"].includes(' in script
     assert 'id="donut-sector-detail"' in page
+    assert 'placeholder="例如：研判 300750，或查询 510300 的实时行情"' in page
     assert page.index('id="copilot-donut-legend"') < page.index('id="donut-sector-detail"')
     assert "为什么得到这个分析结果？" in page
     assert "先看结论和关键原因，需要时再展开专业计算依据" in page

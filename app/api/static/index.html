@@ -7,12 +7,12 @@
     <meta name="description" content="Prism 可解释投资研究工作台">
     <title>Prism · 决策工作台</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bd5700'/%3E%3Cpath d='M18 46V18h16c9 0 14 5 14 13s-5 13-14 13h-7v2H18zm9-11h7c4 0 6-1 6-4s-2-4-6-4h-7v8z' fill='white'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="/static/styles.css?v=20260915-real-data-repair2">
+    <link rel="stylesheet" href="/static/styles.css?v=20260915-chat-ai-research1">
     <link rel="stylesheet" href="/static/prism-v2.css?v=20260915-chat-stages1">
     <script src="/static/dev-mode.js" defer></script>
     <script src="/static/markdown.js?v=20260914-polish5" defer></script>
     <script src="/static/lightweight-charts.js?v=5.2.1" defer></script>
-    <script src="/static/app.js?v=20260915-real-data-repair2" defer></script>
+    <script src="/static/app.js?v=20260915-chat-ai-research1" defer></script>
     <script src="/static/workflow-editor.js" defer></script>
   </head>
   <body class="questionnaire-pending prism-ui-v2">
@@ -302,26 +302,11 @@
                 <button type="button" data-chat-prefix="可转债投资">可转债投资</button>
                 <button type="button" data-chat-prefix="资产重组优化">资产重组优化</button>
               </div>
-              <section class="copilot-stock-lookup" aria-labelledby="copilot-stock-lookup-title">
-                <div class="copilot-stock-lookup-head">
-                  <div>
-                    <strong id="copilot-stock-lookup-title">实时个股 / ETF 底稿</strong>
-                    <span>输入任意受支持的 6 位证券代码</span>
-                  </div>
-                  <span class="status-chip chip-live">真实行情</span>
-                </div>
-                <div class="task-card-input-row">
-                  <label class="sr-only" for="copilot-stock-input">个股或 ETF 代码</label>
-                  <input id="copilot-stock-input" class="copilot-stock-input" type="text" inputmode="numeric" maxlength="10" placeholder="例如 300750、600519 或 510300" autocomplete="off">
-                  <button id="copilot-btn-stock-research" class="copilot-action-btn primary" type="button">查询实时底稿</button>
-                </div>
-                <small>行情已接通时返回实时价格；PE、PB、ROE、估值分位缺失时只展示缺失，不生成估值结论。</small>
-              </section>
               <div class="copilot-query-box">
                 <label class="sr-only" for="copilot-natural-input">向投资 Agent 提问</label>
-                <textarea id="copilot-natural-input" class="copilot-natural-input" rows="3" placeholder="我更在意控制回撤，这套持仓需要怎么调整？" autocomplete="off"></textarea>
+                <textarea id="copilot-natural-input" class="copilot-natural-input" rows="3" placeholder="例如：研判 300750，或查询 510300 的实时行情" autocomplete="off"></textarea>
                 <div class="copilot-composer-meta">
-                  <small>结合当前持仓与投资偏好进行分析</small>
+                  <small>结合当前持仓与投资偏好进行分析；输入股票或 ETF 的 6 位代码，实时行情与可用字段会在本次对话中返回</small>
                   <div id="chat-send-progress" role="status" aria-live="polite" hidden></div>
                   <button id="chat-cancel-query" type="button" hidden>停止</button>
                   <button id="copilot-submit-query" class="copilot-submit-btn" type="button">
@@ -333,7 +318,7 @@
 
               <div class="copilot-quick-tags" id="copilot-quick-tags" aria-label="常用提问">
                 <button class="quick-tag-chip" type="button" data-intent="CHECK_PORTFOLIO">我的组合最需要关注什么？</button>
-                <button class="quick-tag-chip" type="button" data-intent="RESEARCH_STOCK" data-target="300750">查询实时底稿 300750</button>
+                <button class="quick-tag-chip" type="button" data-intent="RESEARCH_STOCK" data-target="300750">研判 300750（AI 对话）</button>
                 <button class="quick-tag-chip" type="button" data-intent="REBALANCE_PORTFOLIO">如何降低组合集中度？</button>
               </div>
 
@@ -1153,9 +1138,9 @@
                 <small>合成离线回放</small>
               </label>
                <button id="run-stock-research" class="query-submit" type="button">运行个股研究</button>
-               <button id="open-live-stock-lookup" class="query-submit secondary" type="button">转到实时个股底稿</button>
+               <button id="open-copilot-stock-chat" class="query-submit secondary" type="button">转到 AI 对话研判</button>
              </div>
-             <p id="stock-research-live-boundary" class="research-boundary">完整研究场景为离线回放；LIVE 模式不会返回演示报告。需要真实行情时，请转到实时个股底稿并输入任意受支持代码。</p>
+             <p id="stock-research-live-boundary" class="research-boundary">完整研究场景为离线回放；LIVE 模式不会返回演示报告。需要真实行情时，请转到 AI 对话并输入任意受支持代码。</p>
              <div id="stock-research-content" class="stock-research-content" aria-live="polite">
               <div class="empty-state">运行研究后查看财务指标、异常项与信息来源。</div>
             </div>

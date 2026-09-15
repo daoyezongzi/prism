@@ -125,14 +125,15 @@ def test_unlocked_chat_strips_unverified_personal_context(monkeypatch, tmp_path)
     assert captured["history"] == []
 
 
-def test_dynamic_quick_tags_keep_direct_live_intent_route():
+def test_dynamic_quick_tags_route_security_research_into_ai_chat():
     app_js = (Path(__file__).parents[2] / "app" / "api" / "static" / "app.js").read_text(encoding="utf-8")
     block = app_js[app_js.index("function renderQuickTags"):app_js.index("function handleCopilotIntent")]
     assert "handleCopilotIntent(t.intent, t.target)" in block
     assert "handleStreamingChat(t.label)" not in block
     intent_block = app_js[app_js.index("function handleCopilotIntent"):app_js.index("function buildCopilotLoadingCard")]
-    assert "runCopilotStockResearch(target)" in intent_block
-    assert "async function runCopilotStockResearch()" in app_js
+    assert "submitCopilotSecurityQuery(target)" in intent_block
+    assert "function submitCopilotSecurityQuery(target)" in app_js
+    assert "function runCopilotStockResearch" not in app_js
 
 
 def test_delete_last_position_and_restore_empty_portfolio(tmp_path):

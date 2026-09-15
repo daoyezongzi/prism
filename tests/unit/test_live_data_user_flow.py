@@ -252,7 +252,7 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
         pytest.skip("Node.js required for frontend behavior regression")
     source = (Path(__file__).resolve().parents[2] / "app/api/static/app.js").read_text(encoding="utf-8")
     prefix = source.partition("  microStore.subscribe((store) => {")[0]
-    names = ["hasFinancialNumber", "researchSourceLabel", "buildCopilotFundCard", "runCopilotStockResearch",
+    names = ["hasFinancialNumber", "researchSourceLabel", "buildCopilotFundCard", "submitCopilotSecurityQuery",
              "requirePortfolioAnalysisContext", "renderPortfolioReadiness",
              "ensureDependency", "confirmProfileContext", "renderCompanionRisk",
              "runCopilotHealthCheck", "runCopilotRebalance", "runCopilotScenarioShock",
@@ -268,12 +268,14 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
         functions.append(match.group())
     probe = prefix + "\n".join(functions) + r'''
   const assert = require("node:assert/strict");
-  class Element {
+    class Element {
     constructor() { this.children = []; this.style = {}; this.value = ""; this.classList = {add(){},remove(){},toggle(){}}; }
     set textContent(value) { this.children = [String(value)]; }
     get textContent() { return this.children.map(x => typeof x === "string" ? x : x.textContent).join(" "); }
     append(...children) { this.children.push(...children); }
     appendChild(child) { this.children.push(child); child.parentElement = this; }
+    focus() {}
+    scrollIntoView() {}
     setAttribute() {}
     addEventListener() {}
   }
@@ -294,6 +296,9 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
   const fetchRuntimeDataMode = async () => {};
   const apiError = async response => new Error((await response.json()).message);
   let calls = [];
+  let chatQueries = [];
+  let respond;
+  const handleStreamingChat = async query => { chatQueries.push(query); };
   let fetch = async url => { calls.push(url); throw new Error("unexpected request"); };
   const output = byId("copilot-decision-output");
   (async () => {
@@ -328,50 +333,13 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
     for (const value of [null, undefined, "", " ", false, true, NaN, Infinity]) assert.equal(hasFinancialNumber(value), false);
     for (const value of [0, "0", -1, "20.5"]) assert.equal(hasFinancialNumber(value), true);
 
-    fetch = async url => {
-      calls.push(url);
-      return {ok:true, status:200, json:async()=>({data:{fund_name:"测试ETF",fund_code:"510300.SH",
-        holding_disclosure_as_of:"2026-06-30",top_holdings:[{asset_id:"600519.SH",name:"贵州茅台",weight_pct:null}]},
-        execution_context:{data_mode:"LIVE",provider:"fuyao_finance_api"}})};
-    };
-    byId("copilot-stock-input").value = "510300.SH";
-    await runCopilotStockResearch();
-    assert.equal(calls.at(-1), "/api/v1/copilot/live-fund?fund_code=510300.SH");
-    assert.match(output.textContent, /定期披露/);
-    assert.match(output.textContent, /2026-06-30/);
-    assert.doesNotMatch(output.textContent, /null|undefined|NaN/);
-
-    calls = [];
-    byId("copilot-stock-input").value = "600519.SH";
-    await runCopilotStockResearch("510300");
-    assert.equal(calls.at(-1), "/api/v1/copilot/live-fund?fund_code=510300",
-      "quick-tag target must override a stale legacy input value");
-
-    calls = [];
-    fetch = async url => { calls.push(url); return {ok:false,status:404,json:async()=>({message:"上游无行情"})}; };
-    byId("copilot-stock-input").value = "600999.SH";
-    await runCopilotStockResearch();
-    assert.equal(calls.length, 1, "live no-result must not auto-index or retry as MOCK");
-    assert.match(output.textContent, /上游无行情/);
-
-    let respond;
-    fetch = () => new Promise(resolve => { respond = resolve; });
-    byId("copilot-stock-input").value = "600519.SZ";
-    const pending = runCopilotStockResearch();
-    state.dataMode = "MOCK";
-    output.textContent = "新的页面状态";
-    respond({ok:true,status:200,json:async()=>({data:{}})});
-    await pending;
-    assert.equal(output.textContent, "新的页面状态", "old request overwrote new mode");
-
-    fetch = async () => ({ok:true,status:200,json:async()=>({data:{name:"测试",symbol:"600519.SH",price_cny:10,
-      pe_ttm:null,pb:0,roe_pct:0,valuation_quantile_pct:0},execution_context:{data_mode:"LIVE"}})});
-    byId("copilot-stock-input").value = "600519.SH";
-    await runCopilotStockResearch();
-    assert.match(output.textContent, /财务指标缺失/);
-    assert.match(output.textContent, /PE\(TTM\)/);
-    assert.doesNotMatch(output.textContent, /LIVE_PRIMARY|数据模式 LIVE|来源层级/);
-    assert.doesNotMatch(output.textContent, /NaN/);
+    const chatInput = byId("copilot-natural-input");
+    submitCopilotSecurityQuery("510300");
+    assert.match(chatInput.value, /研判 510300/);
+    assert.equal(chatQueries.at(-1), chatInput.value);
+    submitCopilotSecurityQuery("600519.SH");
+    assert.match(chatQueries.at(-1), /研判 600519\.SH/);
+    assert.equal(calls.length, 0, "security research quick action must use the chat path");
 
     state.profile = {profile:{risk_level:"BALANCED",max_drawdown_tolerance_pct:"12"},questionnaire:{loss_tolerance_score:3}};
     state.portfolioHealthRun = {technology_weight_pct:"42.00",technology_limit_pct:"25.00"};

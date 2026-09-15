@@ -2898,44 +2898,6 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   color: var(--clay-hover);
 }
 
-.task-card-input-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.copilot-stock-lookup {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-lg);
-  background: var(--surface-soft);
-}
-
-.copilot-stock-lookup-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.copilot-stock-lookup-head > div {
-  display: grid;
-  gap: 3px;
-}
-
-.copilot-stock-lookup-head span:not(.status-chip),
-.copilot-stock-lookup > small {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.copilot-stock-lookup > small {
-  display: block;
-  margin-top: 7px;
-  line-height: 1.5;
-}
-
 .copilot-action-row {
   display: flex;
   align-items: center;
@@ -2967,21 +2929,6 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
 .chat-model-recovery-notice,
 .chat-provider-recovery-notice {
   margin-top: 8px;
-}
-
-.copilot-stock-input {
-  flex: 1;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  font-size: 13px;
-  background: var(--surface-soft);
-}
-
-.copilot-stock-input:focus {
-  border-color: var(--clay);
-  outline: none;
-  background: #ffffff;
 }
 
 /* L2 决策建议输出容器 */
@@ -4806,12 +4753,6 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
-.copilot-stock-input {
-  min-height: 44px;
-  border-color: var(--outline);
-  background: var(--surface-soft);
-}
-
 .copilot-empty-output {
   padding: 28px 24px;
   border-color: var(--outline);
@@ -5206,15 +5147,6 @@ textarea:focus-visible {
   }
 
   .copilot-submit-btn {
-    width: 100%;
-  }
-
-  .task-card-input-row {
-    flex-wrap: wrap;
-  }
-
-  .copilot-stock-input,
-  .task-card-input-row .copilot-action-btn {
     width: 100%;
   }
 

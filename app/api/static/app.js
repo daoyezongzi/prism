@@ -4645,7 +4645,7 @@
 
   async function loadStockResearchCatalog(ownerId) {
     if (state.dataMode === "LIVE") {
-      updateStockResearchEntry();
+      updateLegacyStockResearchEntry();
       return null;
     }
     const sequence = ++state.stockResearchSequence;
@@ -4658,11 +4658,11 @@
     state.stockResearchTemplate = template;
     renderStockResearchScenarioOptions(template.scenarios);
     byId("stock-research-template-meta").textContent = `个股 ${researchSubjectLabel(template.subject)} · ${researchPeriodLabel(template.period)} · ${text(template.metrics?.length, "0")} 项指标 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
-    updateStockResearchEntry();
+    updateLegacyStockResearchEntry();
     return template;
   }
 
-  function updateStockResearchEntry() {
+  function updateLegacyStockResearchEntry() {
     const live = state.dataMode === "LIVE";
     const submit = byId("run-stock-research");
     const scenarioSelect = byId("stock-research-scenario");
@@ -4675,7 +4675,7 @@
       }
       if (scenarioSelect) scenarioSelect.disabled = true;
       if (meta) meta.textContent = "LIVE 完整个股研究服务尚未接入；不会返回固定合成报告。";
-      if (boundary) boundary.textContent = "LIVE 模式不会返回演示报告。需要真实行情时，请转到实时个股底稿并输入任意受支持代码。";
+      if (boundary) boundary.textContent = "LIVE 模式不会返回演示报告。需要真实行情时，请转到 AI 对话并输入任意受支持代码。";
       setStockResearchStatus("LIVE 未接入", "blocked");
     } else {
       if (submit) {
@@ -4687,10 +4687,11 @@
     }
   }
 
-  function openLiveStockLookup() {
+  function openCopilotStockChat() {
     window.location.hash = "copilot";
-    const input = byId("copilot-stock-input");
+    const input = byId("copilot-natural-input");
     if (input) {
+      if (!input.value.trim()) input.value = "研判 300750";
       input.focus();
       input.scrollIntoView({ behavior: "smooth", block: "center" });
     }
@@ -5060,7 +5061,7 @@
     byId("stock-research-template-meta").textContent = "运行时读取固定合成个股与风险规则；结果不写入决策回执。";
     clearStockResearchScenarioOptions();
     setStockResearchStatus("待运行");
-    updateStockResearchEntry();
+    updateLegacyStockResearchEntry();
     renderStockResearch(null);
     state.fundResearchTemplate = null;
     state.fundResearchRun = null;
@@ -5220,7 +5221,7 @@
 
   async function runStockResearch() {
     if (state.dataMode === "LIVE") {
-      updateStockResearchEntry();
+      updateLegacyStockResearchEntry();
       return;
     }
     const nextOwnerId = byId("owner-id").value.trim();
@@ -5838,7 +5839,7 @@
             syncNavigation();
             if (state.ownerId && state.selectedPersona === "custom-user") await loadSavedPortfolio();
           }
-          updateStockResearchEntry();
+          updateLegacyStockResearchEntry();
           updateRuntimeDataModeUI();
         }
       }
@@ -5894,20 +5895,6 @@
       : (liveReady ? `可切换至实时数据；${capabilitySummary}` : "实时数据源尚未就绪"),
     );
 
-    const fundInput = /^(510|512|513|515|588|159)/.test(byId("copilot-stock-input")?.value?.trim() || "");
-    const capabilityControls = [
-      ["copilot-btn-stock-research", fundInput ? "fund_lookthrough" : "stock_quote", "此类标的实时数据权限当前不可用"],
-    ];
-    capabilityControls.forEach(([id, capability, unavailableMessage]) => {
-      const control = byId(id);
-      if (!control) return;
-      const unavailable = isLive && !liveCapabilities[capability];
-      control.disabled = unavailable;
-      control.setAttribute(
-        "title",
-        unavailable ? `${unavailableMessage}；可切换至离线演示查看示例数据` : "",
-      );
-    });
   }
 
   function openDataModeConfirmModal() {
@@ -6351,7 +6338,7 @@
     setResearchStatus("待运行");
   });
   byId("run-stock-research").addEventListener("click", runStockResearch);
-  byId("open-live-stock-lookup")?.addEventListener("click", openLiveStockLookup);
+  byId("open-copilot-stock-chat")?.addEventListener("click", openCopilotStockChat);
   byId("stock-research-scenario").addEventListener("change", () => {
     state.stockResearchRun = null;
     state.stockResearchSequence += 1;
@@ -7299,10 +7286,9 @@
     experienceLevel: "INTERMEDIATE",
     returnExpectation: "MODERATE",
     maxDrawdown: "15",
-    defaultStock: "300750",
     quickTags: [
       { label: "体检我的组合", intent: "CHECK_PORTFOLIO" },
-      { label: "查询实时底稿 300750", intent: "RESEARCH_STOCK", target: "300750" },
+      { label: "研判 300750（AI 对话）", intent: "RESEARCH_STOCK", target: "300750" },
       { label: "生成调仓方案", intent: "REBALANCE_PORTFOLIO" },
       { label: "测试下跌 20%", intent: "SCENARIO_SHOCK" }
     ]
@@ -7326,10 +7312,9 @@
       experienceLevel: "INTERMEDIATE",
       returnExpectation: "MODERATE",
       maxDrawdown: "15",
-      defaultStock: "300750",
       quickTags: [
         { label: "体检科技持仓", intent: "CHECK_PORTFOLIO" },
-        { label: "查询实时底稿 300750", intent: "RESEARCH_STOCK", target: "300750" },
+        { label: "研判 300750（AI 对话）", intent: "RESEARCH_STOCK", target: "300750" },
         { label: "生成调仓方案", intent: "REBALANCE_PORTFOLIO" },
         { label: "测试科技股下跌 20%", intent: "SCENARIO_SHOCK" }
       ]
@@ -7350,7 +7335,6 @@
       experienceLevel: "NOVICE",
       returnExpectation: "LOW",
       maxDrawdown: "8",
-      defaultStock: "113050",
       quickTags: [
         { label: "检查组合风险", intent: "CHECK_PORTFOLIO" },
         { label: "研究 113050", intent: "RESEARCH_STOCK", target: "113050" },
@@ -7374,7 +7358,6 @@
       experienceLevel: "EXPERIENCED",
       returnExpectation: "HIGH",
       maxDrawdown: "25",
-      defaultStock: "588000",
       quickTags: [
         { label: "体检成长组合波动", intent: "CHECK_PORTFOLIO" },
         { label: "研究 588000", intent: "RESEARCH_STOCK", target: "588000" },
@@ -7582,9 +7565,6 @@
     const ddInput = byId("max-drawdown");
     if (ddInput) ddInput.value = persona.maxDrawdown;
 
-    const stockInput = byId("copilot-stock-input");
-    if (stockInput) stockInput.value = persona.defaultStock;
-
     // Update Quick Tags
     renderQuickTags(persona.quickTags);
 
@@ -7646,11 +7626,7 @@
     if (intent === "CHECK_PORTFOLIO") {
       runCopilotHealthCheck();
     } else if (intent === "RESEARCH_STOCK") {
-      if (target) {
-        const stockInput = byId("copilot-stock-input");
-        if (stockInput) stockInput.value = target;
-      }
-      runCopilotStockResearch(target);
+      submitCopilotSecurityQuery(target);
     } else if (intent === "REBALANCE_PORTFOLIO") {
       runCopilotRebalance();
     } else if (intent === "SCENARIO_SHOCK") {
@@ -8833,445 +8809,6 @@
     }
   }
 
-  async function runCopilotStockResearch() {
-    const symbolOverride = typeof arguments[0] === "string" ? arguments[0] : "";
-    const output = byId("copilot-decision-output");
-    if (!output) return;
-    clear(output);
-    const token = beginContextRequest("copilotResearchSequence");
-
-    const stockSymbol = symbolOverride.trim() || byId("copilot-stock-input")?.value?.trim() || "";
-    if (!stockSymbol) {
-      const emptyCard = document.createElement("div");
-      emptyCard.className = "copilot-empty-output";
-      const h4 = document.createElement("h4");
-      h4.textContent = "请输入证券代码";
-      const p = document.createElement("p");
-      p.textContent = "请输入 6 位 A 股证券或 ETF 代码（如 300750、688256、600519）。";
-      emptyCard.append(h4, p);
-      output.append(emptyCard);
-      return;
-    }
-
-    const cleanCode = stockSymbol.replace(/\.(SH|SZ|BJ)$/i, "").trim();
-    const A_SHARE_PREFIXES = /^(600|601|603|605|688|689|000|001|002|003|300|301|82|83|87|88|92|510|512|513|515|588|159)/;
-    const isSixDigits = /^\d{6}$/.test(cleanCode);
-    const hasValidPrefix = A_SHARE_PREFIXES.test(cleanCode);
-
-    // Hard Gate 1: Syntax & Exchange Prefix Validation (e.g. 114514 rejection)
-    if (!isSixDigits || !hasValidPrefix) {
-      const card = document.createElement("div");
-      card.className = "copilot-decision-card";
-
-      const banner = document.createElement("div");
-      banner.className = "decision-banner overbound";
-      const titleWrap = document.createElement("div");
-      titleWrap.className = "decision-verdict-title";
-      const icon = document.createElement("span");
-      icon.className = "decision-verdict-icon";
-      icon.append(createSvgIcon("icon-alert", "prism-icon prism-icon-lg"));
-      const h3 = document.createElement("h3");
-      h3.textContent = `代码格式有误：${stockSymbol}`;
-      titleWrap.append(icon, h3);
-
-      const statusChip = document.createElement("span");
-      statusChip.className = "cf-verdict cf-verdict-overbound";
-      statusChip.append(createSvgIcon("icon-x", "prism-icon"), document.createTextNode(" 代码格式无效"));
-      banner.append(titleWrap, statusChip);
-
-      const body = document.createElement("div");
-      body.className = "decision-card-body";
-
-      const callout = document.createElement("div");
-      callout.className = "doc-callout doc-callout-danger";
-      const cIcon = document.createElement("div");
-      cIcon.className = "callout-icon";
-      cIcon.append(createSvgIcon("icon-alert", "prism-icon"));
-      const cContent = document.createElement("div");
-      cContent.className = "callout-content";
-      const cTitle = document.createElement("div");
-      cTitle.className = "callout-title";
-      cTitle.textContent = "证券代码格式有误";
-      const cP = document.createElement("p");
-      cP.textContent = `A 股上市证券代码通常为 6 位数字（如 60/688 主板与科创板、00/300 主板与创业板、8/92 北交所、51/159 ETF 等）。输入的标的代码 [${stockSymbol}] 格式不符合规范，请输入有效代码后再试。`;
-      cContent.append(cTitle, cP);
-      callout.append(cIcon, cContent);
-
-      const quickWrap = document.createElement("div");
-      quickWrap.style.marginTop = "14px";
-      const qHead = document.createElement("div");
-      qHead.style.fontSize = "13px";
-      qHead.style.fontWeight = "600";
-      qHead.style.marginBottom = "8px";
-      qHead.textContent = "建议检索已收录基准标的：";
-      quickWrap.append(qHead);
-
-      const sampleCodes = [
-        { code: "300750", name: "宁德时代 (新能源)" },
-        { code: "688256", name: "寒武纪 (AI芯片)" },
-        { code: "600519", name: "贵州茅台 (核心消费)" },
-        { code: "002594", name: "比亚迪 (整车/电池)" },
-        { code: "688981", name: "中芯国际 (晶圆制造)" },
-        { code: "600036", name: "招商银行 (股份行)" },
-      ];
-      const chipsRow = document.createElement("div");
-      chipsRow.style.display = "flex";
-      chipsRow.style.flexWrap = "wrap";
-      chipsRow.style.gap = "8px";
-      for (const item of sampleCodes) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "drilldown-btn";
-        btn.textContent = `${item.code} ${item.name}`;
-        btn.addEventListener("click", () => {
-          const input = byId("copilot-stock-input");
-          if (input) input.value = item.code;
-          runCopilotStockResearch(item.code);
-        });
-        chipsRow.append(btn);
-      }
-      quickWrap.append(chipsRow);
-
-      body.append(callout, quickWrap);
-      card.append(banner, body);
-      output.append(card);
-      return;
-    }
-
-    const isFund = /^(510|512|513|515|588|159)/.test(cleanCode);
-    output.append(buildCopilotLoadingCard("icon-activity", `正在查询 ${cleanCode} 数据…`, isFund ? "正在获取基金披露持仓与底层明细…" : "正在获取最新市场行情与财务指标…"));
-
-    try {
-      const endpoint = isFund ? "live-fund?fund_code=" : "live-quote?symbol=";
-      let resp = await fetch(`/api/v1/copilot/${endpoint}${encodeURIComponent(stockSymbol)}`);
-      if (!isContextRequestCurrent(token)) return;
-      let autoDependencyCompleted = false;
-
-      if (isFund) {
-        if (!resp.ok) throw await apiError(resp);
-        const result = await resp.json();
-        if (!isContextRequestCurrent(token)) return;
-        clear(output);
-        output.append(buildCopilotFundCard(result));
-        return;
-      }
-
-      if (resp.status === 404 && token.dataMode === "LIVE") throw await apiError(resp);
-
-      // 遇到阻碍：如果 404 缺失底稿，自动完成前置依赖（自动建档并重试）
-      if (resp.status === 404) {
-        clear(output);
-        output.append(buildCopilotLoadingCard("icon-activity", `正在查询 ${cleanCode} 行情数据…`, "检测到标的代码尚未建档，正在同步行情与财报数据…"));
-        try {
-          const autoResp = await fetch(`/api/v1/copilot/auto-index-security?symbol=${encodeURIComponent(cleanCode)}`, { method: "POST" });
-          if (!isContextRequestCurrent(token)) return;
-          if (autoResp.ok) {
-            const retryResp = await fetch(`/api/v1/copilot/live-quote?symbol=${encodeURIComponent(cleanCode)}`);
-            if (!isContextRequestCurrent(token)) return;
-            if (retryResp.ok) {
-              resp = retryResp;
-              autoDependencyCompleted = true;
-            }
-          }
-        } catch (autoErr) {
-          console.warn("自动补全标的数据失败:", autoErr);
-        }
-      }
-
-      // Hard Gate 2: Unrecorded Security Handling (404)
-      if (resp.status === 404) {
-        clear(output);
-        const card = document.createElement("div");
-        card.className = "copilot-decision-card";
-
-        const banner = document.createElement("div");
-        banner.className = "decision-banner hold";
-        const titleWrap = document.createElement("div");
-        titleWrap.className = "decision-verdict-title";
-        const icon = document.createElement("span");
-        icon.className = "decision-verdict-icon";
-        icon.append(createSvgIcon("icon-alert", "prism-icon prism-icon-lg"));
-        const h3 = document.createElement("h3");
-        h3.textContent = `暂无标的数据：${cleanCode}`;
-        titleWrap.append(icon, h3);
-
-        const statusChip = document.createElement("span");
-        statusChip.className = "cf-verdict cf-verdict-hold";
-        statusChip.append(createSvgIcon("icon-clock", "prism-icon"), document.createTextNode(" 暂未收录"));
-        banner.append(titleWrap, statusChip);
-
-        const body = document.createElement("div");
-        body.className = "decision-card-body";
-
-        const callout = document.createElement("div");
-        callout.className = "doc-callout doc-callout-warning";
-        const cIcon = document.createElement("div");
-        cIcon.className = "callout-icon";
-        cIcon.append(createSvgIcon("icon-alert", "prism-icon"));
-        const cContent = document.createElement("div");
-        cContent.className = "callout-content";
-        const cTitle = document.createElement("div");
-        cTitle.className = "callout-title";
-        cTitle.textContent = "暂无该标的市场数据";
-        const cP = document.createElement("p");
-        cP.textContent = `目前系统尚未收录代码 [${cleanCode}] 的最新行情与财务数据，暂时无法提供分析。请检查代码是否正确或稍后重试。`;
-        cContent.append(cTitle, cP);
-        callout.append(cIcon, cContent);
-
-        const retryWrap = document.createElement("div");
-        retryWrap.style.marginTop = "14px";
-        const retryBtn = document.createElement("button");
-        retryBtn.type = "button";
-        retryBtn.className = "btn btn-primary";
-        retryBtn.style.marginRight = "10px";
-        retryBtn.textContent = "重新尝试自动建档并研判";
-        retryBtn.addEventListener("click", () => {
-          runCopilotStockResearch(stockSymbol);
-        });
-        retryWrap.append(retryBtn);
-
-        const quickWrap = document.createElement("div");
-        quickWrap.style.marginTop = "14px";
-        const qHead = document.createElement("div");
-        qHead.style.fontSize = "13px";
-        qHead.style.fontWeight = "600";
-        qHead.style.marginBottom = "8px";
-        qHead.textContent = "可查询已收录基准池标的：";
-        quickWrap.append(qHead);
-
-        const sampleCodes = [
-          { code: "300750", name: "宁德时代" },
-          { code: "688256", name: "寒武纪" },
-          { code: "601998", name: "中信银行" },
-          { code: "600519", name: "贵州茅台" },
-          { code: "002594", name: "比亚迪" },
-          { code: "688981", name: "中芯国际" },
-          { code: "600036", name: "招商银行" },
-          { code: "601318", name: "中国平安" },
-          { code: "600900", name: "长江电力" },
-        ];
-        const chipsRow = document.createElement("div");
-        chipsRow.style.display = "flex";
-        chipsRow.style.flexWrap = "wrap";
-        chipsRow.style.gap = "8px";
-        for (const item of sampleCodes) {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "drilldown-btn";
-          btn.textContent = `${item.code} ${item.name}`;
-          btn.addEventListener("click", () => {
-            const input = byId("copilot-stock-input");
-            if (input) input.value = item.code;
-            runCopilotStockResearch(item.code);
-          });
-          chipsRow.append(btn);
-        }
-        quickWrap.append(chipsRow);
-
-        body.append(callout, retryWrap, quickWrap);
-        card.append(banner, body);
-        output.append(card);
-        return;
-      }
-
-      if (!resp.ok) {
-        const errJson = await resp.json().catch(() => ({}));
-        throw new Error(errJson.message || `请求失败 HTTP ${resp.status}`);
-      }
-
-      const res = await resp.json();
-      if (!isContextRequestCurrent(token)) return;
-      const quote = res.data;
-      if (!quote) throw new Error("未获取到标的底稿数据");
-
-      const requiredFinancialFields = ["pe_ttm", "pb", "roe_pct", "valuation_quantile_pct"];
-      const missingFinancialFields = requiredFinancialFields.filter((field) => !hasFinancialNumber(quote[field]) || (quote.missing_fields || []).includes(field));
-      if (missingFinancialFields.length) {
-        clear(output);
-        const card = document.createElement("div");
-        card.className = "copilot-decision-card";
-        const banner = document.createElement("div");
-        banner.className = "decision-banner hold";
-        const title = document.createElement("h3");
-        title.textContent = `${quote.name} (${quote.symbol}) 已取得实时行情，财务指标待补齐`;
-        const status = document.createElement("span");
-        status.className = "cf-verdict cf-verdict-hold";
-        const financialStatusLabels = {
-          PERMISSION_REQUIRED: "待授权",
-          NOT_CONFIGURED: "未配置",
-          UNAVAILABLE: "暂不可用",
-        };
-        status.textContent = `待复核 · 财务指标${financialStatusLabels[quote.financial_data_status] || "缺失"}`;
-        banner.append(title, status);
-        const body = document.createElement("div");
-        body.className = "decision-card-body";
-        const message = document.createElement("p");
-        const fieldLabels = {
-          pe_ttm: "PE(TTM)",
-          pb: "PB",
-          roe_pct: "ROE",
-          valuation_quantile_pct: "估值分位",
-        };
-        const missingLabels = missingFinancialFields.map((field) => fieldLabels[field] || "财务指标");
-        const sourceLabel = researchSourceLabel(quote.source || quote.provider);
-        const observedLabel = quote.observed_at || "未提供";
-        const statusLabel = financialStatusLabels[quote.financial_data_status] || "财务指标待补齐";
-        message.textContent = `已取得实时行情，报价 ¥${quote.price_cny}；来源：${sourceLabel}；更新时间：${observedLabel}。财务指标${statusLabel}，缺少 ${missingLabels.join("、")}，因此暂不生成估值与配置结论。`;
-        body.append(message);
-        const actionRow = document.createElement("div");
-        actionRow.className = "copilot-action-row";
-        const configureButton = document.createElement("button");
-        configureButton.type = "button";
-        configureButton.className = "copilot-action-btn secondary";
-        configureButton.textContent = "配置 / 测试问财数据";
-        configureButton.addEventListener("click", () => {
-          if (typeof openLLMConfigModal === "function") openLLMConfigModal();
-        });
-        const actionHint = document.createElement("small");
-        actionHint.textContent = "测试通过后重新查询，系统才会使用真实财务字段。";
-        actionRow.append(configureButton, actionHint);
-        body.append(actionRow);
-        card.append(banner, body);
-        output.append(card);
-        return;
-      }
-
-      const providerTier = quote.provider_tier || "UNSPECIFIED";
-      const sourceIsLive = res.execution_context?.data_mode === "LIVE"
-        || providerTier === "LIVE_PRIMARY" || providerTier === "LIVE_SECONDARY";
-      const verdictBannerClass = sourceIsLive ? "buy" : "hold";
-      const verdictTitle = `标的底稿：${quote.name} (${quote.symbol}) · ${sourceIsLive ? "实时行情" : "离线底稿"}`;
-      const verdictChipText = sourceIsLive ? "实时行情已获取" : "离线底稿";
-      const verdictChipClass = sourceIsLive ? "cf-verdict-pass" : "cf-verdict-hold";
-
-      clear(output);
-      const card = document.createElement("div");
-      card.className = "copilot-decision-card";
-
-      // Banner
-      const banner = document.createElement("div");
-      banner.className = `decision-banner ${verdictBannerClass}`;
-      const titleWrap = document.createElement("div");
-      titleWrap.className = "decision-verdict-title";
-      const icon = document.createElement("span");
-      icon.className = "decision-verdict-icon";
-      icon.append(createSvgIcon(sourceIsLive ? "icon-check" : "icon-file-text", "prism-icon prism-icon-lg"));
-      const h3 = document.createElement("h3");
-      h3.textContent = verdictTitle;
-      titleWrap.append(icon, h3);
-
-      const statusChip = document.createElement("span");
-      statusChip.className = `cf-verdict ${verdictChipClass}`;
-      statusChip.append(createSvgIcon(sourceIsLive ? "icon-check" : "icon-file-text", "prism-icon"), document.createTextNode(` ${verdictChipText}`));
-      banner.append(titleWrap, statusChip);
-
-      // Body
-      const body = document.createElement("div");
-      body.className = "decision-card-body";
-
-      if (autoDependencyCompleted || quote.auto_indexed) {
-        const autoNotice = document.createElement("div");
-        autoNotice.className = "doc-callout doc-callout-info";
-        autoNotice.style.marginBottom = "14px";
-        const anIcon = document.createElement("div");
-        anIcon.className = "callout-icon";
-        anIcon.append(createSvgIcon("icon-check", "prism-icon"));
-        const anContent = document.createElement("div");
-        anContent.className = "callout-content";
-        const anTitle = document.createElement("div");
-        anTitle.className = "callout-title";
-        anTitle.textContent = "已自动完成前置底稿建档依赖";
-        const anText = document.createElement("p");
-        anText.textContent = `系统检测到标的代码 [${cleanCode}] 初始未收录，已按主行情源、备用行情源、静态底稿顺序尝试建档；缺失财务字段保持显式缺失。`;
-        anContent.append(anTitle, anText);
-        autoNotice.append(anIcon, anContent);
-        body.append(autoNotice);
-      }
-
-      // Callout
-      const callout = document.createElement("div");
-      callout.className = sourceIsLive ? "doc-callout doc-callout-info" : "doc-callout doc-callout-warning";
-      const cIcon = document.createElement("div");
-      cIcon.className = "callout-icon";
-      cIcon.append(createSvgIcon(sourceIsLive ? "icon-file-text" : "icon-alert", "prism-icon"));
-      const cContent = document.createElement("div");
-      cContent.className = "callout-content";
-      const cTitle = document.createElement("div");
-      cTitle.className = "callout-title";
-      cTitle.textContent = `基本面概况（所属行业：${quote.sector || "未提供"} / ${quote.sub_industry || quote.sector || "未提供"}）`;
-      const cP = document.createElement("p");
-      const formatMetric = (value, digits = 1, suffix = "") => hasFinancialNumber(value) ? `${Number(value).toFixed(digits)}${suffix}` : "未提供";
-      cP.textContent = `${quote.name}（${quote.symbol}）当前报价 ¥${formatMetric(quote.price_cny, 2)}，动态市盈率 TTM ${formatMetric(quote.pe_ttm, 1, " 倍")}，市净率 PB ${formatMetric(quote.pb, 2)}，历史估值分位 ${formatMetric(quote.valuation_quantile_pct, 1, "%")}。毛利率 ${formatMetric(quote.gross_margin_pct, 1, "%")}，ROE ${formatMetric(quote.roe_pct, 1, "%")}，资产负债率 ${formatMetric(quote.debt_ratio_pct, 1, "%")}。`;
-      cContent.append(cTitle, cP);
-      callout.append(cIcon, cContent);
-
-      // Metrics row with genuine backend data
-      const metricsRow = document.createElement("div");
-      metricsRow.className = "decision-metrics-row";
-      const changePrefix = quote.change_pct >= 0 ? "+" : "";
-      metricsRow.append(
-        buildCopilotMetricBox("最新报价 / 日涨跌", `¥${formatMetric(quote.price_cny, 2)} (${hasFinancialNumber(quote.change_pct) ? `${changePrefix}${Number(quote.change_pct).toFixed(2)}%` : "未提供"})`, false, sourceIsLive, `数据源：${researchSourceLabel(quote.source || quote.provider)}`),
-        buildCopilotMetricBox("估值分位", formatMetric(quote.valuation_quantile_pct, 1, "%"), false, false, "历史分位数参考。"),
-        buildCopilotMetricBox("数据时效", quote.staleness_seconds == null ? "未提供" : `${Number(quote.staleness_seconds).toFixed(0)} 秒前`, false, sourceIsLive, "数据更新时间间隔。"),
-        buildCopilotMetricBox("ROE / 毛利率", `${formatMetric(quote.roe_pct, 1, "%")} / ${formatMetric(quote.gross_margin_pct, 1, "%")}`, false, false, "来自最新财报披露。")
-      );
-
-      // Factual audit lineage
-      const reasonsWrap = document.createElement("div");
-      const reasonsHead = document.createElement("h4");
-      reasonsHead.style.margin = "0 0 8px";
-      reasonsHead.style.fontSize = "14px";
-      const rHeadIcon = createSvgIcon("icon-file-text", "prism-icon");
-      rHeadIcon.style.marginRight = "6px";
-      reasonsHead.append(rHeadIcon, document.createTextNode(" 基本面与参考数据："));
-      const reasonsList = document.createElement("ul");
-      reasonsList.className = "decision-reasons-list";
-
-      const r1 = document.createElement("li");
-      const r1Bold = document.createElement("strong");
-      r1Bold.textContent = "行情与财务：";
-      r1.append(r1Bold, document.createTextNode(`数据源：${researchSourceLabel(quote.source || quote.provider)}；资产负债率 ${formatMetric(quote.debt_ratio_pct, 1, "%")}。`));
-
-      const r2 = document.createElement("li");
-      const r2Bold = document.createElement("strong");
-      r2Bold.textContent = "行业与市值：";
-      r2.append(r2Bold, document.createTextNode(`所属 ${quote.sector || "未提供"} / ${quote.sub_industry || "未提供"}；总市值约 ${hasFinancialNumber(quote.market_cap_cny) ? `¥${Number(quote.market_cap_cny).toLocaleString()}` : "未提供"}。`));
-
-      const r3 = document.createElement("li");
-      const r3Bold = document.createElement("strong");
-      r3Bold.textContent = "需要注意：";
-      r3.append(r3Bold, document.createTextNode(`${(quote.missing_fields && quote.missing_fields.length > 0) ? `部分字段暂未更新（${quote.missing_fields.join("、")}）；` : ""}可进入组合工具评估该标的对你整体组合的影响。`));
-
-      reasonsList.append(r1, r2, r3);
-      reasonsWrap.append(reasonsHead, reasonsList);
-
-      body.append(callout, metricsRow, reasonsWrap);
-
-      // Drilldown links
-      body.append(buildCopilotDrilldownRow([
-        { href: "#stock-research", text: "查看完整研究" },
-        { href: "#evidence", text: "查看数据来源" },
-        { href: "#portfolio-optimization", text: "查看组合目标" }
-      ]));
-
-      card.append(banner, body);
-      output.append(card);
-    } catch (err) {
-      if (!isContextRequestCurrent(token)) return;
-      if (token.dataMode === "LIVE") await fetchRuntimeDataMode();
-      if (!isContextRequestCurrent(token)) return;
-      clear(output);
-      const errCard = document.createElement("div");
-      errCard.className = "copilot-empty-output";
-      const h4 = document.createElement("h4");
-      h4.textContent = "研判失败";
-      const p = document.createElement("p");
-      p.textContent = err.message || "未能完成标的研判";
-      errCard.append(h4, p);
-      output.append(errCard);
-    }
-  }
-
   function hasFinancialNumber(value) {
     return (typeof value === "number" || (typeof value === "string" && value.trim() !== "")) && Number.isFinite(Number(value));
   }
@@ -10285,6 +9822,19 @@
       loadModelSettings().catch(error => setError(error.message));
       loadWencaiSettings().catch(error => setError(error.message));
     }
+  }
+
+  function submitCopilotSecurityQuery(target) {
+    const code = String(target || "").trim();
+    const query = code
+      ? `研判 ${code}：请调用真实工具查询最新行情，并返回可用的财务、行业和估值字段；缺失项请明确列出，不要补值。`
+      : "请在 AI 对话中输入要研判的 6 位股票或 ETF 代码。";
+    const input = byId("copilot-natural-input");
+    if (input) {
+      input.value = query;
+      input.focus();
+    }
+    if (code) void handleStreamingChat(query);
   }
 
   function updateVisibleSourceStatus() {
@@ -11394,15 +10944,6 @@
   // Copilot Task Buttons
   const copilotHealthBtn = byId("copilot-btn-health-check");
   if (copilotHealthBtn) copilotHealthBtn.addEventListener("click", runCopilotHealthCheck);
-  const copilotStockBtn = byId("copilot-btn-stock-research");
-  if (copilotStockBtn) copilotStockBtn.addEventListener("click", runCopilotStockResearch);
-  byId("copilot-stock-input")?.addEventListener("input", updateRuntimeDataModeUI);
-  byId("copilot-stock-input")?.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      runCopilotStockResearch();
-    }
-  });
   const copilotRebalanceBtn = byId("copilot-btn-rebalance");
   if (copilotRebalanceBtn) copilotRebalanceBtn.addEventListener("click", runCopilotRebalance);
   const copilotQueryBtn = byId("copilot-submit-query");
