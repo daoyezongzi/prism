@@ -6,20 +6,20 @@
 
 | 配置 | 默认 | 用途 | 验证边界 |
 |---|---|---|---|
-| `PRISM_DB_PATH` | `data/private/prism.sqlite3` | 本地持久化 | SQLite 回归与备份恢复 |
+| `PRISM_DB_PATH` | Git 共同工作树的 `data/private/prism.sqlite3` | 本地持久化 | SQLite 回归与备份恢复；可显式覆盖 |
 | `PRISM_DATABASE_URL` | 未设置 | PostgreSQL 连接配置，设置后优先于 SQLite | 真实 PostgreSQL 17.11 隔离回归；不自动搬迁旧数据 |
-| `PRISM_SECRET_STORE_PATH` | `data/private/prism-secrets.json` | Windows DPAPI 保护的本地凭据文件 | 文件只保存密文；必须由同一 Windows 账户运行 Prism 才能解密 |
+| `PRISM_SECRET_STORE_PATH` | Git 共同工作树的 `data/private/prism-secrets.json` | Windows DPAPI 保护的本地凭据文件 | 文件只保存密文；必须由同一 Windows 账户运行 Prism 才能解密；可显式覆盖 |
 | `PRISM_AUTH_ACCOUNTS_FILE` | 未设置 | 启用 HTTP Basic 账户校验 | 本地回环；跨机器必须先配置 HTTPS |
 | `HITHINK_FINANCE_API_KEY` | 未设置 | 扶摇服务端凭据 | 真实能力探测成功后可用 |
 | `IWENCAI_API_KEY` / `IWENCAI_BASE_URL` | 未设置 / `https://openapi.iwencai.com` | 问财 OpenAPI 服务端凭据与地址 | 配置 Skill 版本头并完成真实查询后可用 |
-| `WENCAI_SKILLHUB_CONTRACT_VERIFIED` | `false` | 问财响应契约人工确认闸门 | `true` 后允许问财 LIVE 能力 |
+| `WENCAI_SKILLHUB_CONTRACT_VERIFIED` | `false` | 问财批量探针的契约确认状态 | 探针通过后完整开放能力矩阵；凭据已配置但尚未完成探针时，系统仍可直接尝试真实 Skill，失败则闭合 |
 | `/api/health` | 无认证 | 进程和数据模式健康检查 | 不等于供应商可用性承诺 |
 
 未设置认证文件时为开发模式，`X-Owner-ID` 只是数据命名空间，不构成访问保护。认证开启后所有页面及业务接口需要认证，服务端将身份绑定到固定 owner；普通账户无权修改全局模型和数据模式。认证文件无效时启动失败，不自动回退到开发模式。
 
 ## 第2章 启动与账户管理
 
-在仓库根目录执行。密码通过交互输入，不放进命令历史；生成文件只保存随机盐和 scrypt 摘要。已有持仓属于 `demo-owner` 时，使用该 owner 可继续读取已有数据。运行前由使用者自行设置密码，不提供公共默认密码。
+在仓库根目录执行。密码通过交互输入，不放进命令历史；生成文件只保存随机盐和 scrypt 摘要。已有持仓属于 `demo-owner` 时，使用该 owner 可继续读取已有数据。运行前由使用者自行设置密码，不提供公共默认密码。Git linked worktree 默认解析共同主仓库的 `data/private`，因此可复用已确认持仓和 DPAPI 密钥；如需隔离测试，显式设置 `PRISM_DB_PATH` 与 `PRISM_SECRET_STORE_PATH`。
 
 ```powershell
 .venv/Scripts/python.exe tools/local_account.py --username local-admin --owner demo-owner --admin

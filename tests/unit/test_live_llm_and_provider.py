@@ -313,6 +313,68 @@ def test_agent_rejects_content_only_answer_for_financial_query() -> None:
     assert any(event["type"] == "token" for event in named_events)
 
 
+def test_tool_contract_normalizes_known_security_names_and_rejects_unknown() -> None:
+    args, error = CopilotAgent._validate_tool_call(
+        "query_stock_quote", {"symbol": "宁德时代"}
+    )
+    assert error is None
+    assert args == {"symbol": "300750"}
+
+    args, error = CopilotAgent._validate_tool_call(
+        "query_stock_quote", {"symbol": "300750.SZ"}
+    )
+    assert error is None
+    assert args == {"symbol": "300750"}
+
+    _, error = CopilotAgent._validate_tool_call(
+        "query_stock_quote", {"symbol": "非已知证券名称"}
+    )
+    assert error == "标的代码必须为 6 位数字，可附带 .SH、.SZ 或 .BJ。"
+
+
+def test_live_semantic_call_attempts_configured_provider_before_batch_probe() -> None:
+    class ConfiguredSemanticProvider:
+        name = "wencai_skillhub_provider"
+        is_configured = True
+
+        async def execute(self, request: ProviderRequest) -> ProviderResult:
+            fields = {
+                "items": [{
+                    "title": "宁德时代公告",
+                    "summary": "来自真实检索适配器的记录",
+                    "publish_date": "2026-09-15",
+                }],
+            }
+            return ProviderResult(
+                request_id=request.request_id,
+                request_fingerprint=compute_request_fingerprint(request),
+                provider=self.name,
+                status=ProviderStatus.SUCCESS,
+                retrieved_at=datetime.now(UTC),
+                records=(ProviderRecord(source=self.name, fields=fields),),
+                serving_mode=ProviderServingMode.DIRECT,
+            )
+
+    from app.runtime.mode import reset_runtime_mode_controller
+
+    reset_runtime_mode_controller(DataMode.LIVE)
+    provider = ConfiguredSemanticProvider()
+
+    async def _run():
+        agent = CopilotAgent(skillhub_provider=provider)
+        return await agent._execute_tool(
+            "query_wencai_semantic",
+            {"query": "宁德时代公告", "channel": "announcement"},
+            {},
+            None,
+            DataMode.LIVE,
+        )
+
+    result = asyncio.run(_run())
+    assert result["status"] == "SUCCESS"
+    assert result["items"][0]["title"] == "宁德时代公告"
+
+
 def test_agent_allows_general_financial_education_without_live_tool() -> None:
     class ContentOnlyClient:
         is_configured = True

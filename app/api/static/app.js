@@ -7714,6 +7714,13 @@
     const profile = token.profile.profile;
     let portfolio = token.portfolio;
     const liveCapabilities = (state.capabilities && state.capabilities.LIVE) || {};
+    const hasConfirmedPortfolio = Boolean(
+      portfolio?.position_snapshot?.positions?.length
+    );
+    const canUseConfirmedPortfolio = state.dataMode === "LIVE"
+      && hasConfirmedPortfolio
+      && (liveCapabilities.stock_quote === true
+        || liveCapabilities.fund_lookthrough === true);
     const shouldRefresh = state.dataMode !== "LIVE"
       || liveCapabilities.portfolio_refresh === true
       || (liveCapabilities.stock_quote === true && state.wencaiConfigured === true);
@@ -7738,29 +7745,49 @@
         throw new Error(refreshPayload.message || "最新数据刷新失败，未使用旧数据继续计算");
       }
       if (refreshPayload.status !== "COMPLETE" || !refreshPayload.portfolio) {
-        microStore.transact((store) => { store.portfolioRefreshRun = refreshPayload; });
+        if (canUseConfirmedPortfolio && refreshPayload.status === "REVIEW_REQUIRED") {
+          const skippedRefresh = {
+            ...refreshPayload,
+            status: "SKIPPED",
+            issues: [
+              ...(Array.isArray(refreshPayload.issues) ? refreshPayload.issues : []),
+              "外部补充数据未完整取得；本次体检使用已确认持仓执行确定性计算。",
+            ],
+          };
+          microStore.transact((store) => { store.portfolioRefreshRun = skippedRefresh; });
+          renderPortfolioRefreshStatus(skippedRefresh);
+          if (refreshPayload.data_mode === "LIVE") await fetchRuntimeDataMode();
+        } else {
+          microStore.transact((store) => { store.portfolioRefreshRun = refreshPayload; });
+          renderPortfolioRefreshStatus(refreshPayload);
+          if (refreshPayload.data_mode === "LIVE") await fetchRuntimeDataMode();
+          throw new Error("最新数据不完整，组合体检已暂停并等待复核");
+        }
+      }
+      if (refreshPayload.status === "COMPLETE" && refreshPayload.portfolio) {
+        microStore.transact((store) => {
+          store.portfolio = refreshPayload.portfolio;
+          store.portfolioRefreshRun = refreshPayload;
+        });
         renderPortfolioRefreshStatus(refreshPayload);
         if (refreshPayload.data_mode === "LIVE") await fetchRuntimeDataMode();
-        throw new Error("最新数据不完整，组合体检已暂停并等待复核");
+        token = beginContextRequest("portfolioHealthSequence");
+        portfolio = token.portfolio;
       }
-      microStore.transact((store) => {
-        store.portfolio = refreshPayload.portfolio;
-        store.portfolioRefreshRun = refreshPayload;
-      });
-      renderPortfolioRefreshStatus(refreshPayload);
-      if (refreshPayload.data_mode === "LIVE") await fetchRuntimeDataMode();
-      token = beginContextRequest("portfolioHealthSequence");
-      portfolio = token.portfolio;
     } else {
       const skippedRefresh = {
-        status: "BLOCKED",
+        status: canUseConfirmedPortfolio ? "SKIPPED" : "BLOCKED",
         data_mode: "LIVE",
         provider: "未执行外部刷新",
-        issues: ["真实组合行情当前不可用；未使用旧持仓价格继续计算。"],
+        issues: [canUseConfirmedPortfolio
+          ? "当前没有可用的组合补充数据；本次体检使用已确认持仓执行确定性计算。"
+          : "真实组合行情当前不可用；未使用旧持仓价格继续计算."],
       };
       microStore.transact((store) => { store.portfolioRefreshRun = skippedRefresh; });
       renderPortfolioRefreshStatus(skippedRefresh);
-      throw new Error("真实组合行情当前不可用，组合体检已停止");
+      if (!canUseConfirmedPortfolio) {
+        throw new Error("真实组合行情当前不可用，组合体检已停止");
+      }
     }
     const response = await fetch("/api/v1/advisor/portfolio-health", {
       method: "POST",

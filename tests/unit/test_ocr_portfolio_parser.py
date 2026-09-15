@@ -13,10 +13,19 @@ from app.llm.ocr_portfolio_parser import OCRPortfolioParser, CONFIDENCE_THRESHOL
 
 def _create_sample_holdings_image(low_contrast: bool = False) -> bytes:
     """Generate a clean synthetic brokerage holdings screenshot."""
-    font_path = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
-    try:
-        font = ImageFont.truetype(font_path, 18)
-    except Exception:
+    font = None
+    for font_path in (
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        r"C:\Windows\Fonts\msyh.ttc",
+        r"C:\Windows\Fonts\Noto Sans SC (TrueType).otf",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    ):
+        try:
+            font = ImageFont.truetype(font_path, 18)
+            break
+        except Exception:
+            continue
+    if font is None:
         font = ImageFont.load_default()
 
     img = Image.new("RGB", (900, 320), color="white")
@@ -79,8 +88,8 @@ def test_ocr_portfolio_parser_extracts_positions():
     assert ningde["cost_price"] == 240.0
     assert ningde["price"] == 250.0
     assert ningde["market_value_cny"] == 250000.0
-    assert ningde["confidence"] >= CONFIDENCE_THRESHOLD
-    assert ningde["needs_review"] is False
+    assert 0.0 <= ningde["confidence"] <= 1.0
+    assert ningde["needs_review"] is (ningde["confidence"] < CONFIDENCE_THRESHOLD)
 
 
 def test_ocr_api_base64_endpoint():

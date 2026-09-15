@@ -303,7 +303,8 @@ def test_frontend_keeps_safe_dom_and_renders_sector_result_below_chart():
     assert 'await refreshPortfolioHealth()' in script
     assert 'liveCapabilities.portfolio_refresh === true' in script
     assert 'liveCapabilities.stock_quote === true && state.wencaiConfigured === true' in script
-    assert 'status: "BLOCKED"' in script
+    assert 'status: canUseConfirmedPortfolio ? "SKIPPED" : "BLOCKED"' in script
+    assert '本次体检使用已确认持仓执行确定性计算。' in script
     assert 'error.errorCode = payload?.error_code || null' in script
     assert 'err.errorCode === "LIVE_PORTFOLIO_REFRESH_REQUIRED"' in script
     assert 'state.portfolioOptimizationRun = null' in script

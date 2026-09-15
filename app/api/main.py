@@ -235,6 +235,7 @@ from app.runtime.mode import (
     wencai_capability_for_operation,
     wencai_skills_for_capability,
 )
+from app.runtime.paths import default_private_data_dir
 from typing import Any, Literal
 import json
 from hashlib import sha256
@@ -3190,7 +3191,10 @@ def create_app(
         if (
             controller.mode != DataMode.LIVE
             or required_capability is None
-            or not controller.is_wencai_capability_ready(required_capability)
+            or (
+                not controller.is_wencai_capability_ready(required_capability)
+                and not getattr(active_wencai_provider, "is_configured", False)
+            )
         ):
             return JSONResponse(
                 status_code=409,
@@ -3214,6 +3218,10 @@ def create_app(
             error_code = result.issues[0].code.value if result.issues else "PROVIDER_FAILED"
             await controller.record_wencai_failure(
                 error_code, capability=required_capability
+            )
+        else:
+            await controller.record_wencai_capability_result(
+                required_capability, available=True
             )
         status_code = 200 if result.status in {ProviderStatus.SUCCESS, ProviderStatus.PARTIAL, ProviderStatus.EMPTY} else 502
         return JSONResponse(status_code=status_code, content=result.model_dump(mode="json"))
@@ -3389,9 +3397,11 @@ def create_app(
 
 
 _DEFAULT_SECRET_STORE = (
+    # Worktrees share the ignored local data directory resolved from Git
+    # metadata; PRISM_SECRET_STORE_PATH remains the explicit isolation switch.
     ProtectedSecretStore(
         os.getenv("PRISM_SECRET_STORE_PATH")
-        or str(Path(__file__).resolve().parents[2] / "data/private/prism-secrets.json")
+        or str(default_private_data_dir() / "prism-secrets.json")
     )
     if os.name == "nt"
     else None
@@ -3399,7 +3409,7 @@ _DEFAULT_SECRET_STORE = (
 
 app = create_app(
     database_url=os.getenv("PRISM_DATABASE_URL") or None,
-    database_path=os.getenv("PRISM_DB_PATH") or str(Path(__file__).resolve().parents[2] / "data/private/prism.sqlite3"),
+    database_path=os.getenv("PRISM_DB_PATH") or str(default_private_data_dir() / "prism.sqlite3"),
     auth_accounts_path=os.getenv("PRISM_AUTH_ACCOUNTS_FILE") or None,
     secret_store=_DEFAULT_SECRET_STORE,
 )

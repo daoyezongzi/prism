@@ -318,6 +318,20 @@ class CopilotAgent:
                 return {}, "模型工具参数未通过契约校验。"
             if key in sanitized:
                 sanitized[key] = sanitized[key].strip()
+        if name == "query_stock_quote":
+            normalized_symbol = CopilotAgent._normalize_security_identifier(
+                sanitized["symbol"], fund=False
+            )
+            if normalized_symbol is None:
+                return {}, "标的代码必须为 6 位数字，可附带 .SH、.SZ 或 .BJ。"
+            sanitized["symbol"] = normalized_symbol
+        elif name == "query_fund_lookthrough":
+            normalized_fund = CopilotAgent._normalize_security_identifier(
+                sanitized["fund_code"], fund=True
+            )
+            if normalized_fund is None:
+                return {}, "基金代码必须为 6 位数字，可附带 .SH 或 .SZ。"
+            sanitized["fund_code"] = normalized_fund
         if "channel" in sanitized:
             channel = sanitized["channel"]
             if not isinstance(channel, str) or channel.lower() not in {
@@ -331,6 +345,37 @@ class CopilotAgent:
                 return {}, "模型工具参数未通过契约校验。"
             sanitized["target_sector_cap"] = float(value)
         return sanitized, None
+
+    @staticmethod
+    def _normalize_security_identifier(value: str, *, fund: bool) -> str | None:
+        """Resolve model-provided names to codes without querying or guessing."""
+        text = value.strip()
+        match = re.search(
+            r"(?<!\d)(?P<code>\d{6})(?:\.(?:SH|SZ|BJ))?(?!\d)",
+            text.upper(),
+        )
+        code = match.group("code") if match else None
+        database = ETF_LOOKTHROUGH_DATABASE if fund else A_SHARE_DATABASE
+        if code is None:
+            for candidate, info in database.items():
+                names = (
+                    str(info.get("fund_name", "")),
+                    str(info.get("name", "")),
+                ) if fund else (str(info.get("name", "")),)
+                if any(name and name in text for name in names):
+                    code = candidate
+                    break
+        allowed_prefixes = (
+            ("510", "512", "513", "515", "588", "159")
+            if fund else
+            ("600", "601", "603", "605", "688", "689", "000", "001", "002", "003",
+             "300", "301", "82", "83", "87", "88", "92")
+        )
+        if code is None or (
+            code not in database and not code.startswith(allowed_prefixes)
+        ):
+            return None
+        return code
 
     async def _enrich_live_stock_data(
         self, data: dict[str, Any], symbol: str,
@@ -706,7 +751,7 @@ class CopilotAgent:
                 )
                 if (
                     required_capability is None
-                    or not controller.is_wencai_capability_ready(required_capability)
+                    or not getattr(self.skillhub_provider, "is_configured", False)
                 ):
                     return {
                         "status": "FAILED",
@@ -756,6 +801,10 @@ class CopilotAgent:
                     )
                     if self.on_wencai_failure is not None:
                         await self.on_wencai_failure(error_code, required_capability)
+                else:
+                    await controller.record_wencai_capability_result(
+                        required_capability, available=True
+                    )
                 fields = dict(res.records[0].fields) if res.records else {}
                 raw_items = fields.get("items")
                 items: list[dict[str, Any]] = []
