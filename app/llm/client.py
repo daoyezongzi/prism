@@ -42,8 +42,14 @@ class LLMConfig(BaseModel):
 class AsyncLLMClient:
     """Async client for OpenAI-compatible streaming LLM calls."""
 
-    def __init__(self, config: LLMConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: LLMConfig | None = None,
+        *,
+        fallback_on_auth: bool = False,
+    ) -> None:
         self.config = config or LLMConfig.from_env()
+        self.fallback_on_auth = fallback_on_auth
 
     @property
     def is_configured(self) -> bool:
@@ -83,10 +89,39 @@ class AsyncLLMClient:
                 tool_call_buffers: dict[int, dict[str, str]] = {}
                 async with client.stream("POST", endpoint, headers=headers, json=payload) as response:
                     if response.status_code != 200:
-                        yield {
-                            "type": "error",
-                            "message": f"模型服务返回 HTTP {response.status_code}，请检查服务配置或稍后重试。",
-                        }
+                        if response.status_code in (401, 403):
+                            auth_error = {
+                                "type": "error",
+                                "error_code": "MODEL_AUTH_FAILED",
+                                "http_status": response.status_code,
+                                "message": (
+                                    f"模型服务鉴权失败（HTTP {response.status_code}），"
+                                    "API Key 无效或权限不足。"
+                                ),
+                            }
+                            if self.fallback_on_auth:
+                                yield {
+                                    "type": "model_fallback",
+                                    "error_code": "MODEL_AUTH_FAILED",
+                                    "http_status": response.status_code,
+                                    "message": (
+                                        "模型服务鉴权失败，已切换本地规则编排；"
+                                        "金融数据仍需由真实工具返回。"
+                                    ),
+                                }
+                                async for fallback_chunk in self._stream_offline_simulation(
+                                    messages, tools
+                                ):
+                                    yield fallback_chunk
+                            else:
+                                yield auth_error
+                        else:
+                            yield {
+                                "type": "error",
+                                "error_code": "MODEL_PROVIDER_FAILED",
+                                "http_status": response.status_code,
+                                "message": f"模型服务返回 HTTP {response.status_code}，请检查服务配置或稍后重试。",
+                            }
                         return
 
                     async for line in response.aiter_lines():
@@ -149,7 +184,7 @@ class AsyncLLMClient:
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Intelligent local fallback generator when API key is not configured."""
+        """Intelligent local fallback generator for unavailable model credentials."""
         user_msg = ""
         for m in reversed(messages):
             if m.get("role") == "user":
@@ -161,6 +196,20 @@ class AsyncLLMClient:
             "type": "reasoning",
             "delta": "【Prism 智能体思考流】\n1. 正在分析用户自然语言意图...\n2. 识别到关注标的/持仓风险，准备调度底层数据工具验证数据真实性...\n",
         }
+
+        normalized_user_message = re.sub(r"[\s，。！？,.!?（）()]+", "", user_msg).casefold()
+        if normalized_user_message in {
+            "你好", "您好", "谢谢", "感谢", "再见", "你是谁", "你能做什么",
+            "hello", "hi", "thanks", "thankyou", "help",
+        }:
+            yield {
+                "type": "content",
+                "delta": (
+                    "你好。我可以查询实时行情、核对组合数据，或解释投资概念。"
+                    "查询具体标的时，请提供 6 位证券代码。"
+                ),
+            }
+            return
 
         # Check intent
         explicit_code = re.search(r"(?<!\d)\d{6}(?:\.(?:SH|SZ|BJ))?(?!\d)", user_msg, re.IGNORECASE)
@@ -197,9 +246,20 @@ class AsyncLLMClient:
                 "name": "generate_portfolio_rebalance",
                 "arguments": {"target_sector_cap": 0.30},
             }
-        else:
+        elif any(k in user_msg for k in (
+            "公告", "新闻", "研报", "行业", "基本面", "财务", "估值",
+            "消息", "宏观", "政策", "资料", "检索",
+        )):
             yield {
                 "type": "tool_call",
                 "name": "query_wencai_semantic",
                 "arguments": {"query": user_msg},
+            }
+        else:
+            yield {
+                "type": "content",
+                "delta": (
+                    "我可以回答一般投资概念；如需实时行情，请输入 6 位证券代码，"
+                    "例如“查询 600519”。"
+                ),
             }

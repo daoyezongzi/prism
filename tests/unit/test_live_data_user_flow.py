@@ -84,6 +84,20 @@ def test_local_chat_does_not_choose_a_default_fund():
     assert "证券代码" in chunks[-1]["delta"]
 
 
+def test_local_chat_answers_harmless_greeting_without_invoking_wencai():
+    from app.llm.client import AsyncLLMClient
+
+    async def collect():
+        return [chunk async for chunk in AsyncLLMClient()._stream_offline_simulation([
+            {"role": "user", "content": "你好"},
+        ])]
+
+    chunks = asyncio.run(collect())
+    assert any(chunk["type"] == "content" for chunk in chunks)
+    assert not any(chunk["type"] == "tool_call" for chunk in chunks)
+    assert "实时行情" in chunks[-1]["delta"]
+
+
 def test_text_holdings_preserve_explicit_live_price_and_cost(monkeypatch):
     monkeypatch.setattr("app.llm.agent.get_runtime_mode_controller", lambda: SimpleNamespace(mode=DataMode.LIVE))
     agent = CopilotAgent()

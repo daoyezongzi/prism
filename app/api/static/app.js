@@ -4644,6 +4644,10 @@
   }
 
   async function loadStockResearchCatalog(ownerId) {
+    if (state.dataMode === "LIVE") {
+      updateStockResearchEntry();
+      return null;
+    }
     const sequence = ++state.stockResearchSequence;
     const response = await fetch("/api/v1/advisor/stock-research-template", {
       headers: { "X-Owner-ID": ownerId },
@@ -4654,7 +4658,42 @@
     state.stockResearchTemplate = template;
     renderStockResearchScenarioOptions(template.scenarios);
     byId("stock-research-template-meta").textContent = `个股 ${researchSubjectLabel(template.subject)} · ${researchPeriodLabel(template.period)} · ${text(template.metrics?.length, "0")} 项指标 · ${text((template.scenarios || []).length, "0")} 个回放场景 · 生成时间 ${text(template.generated_at)}`;
+    updateStockResearchEntry();
     return template;
+  }
+
+  function updateStockResearchEntry() {
+    const live = state.dataMode === "LIVE";
+    const submit = byId("run-stock-research");
+    const scenarioSelect = byId("stock-research-scenario");
+    const meta = byId("stock-research-template-meta");
+    const boundary = byId("stock-research-live-boundary");
+    if (live) {
+      if (submit) {
+        submit.disabled = true;
+        submit.title = "LIVE 完整个股研究服务尚未接入";
+      }
+      if (scenarioSelect) scenarioSelect.disabled = true;
+      if (meta) meta.textContent = "LIVE 完整个股研究服务尚未接入；不会返回固定合成报告。";
+      if (boundary) boundary.textContent = "LIVE 模式不会返回演示报告。需要真实行情时，请转到实时个股底稿并输入任意受支持代码。";
+      setStockResearchStatus("LIVE 未接入", "blocked");
+    } else {
+      if (submit) {
+        submit.disabled = false;
+        submit.removeAttribute("title");
+      }
+      if (meta && !state.stockResearchTemplate) meta.textContent = "运行时读取固定合成个股与风险规则；结果不写入决策回执。";
+      if (boundary) boundary.textContent = "完整研究场景为离线回放，仅用于验证规则、风险与证据展示；不代表实时行情。";
+    }
+  }
+
+  function openLiveStockLookup() {
+    window.location.hash = "copilot";
+    const input = byId("copilot-stock-input");
+    if (input) {
+      input.focus();
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   }
 
   async function loadFundResearchCatalog(ownerId) {
@@ -5021,6 +5060,7 @@
     byId("stock-research-template-meta").textContent = "运行时读取固定合成个股与风险规则；结果不写入决策回执。";
     clearStockResearchScenarioOptions();
     setStockResearchStatus("待运行");
+    updateStockResearchEntry();
     renderStockResearch(null);
     state.fundResearchTemplate = null;
     state.fundResearchRun = null;
@@ -5179,6 +5219,10 @@
   }
 
   async function runStockResearch() {
+    if (state.dataMode === "LIVE") {
+      updateStockResearchEntry();
+      return;
+    }
     const nextOwnerId = byId("owner-id").value.trim();
     const ownerChanged = nextOwnerId !== state.ownerId;
     state.ownerId = nextOwnerId;
@@ -5794,6 +5838,7 @@
             syncNavigation();
             if (state.ownerId && state.selectedPersona === "custom-user") await loadSavedPortfolio();
           }
+          updateStockResearchEntry();
           updateRuntimeDataModeUI();
         }
       }
@@ -5815,11 +5860,12 @@
   function liveModeLabelForUser() {
     const liveCapabilities = (state.capabilities && state.capabilities.LIVE) || {};
     const fuyaoReady = !!(liveCapabilities.stock_quote || liveCapabilities.fund_lookthrough);
-    const wencaiReady = state.wencaiReady === true
-      || !!(liveCapabilities.semantic_search || liveCapabilities.industry_data || liveCapabilities.company_data);
-    if (fuyaoReady && wencaiReady) return "实时数据 · 双数据源";
+    const financialReady = !!(liveCapabilities.industry_data || liveCapabilities.company_data);
+    const researchReady = state.wencaiReady === true || !!liveCapabilities.semantic_search;
+    if (fuyaoReady && financialReady) return "实时数据 · 行情与基本面";
+    if (fuyaoReady && researchReady) return "实时数据 · 行情与资料";
     if (fuyaoReady) return "实时数据 · 扶摇行情";
-    if (wencaiReady) return "实时数据 · 问财数据";
+    if (researchReady) return "实时数据 · 问财资料";
     return "实时数据 · 暂不可用";
   }
 
@@ -6305,6 +6351,7 @@
     setResearchStatus("待运行");
   });
   byId("run-stock-research").addEventListener("click", runStockResearch);
+  byId("open-live-stock-lookup")?.addEventListener("click", openLiveStockLookup);
   byId("stock-research-scenario").addEventListener("change", () => {
     state.stockResearchRun = null;
     state.stockResearchSequence += 1;
@@ -7255,7 +7302,7 @@
     defaultStock: "300750",
     quickTags: [
       { label: "体检我的组合", intent: "CHECK_PORTFOLIO" },
-      { label: "研究 300750", intent: "RESEARCH_STOCK", target: "300750" },
+      { label: "查询实时底稿 300750", intent: "RESEARCH_STOCK", target: "300750" },
       { label: "生成调仓方案", intent: "REBALANCE_PORTFOLIO" },
       { label: "测试下跌 20%", intent: "SCENARIO_SHOCK" }
     ]
@@ -7282,7 +7329,7 @@
       defaultStock: "300750",
       quickTags: [
         { label: "体检科技持仓", intent: "CHECK_PORTFOLIO" },
-        { label: "研究 300750", intent: "RESEARCH_STOCK", target: "300750" },
+        { label: "查询实时底稿 300750", intent: "RESEARCH_STOCK", target: "300750" },
         { label: "生成调仓方案", intent: "REBALANCE_PORTFOLIO" },
         { label: "测试科技股下跌 20%", intent: "SCENARIO_SHOCK" }
       ]
@@ -8807,7 +8854,7 @@
     }
 
     const cleanCode = stockSymbol.replace(/\.(SH|SZ|BJ)$/i, "").trim();
-    const A_SHARE_PREFIXES = /^(600|601|603|605|688|689|000|001|002|003|300|301|82|83|87|88|92|510|512|513|515|588|159|110|113|123|127|128)/;
+    const A_SHARE_PREFIXES = /^(600|601|603|605|688|689|000|001|002|003|300|301|82|83|87|88|92|510|512|513|515|588|159)/;
     const isSixDigits = /^\d{6}$/.test(cleanCode);
     const hasValidPrefix = A_SHARE_PREFIXES.test(cleanCode);
 
@@ -9071,6 +9118,19 @@
         const statusLabel = financialStatusLabels[quote.financial_data_status] || "财务指标待补齐";
         message.textContent = `已取得实时行情，报价 ¥${quote.price_cny}；来源：${sourceLabel}；更新时间：${observedLabel}。财务指标${statusLabel}，缺少 ${missingLabels.join("、")}，因此暂不生成估值与配置结论。`;
         body.append(message);
+        const actionRow = document.createElement("div");
+        actionRow.className = "copilot-action-row";
+        const configureButton = document.createElement("button");
+        configureButton.type = "button";
+        configureButton.className = "copilot-action-btn secondary";
+        configureButton.textContent = "配置 / 测试问财数据";
+        configureButton.addEventListener("click", () => {
+          if (typeof openLLMConfigModal === "function") openLLMConfigModal();
+        });
+        const actionHint = document.createElement("small");
+        actionHint.textContent = "测试通过后重新查询，系统才会使用真实财务字段。";
+        actionRow.append(configureButton, actionHint);
+        body.append(actionRow);
         card.append(banner, body);
         output.append(card);
         return;
@@ -9785,6 +9845,54 @@
     }
   }
 
+  function appendRecoveryNotice(container, options) {
+    if (!container || !options) return;
+    const notice = document.createElement("div");
+    notice.className = `doc-callout doc-callout-warning ${options.className || "chat-provider-recovery-notice"}`;
+    const icon = document.createElement("div");
+    icon.className = "callout-icon";
+    icon.append(createSvgIcon("icon-alert", "prism-icon"));
+    const content = document.createElement("div");
+    content.className = "callout-content";
+    const title = document.createElement("div");
+    title.className = "callout-title";
+    title.textContent = options.title || "需要恢复数据能力";
+    const detail = document.createElement("p");
+    detail.textContent = options.message || "当前数据能力不可用。";
+    const action = document.createElement("button");
+    action.type = "button";
+    action.className = "copilot-action-btn secondary small";
+    action.textContent = options.buttonText || "打开设置";
+    action.addEventListener("click", options.onClick);
+    content.append(title, detail, action);
+    notice.append(icon, content);
+    container.append(notice);
+  }
+
+  function appendChatModelRecoveryNotice(container, message) {
+    appendRecoveryNotice(container, {
+      className: "chat-model-recovery-notice",
+      title: "模型接口需要重新配置",
+      message: message || "当前保存的模型凭据不可用。",
+      buttonText: "打开模型设置",
+      onClick: () => {
+        if (typeof openLLMConfigModal === "function") openLLMConfigModal();
+      },
+    });
+  }
+
+  function appendWencaiRecoveryNotice(container, message) {
+    appendRecoveryNotice(container, {
+      className: "chat-provider-recovery-notice",
+      title: "问财能力需要配置 / 授权",
+      message: message || "当前问财凭据、权限或真实契约尚未通过；不会使用模拟金融数据。",
+      buttonText: "打开问财设置",
+      onClick: () => {
+        if (typeof openLLMConfigModal === "function") openLLMConfigModal();
+      },
+    });
+  }
+
   async function performStreamingChat(customQuery, signal) {
     const turnContextRevision = chatContextRevision;
     const input = byId("copilot-natural-input");
@@ -9996,6 +10104,14 @@
               progressLabel.textContent = "正在核对资料…";
               progressBar.style.width = "35%";
               thinkingBox.style.display = "inline-flex";
+            } else if (event.type === "model_fallback") {
+              pipeHead.textContent = "模型鉴权失败，已启用本地工具编排…";
+              progressLabel.textContent = "模型鉴权失败，已启用本地工具编排…";
+              progressBar.style.width = "42%";
+              appendChatModelRecoveryNotice(
+                toolsContainer,
+                event.message || "模型 API Key 无效或已失效；金融数据仍由真实工具返回。",
+              );
             } else if (event.type === "tool_start") {
               if (!toolStarted) {
                 toolStarted = true;
@@ -10022,6 +10138,11 @@
               toolFailed = toolFailed || currentToolFailed;
               toolCompleted = toolCompleted || !currentToolFailed;
               if (currentToolFailed) setPipelineStepState(s2, "failed");
+              if (
+                currentToolFailed
+                && event.tool === "query_wencai_semantic"
+                && ["AUTH_FAILED", "PERMISSION_DENIED", "WENCAI_NOT_CONFIGURED"].includes(event.result?.error_code)
+              ) appendWencaiRecoveryNotice(toolsContainer, event.result?.message);
               pipeHead.textContent = currentToolFailed
                 ? "真实数据工具未完成，正在整理失败边界…"
                 : "已取得数据，正在继续处理…";
@@ -10100,6 +10221,9 @@
         if (step.classList.contains("active")) setPipelineStepState(step, "failed");
       });
       contentBox.textContent = signal.aborted ? "分析已停止，可重新发送。" : `请求未完成：${err.message || "服务连接异常"}`;
+      if (!signal.aborted && ["MODEL_AUTH_FAILED", "MODEL_NOT_CONFIGURED"].includes(err.errorCode)) {
+        appendChatModelRecoveryNotice(contentBox, err.message);
+      }
       recordTruthTurnAlert(aiMsgRow, err.message || "服务连接异常", chatOwner);
     }
   }
@@ -10123,6 +10247,7 @@
     model: "deepseek-chat",
     provider: "deepseek",
   };
+  const DEFAULT_WENCAI_BASE_URL = "https://openapi.iwencai.com";
 
   function updateLLMConfigUI() {
     updateVisibleSourceStatus();
@@ -10158,6 +10283,7 @@
       document.body.appendChild(modal);
       modal.style.display = "flex";
       loadModelSettings().catch(error => setError(error.message));
+      loadWencaiSettings().catch(error => setError(error.message));
     }
   }
 
@@ -10167,7 +10293,21 @@
     if (!ai || !data) return;
     ai.textContent = mode === "MOCK" ? "AI · 离线演示" : llmConfig.configured ? "AI · 真实接口已配置" : mode === "LIVE" ? "AI · 真实接口未配置" : "AI · 本地规则";
     ai.dataset.mode = mode === "MOCK" ? "mock" : llmConfig.configured ? "live" : "pending";
-    data.textContent = state.dataMode === "LIVE" ? "工具数据 · 实时数据" : "工具数据 · 离线演示";
+    if (state.dataMode !== "LIVE") {
+      data.textContent = "工具数据 · 离线演示";
+    } else {
+      const liveCapabilities = (state.capabilities && state.capabilities.LIVE) || {};
+      const quoteReady = liveCapabilities.stock_quote === true || liveCapabilities.fund_lookthrough === true;
+      const financialReady = liveCapabilities.company_data === true || liveCapabilities.industry_data === true;
+      const researchReady = state.wencaiReady === true || liveCapabilities.semantic_search === true;
+      data.textContent = quoteReady && financialReady
+        ? "工具数据 · 实时行情与财务"
+        : quoteReady && researchReady
+          ? "工具数据 · 实时行情与资料；财务待授权"
+          : quoteReady
+            ? "工具数据 · 实时行情；财务待授权"
+            : "工具数据 · 实时能力待就绪";
+    }
     data.dataset.mode = state.dataMode === "LIVE" ? "live" : "mock";
   }
 
@@ -10192,6 +10332,94 @@
     const persistence = settings.persistence === "OS_PROTECTED" ? "操作系统加密持久化" : "仅当前服务进程有效";
     byId("llm-config-status").textContent = settings.is_configured ? `已配置 ${settings.model} · ${persistence}，可测试连接。` : `填写个人 API Key 或由服务端提供默认配置 · ${persistence}。`;
     return settings;
+  }
+
+  async function loadWencaiSettings() {
+    const response = await fetch("/api/v1/runtime/wencai-settings");
+    if (!response.ok) throw await apiError(response);
+    const settings = await response.json();
+    const keyInput = byId("wencai-api-key-input");
+    const urlInput = byId("wencai-base-url-input");
+    const status = byId("wencai-config-status");
+    if (keyInput) keyInput.value = "";
+    if (urlInput) urlInput.value = settings.base_url || DEFAULT_WENCAI_BASE_URL;
+    if (status) {
+      status.style.display = "block";
+      if (!settings.is_configured) {
+        status.textContent = "未配置问财凭据；个股财务与行业字段不会补齐。";
+      } else if (settings.contract_verified) {
+        status.textContent = "问财真实契约已验证，可尝试补齐财务与行业字段。";
+      } else if (
+        state.capabilities?.LIVE?.company_data === false
+        || state.capabilities?.LIVE?.industry_data === false
+      ) {
+        status.textContent = "问财凭据已保存，但财务 / 行业能力未获授权或未通过真实契约测试。";
+      } else {
+        status.textContent = "已保存问财凭据，但真实契约尚未验证；请测试连接。";
+      }
+    }
+    return settings;
+  }
+
+  async function handleSaveWencaiConfig() {
+    const status = byId("wencai-config-status");
+    const button = byId("btn-save-wencai-config");
+    button.disabled = true;
+    status.style.display = "block";
+    status.textContent = "正在保存问财配置…";
+    try {
+      const baseUrlInput = byId("wencai-base-url-input");
+      const response = await fetch("/api/v1/runtime/wencai-settings", {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          api_key: byId("wencai-api-key-input").value.trim(),
+          base_url: (baseUrlInput?.value || DEFAULT_WENCAI_BASE_URL).trim(),
+        }),
+      });
+      if (!response.ok) throw await apiError(response);
+      await fetchRuntimeDataMode();
+      await loadWencaiSettings();
+      status.textContent = "问财配置已保存；请测试真实契约后再生成基本面结论。";
+    } catch (error) {
+      status.textContent = `保存失败：${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function handleClearWencaiConfig() {
+    byId("wencai-api-key-input").value = "";
+    await handleSaveWencaiConfig();
+  }
+
+  async function handleTestWencaiProvider(event) {
+    const status = byId("wencai-config-status");
+    const button = event.currentTarget;
+    button.disabled = true;
+    status.style.display = "block";
+    status.textContent = "正在通过问财真实 SkillHub 契约测试…";
+    try {
+      const response = await fetch("/api/v1/runtime/wencai-settings/test", {method: "POST"});
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(payload.message || `问财真实契约测试未通过（HTTP ${response.status}）`);
+        error.errorCode = payload.error_code || "WENCAI_TEST_FAILED";
+        throw error;
+      }
+      const rows = Array.isArray(payload.skills) ? payload.skills : [];
+      const failed = rows.filter(row => !["SUCCESS", "PARTIAL"].includes(row.status) || !(row.record_count > 0) || !(row.item_count > 0));
+      status.textContent = payload.status === "PASS"
+        ? `问财真实契约测试通过（${rows.length} 项能力）。`
+        : `问财测试${payload.status === "PARTIAL" ? "部分通过" : "未通过"}：${failed.length} 项能力未返回可用记录。`;
+      await fetchRuntimeDataMode();
+      await loadWencaiSettings();
+    } catch (error) {
+      status.textContent = `问财连接未通过：${error.message}`;
+      await fetchRuntimeDataMode();
+    } finally {
+      button.disabled = false;
+    }
   }
 
   async function handleSaveLLMConfig() {
@@ -11113,6 +11341,9 @@
     } catch (error) { status.textContent = `连接未通过：${error.message}`; }
     finally { byId("test-user-model").disabled = false; }
   });
+  byId("btn-save-wencai-config")?.addEventListener("click", handleSaveWencaiConfig);
+  byId("btn-clear-wencai-config")?.addEventListener("click", handleClearWencaiConfig);
+  byId("test-wencai-provider")?.addEventListener("click", handleTestWencaiProvider);
 
   // Event bindings for P2 panels
   const refHistBtn = byId("refresh-history");
@@ -11166,6 +11397,12 @@
   const copilotStockBtn = byId("copilot-btn-stock-research");
   if (copilotStockBtn) copilotStockBtn.addEventListener("click", runCopilotStockResearch);
   byId("copilot-stock-input")?.addEventListener("input", updateRuntimeDataModeUI);
+  byId("copilot-stock-input")?.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runCopilotStockResearch();
+    }
+  });
   const copilotRebalanceBtn = byId("copilot-btn-rebalance");
   if (copilotRebalanceBtn) copilotRebalanceBtn.addEventListener("click", runCopilotRebalance);
   const copilotQueryBtn = byId("copilot-submit-query");

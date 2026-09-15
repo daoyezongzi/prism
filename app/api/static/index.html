@@ -7,12 +7,12 @@
     <meta name="description" content="Prism 可解释投资研究工作台">
     <title>Prism · 决策工作台</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bd5700'/%3E%3Cpath d='M18 46V18h16c9 0 14 5 14 13s-5 13-14 13h-7v2H18zm9-11h7c4 0 6-1 6-4s-2-4-6-4h-7v8z' fill='white'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="/static/styles.css?v=20260915-chat-stages1">
+    <link rel="stylesheet" href="/static/styles.css?v=20260915-real-data-repair2">
     <link rel="stylesheet" href="/static/prism-v2.css?v=20260915-chat-stages1">
     <script src="/static/dev-mode.js" defer></script>
     <script src="/static/markdown.js?v=20260914-polish5" defer></script>
     <script src="/static/lightweight-charts.js?v=5.2.1" defer></script>
-    <script src="/static/app.js?v=20260915-chat-stages1" defer></script>
+    <script src="/static/app.js?v=20260915-real-data-repair2" defer></script>
     <script src="/static/workflow-editor.js" defer></script>
   </head>
   <body class="questionnaire-pending prism-ui-v2">
@@ -302,6 +302,21 @@
                 <button type="button" data-chat-prefix="可转债投资">可转债投资</button>
                 <button type="button" data-chat-prefix="资产重组优化">资产重组优化</button>
               </div>
+              <section class="copilot-stock-lookup" aria-labelledby="copilot-stock-lookup-title">
+                <div class="copilot-stock-lookup-head">
+                  <div>
+                    <strong id="copilot-stock-lookup-title">实时个股 / ETF 底稿</strong>
+                    <span>输入任意受支持的 6 位证券代码</span>
+                  </div>
+                  <span class="status-chip chip-live">真实行情</span>
+                </div>
+                <div class="task-card-input-row">
+                  <label class="sr-only" for="copilot-stock-input">个股或 ETF 代码</label>
+                  <input id="copilot-stock-input" class="copilot-stock-input" type="text" inputmode="numeric" maxlength="10" placeholder="例如 300750、600519 或 510300" autocomplete="off">
+                  <button id="copilot-btn-stock-research" class="copilot-action-btn primary" type="button">查询实时底稿</button>
+                </div>
+                <small>行情已接通时返回实时价格；PE、PB、ROE、估值分位缺失时只展示缺失，不生成估值结论。</small>
+              </section>
               <div class="copilot-query-box">
                 <label class="sr-only" for="copilot-natural-input">向投资 Agent 提问</label>
                 <textarea id="copilot-natural-input" class="copilot-natural-input" rows="3" placeholder="我更在意控制回撤，这套持仓需要怎么调整？" autocomplete="off"></textarea>
@@ -318,7 +333,7 @@
 
               <div class="copilot-quick-tags" id="copilot-quick-tags" aria-label="常用提问">
                 <button class="quick-tag-chip" type="button" data-intent="CHECK_PORTFOLIO">我的组合最需要关注什么？</button>
-                <button class="quick-tag-chip" type="button" data-intent="RESEARCH_STOCK" data-target="300750">分析 300750</button>
+                <button class="quick-tag-chip" type="button" data-intent="RESEARCH_STOCK" data-target="300750">查询实时底稿 300750</button>
                 <button class="quick-tag-chip" type="button" data-intent="REBALANCE_PORTFOLIO">如何降低组合集中度？</button>
               </div>
 
@@ -513,6 +528,26 @@
                 <p class="modal-hint">默认使用服务端配置。配置状态会说明个人密钥是否已由操作系统安全机制持久化；浏览器和接口不会回读明文，留空保存可删除个人配置并恢复默认。</p>
                 <button id="test-user-model" type="button" class="copilot-action-btn secondary">测试连接</button>
                 <div id="llm-config-status" class="parsed-portfolio-status" style="display:none;"></div>
+
+                <div class="provider-settings-divider" role="separator"></div>
+                <section class="provider-settings-section" aria-labelledby="wencai-settings-title">
+                  <h4 id="wencai-settings-title">问财 SkillHub：财务、行业与资料</h4>
+                  <p class="modal-hint">用于补齐个股 PE(TTM)、PB、ROE、估值分位及行业资料。保存后必须通过真实契约测试，测试失败不会伪造或回退模拟字段。</p>
+                  <div style="margin-bottom:12px;">
+                    <label for="wencai-api-key-input" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">问财 SkillHub API Key：</label>
+                    <input type="password" id="wencai-api-key-input" class="portfolio-textarea" style="height:38px; padding:6px 10px;" placeholder="输入服务端凭据" autocomplete="off">
+                  </div>
+                  <div style="margin-bottom:14px;">
+                    <label for="wencai-base-url-input" style="font-size:12.5px; font-weight:600; display:block; margin-bottom:4px;">服务地址：</label>
+                    <input type="text" id="wencai-base-url-input" class="portfolio-textarea" style="height:38px; padding:6px 10px;" placeholder="由服务端返回" readonly>
+                  </div>
+                  <div class="modal-actions" style="gap:8px;">
+                    <button id="btn-clear-wencai-config" class="copilot-action-btn secondary" type="button">删除问财配置</button>
+                    <button id="btn-save-wencai-config" class="copilot-action-btn primary" type="button">保存问财配置</button>
+                  </div>
+                  <button id="test-wencai-provider" type="button" class="copilot-action-btn secondary">测试问财真实契约</button>
+                  <div id="wencai-config-status" class="parsed-portfolio-status" style="display:none;"></div>
+                </section>
               </div>
             </div>
           </div>
@@ -1117,9 +1152,11 @@
                 </select>
                 <small>合成离线回放</small>
               </label>
-              <button id="run-stock-research" class="query-submit" type="button">运行个股研究</button>
-            </div>
-            <div id="stock-research-content" class="stock-research-content" aria-live="polite">
+               <button id="run-stock-research" class="query-submit" type="button">运行个股研究</button>
+               <button id="open-live-stock-lookup" class="query-submit secondary" type="button">转到实时个股底稿</button>
+             </div>
+             <p id="stock-research-live-boundary" class="research-boundary">完整研究场景为离线回放；LIVE 模式不会返回演示报告。需要真实行情时，请转到实时个股底稿并输入任意受支持代码。</p>
+             <div id="stock-research-content" class="stock-research-content" aria-live="polite">
               <div class="empty-state">运行研究后查看财务指标、异常项与信息来源。</div>
             </div>
           </section>

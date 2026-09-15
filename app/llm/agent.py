@@ -52,7 +52,7 @@ class CopilotMessage(BaseModel):
 
 
 class ChatStreamChunk(BaseModel):
-    type: str = Field(description="Event type: thinking, tool_start, tool_done, grounding_start, research_skipped, token, decision, error, done")
+    type: str = Field(description="Event type: thinking, model_fallback, tool_start, tool_done, grounding_start, research_skipped, token, decision, error, done")
     data: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -66,7 +66,10 @@ class CopilotAgent:
         skillhub_provider: WencaiSkillHubProvider | None = None,
         on_wencai_failure: Callable[[str, str | None], Awaitable[None]] | None = None,
     ) -> None:
-        self.client = llm_client or AsyncLLMClient()
+        # Chat may still execute deterministic live tools when a saved model
+        # credential has expired.  Other LLM consumers construct their own
+        # client and keep the default fail-closed behavior.
+        self.client = llm_client or AsyncLLMClient(fallback_on_auth=True)
         self.static_market_provider = StaticMarketProvider()
         self.market_provider = self.static_market_provider
         self.skillhub_provider = skillhub_provider or WencaiSkillHubProvider()
@@ -85,7 +88,11 @@ class CopilotAgent:
     ) -> AsyncIterator[dict[str, Any]]:
         """Stream coordinator progress, tool execution, and grounded advisory response."""
 
-        active_client = AsyncLLMClient(LLMConfig(**llm_config)) if (llm_config and llm_config.get("api_key")) else self.client
+        active_client = (
+            AsyncLLMClient(LLMConfig(**llm_config), fallback_on_auth=True)
+            if (llm_config and llm_config.get("api_key"))
+            else self.client
+        )
 
         if persona_info:
             persona = persona_info
@@ -140,6 +147,17 @@ class CopilotAgent:
                 # Never expose provider chain-of-thought.  The API emits a separate,
                 # deterministic facts/rules/evidence summary for explainability.
                 yield {"type": "thinking", "title": "正在核对结构化事实与规则"}
+
+            elif chunk_type == "model_fallback":
+                yield {
+                    "type": "model_fallback",
+                    "error_code": chunk.get("error_code", "MODEL_AUTH_FAILED"),
+                    "http_status": chunk.get("http_status"),
+                    "message": chunk.get(
+                        "message",
+                        "模型接口不可用，已切换本地规则编排；金融数据仍需由真实工具返回。",
+                    ),
+                }
 
             elif chunk_type == "tool_call":
                 tool_name = chunk.get("name", "")
@@ -756,7 +774,7 @@ class CopilotAgent:
                     return {
                         "status": "FAILED",
                         "error_code": "AUTH_FAILED",
-                        "message": "问财 SkillHub 凭据或服务端契约确认未就绪，LIVE 模式拒绝执行非真实外部调用，未回退模拟数据。",
+                        "message": "问财真实能力未就绪（凭据、权限或服务契约未通过）；LIVE 模式未执行模拟数据。请在“更多 → 模型设置 → 问财 SkillHub”中保存并测试。",
                         "execution_context": {
                             "data_mode": "LIVE",
                             "provider": "wencai_skillhub_provider",
@@ -786,7 +804,7 @@ class CopilotAgent:
                     return {
                         "status": "FAILED",
                         "error_code": error_code,
-                        "message": "问财真实检索暂时不可用，LIVE 模式未回退模拟数据。",
+                        "message": "问财真实检索暂时不可用；LIVE 模式未回退模拟数据。请在“更多 → 模型设置 → 问财 SkillHub”中重试真实契约测试。",
                         "execution_context": {
                             "data_mode": "LIVE",
                             "provider": "wencai_skillhub_provider",

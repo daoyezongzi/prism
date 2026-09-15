@@ -171,3 +171,25 @@ def test_upstream_error_body_is_not_forwarded_to_browser(monkeypatch):
     assert chunks[0]["type"] == "error"
     assert "401" in chunks[0]["message"]
     assert "private-test-value" not in str(chunks)
+
+
+def test_chat_auth_failure_can_fall_back_to_local_tool_orchestration(monkeypatch):
+    import asyncio
+    import httpx
+    from app.llm.client import AsyncLLMClient, LLMConfig
+
+    original = httpx.AsyncClient
+    transport = httpx.MockTransport(lambda _: httpx.Response(401, json={"secret": "must-not-leak"}))
+    monkeypatch.setattr("app.llm.client.httpx.AsyncClient", lambda **kwargs: original(transport=transport))
+
+    async def collect():
+        return [chunk async for chunk in AsyncLLMClient(
+            LLMConfig(api_key="test-key", base_url="https://example.invalid"),
+            fallback_on_auth=True,
+        ).stream_chat([{"role": "user", "content": "查询 300750 最新行情"}], tools=[{"type": "function"}])]
+
+    chunks = asyncio.run(collect())
+    assert chunks[0]["type"] == "model_fallback"
+    assert chunks[0]["error_code"] == "MODEL_AUTH_FAILED"
+    assert any(chunk["type"] == "tool_call" for chunk in chunks)
+    assert "must-not-leak" not in str(chunks)

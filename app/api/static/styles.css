@@ -2904,6 +2904,71 @@ dd { margin: 2px 0 0; font: 12px var(--mono); color: var(--ink); }
   margin-top: 6px;
 }
 
+.copilot-stock-lookup {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft);
+}
+
+.copilot-stock-lookup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.copilot-stock-lookup-head > div {
+  display: grid;
+  gap: 3px;
+}
+
+.copilot-stock-lookup-head span:not(.status-chip),
+.copilot-stock-lookup > small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.copilot-stock-lookup > small {
+  display: block;
+  margin-top: 7px;
+  line-height: 1.5;
+}
+
+.copilot-action-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.copilot-action-row small {
+  color: var(--muted);
+}
+
+.provider-settings-divider {
+  height: 1px;
+  margin: 18px 0 14px;
+  background: var(--outline);
+}
+
+.provider-settings-section {
+  display: grid;
+  gap: 8px;
+}
+
+.provider-settings-section h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.chat-model-recovery-notice,
+.chat-provider-recovery-notice {
+  margin-top: 8px;
+}
+
 .copilot-stock-input {
   flex: 1;
   border: 1px solid var(--outline);

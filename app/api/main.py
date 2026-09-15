@@ -2719,10 +2719,14 @@ def create_app(
         if not config.api_key:
             return _error_response(409, "MODEL_NOT_CONFIGURED", "请先保存 API Key")
         client = AsyncLLMClient(config.model_copy(update={"timeout_seconds": 8}))
+        probe_error: dict[str, Any] | None = None
+
         async def probe():
+            nonlocal probe_error
             async with aclosing(client.stream_chat([{"role": "user", "content": "Reply OK."}])) as stream:
                 async for event in stream:
                     if event.get("type") == "error":
+                        probe_error = event
                         return False
                     if event.get("type") == "content" and event.get("delta"):
                         return True
@@ -2732,6 +2736,12 @@ def create_app(
         except (TimeoutError, ValueError):
             ok = False
         if not ok:
+            if probe_error and probe_error.get("error_code") == "MODEL_AUTH_FAILED":
+                return _error_response(
+                    401,
+                    "MODEL_AUTH_FAILED",
+                    "模型 API Key 无效或已失效，请重新配置后再测试",
+                )
             return _error_response(502, "MODEL_TEST_FAILED", "模型未返回有效内容，请检查配置或稍后重试")
         return {"status": "PASS"}
 

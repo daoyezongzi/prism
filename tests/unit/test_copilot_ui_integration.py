@@ -43,6 +43,9 @@ def test_copilot_markup_structure() -> None:
         "copilot-submit-query",
         "copilot-quick-tags",
         "copilot-decision-output",
+        "copilot-stock-input",
+        "copilot-btn-stock-research",
+        "open-live-stock-lookup",
         "copilot-chat-panel",
         "copilot-chat-messages",
         "portfolio-modal",
@@ -52,6 +55,12 @@ def test_copilot_markup_structure() -> None:
         "llm-config-modal",
         "btn-save-llm-config",
         "btn-clear-llm-config",
+        "wencai-api-key-input",
+        "wencai-base-url-input",
+        "btn-save-wencai-config",
+        "btn-clear-wencai-config",
+        "test-wencai-provider",
+        "wencai-config-status",
         "btn-custom-profile-chip",
         "open-profile-modal-btn",
         "profile-edit-modal",
@@ -111,6 +120,12 @@ def test_copilot_script_personas_and_workflows() -> None:
         "function openLLMConfigModal(",
         "function closeLLMConfigModal(",
         "function handleSaveLLMConfig(",
+        "function loadWencaiSettings(",
+        "function handleSaveWencaiConfig(",
+        "function handleTestWencaiProvider(",
+        "function appendChatModelRecoveryNotice(",
+        "function appendWencaiRecoveryNotice(",
+        "function updateStockResearchEntry(",
         "function buildCopilotDrilldownRow(",
         "function buildCopilotMetricBox(",
         "function buildCopilotLoadingCard(",
@@ -161,6 +176,8 @@ def test_copilot_styles_and_responsive_rules() -> None:
         ".copilot-natural-input",
         ".copilot-submit-btn",
         ".copilot-quick-tags",
+        ".copilot-stock-lookup",
+        ".copilot-stock-input",
         ".copilot-tasks-grid",
         ".copilot-task-card",
         ".copilot-decision-card",
@@ -311,7 +328,7 @@ def test_agent_home_uses_demo_composition_without_changing_dom_identity() -> Non
     script = (STATIC / "app.js").read_text(encoding="utf-8")
     v2_styles = (STATIC / "prism-v2.css").read_text(encoding="utf-8")
 
-    assert '<link rel="stylesheet" href="/static/styles.css?v=20260915-chat-stages1">\n    <link rel="stylesheet" href="/static/prism-v2.css?v=20260915-chat-stages1">' in markup
+    assert '<link rel="stylesheet" href="/static/styles.css?v=20260915-real-data-repair2">\n    <link rel="stylesheet" href="/static/prism-v2.css?v=20260915-chat-stages1">' in markup
     assert '<script src="/static/lightweight-charts.js?v=5.2.1" defer></script>' in markup
     agent_start = markup.index('<section class="copilot-section" id="copilot"')
     agent_end = markup.index('id="portfolio-modal"', agent_start)
@@ -356,6 +373,7 @@ def test_agent_home_uses_demo_composition_without_changing_dom_identity() -> Non
     assert 'setPipelineStepState(s2, "skipped")' in script
     assert 'event.type === "grounding_start"' in script
     assert 'event.type === "research_skipped"' in script
+    assert 'event.type === "model_fallback"' in script
     assert 'event.type === "done" && !streamError' in script
     assert '["FAILED", "BLOCKED", "REJECTED"].includes(toolStatus)' in script
     assert 'setPipelineStepState(s2, "failed")' in script
