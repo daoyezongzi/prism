@@ -202,6 +202,11 @@ from app.providers import (
     ProviderStatus,
     WencaiSkillHubProvider,
 )
+from app.providers.wencai_normalization import (
+    canonical_sector_from_wencai,
+    decode_stock_identity,
+    decode_stock_metrics,
+)
 from app.store import (
     ContextMemoryListResponse,
     ContextMemoryWriteRequest,
@@ -226,6 +231,9 @@ from app.runtime.mode import (
     LiveProviderUnavailableError,
     ModeRevisionConflictError,
     get_runtime_mode_controller,
+    wencai_capabilities_for_skills,
+    wencai_capability_for_operation,
+    wencai_skills_for_capability,
 )
 from typing import Any, Literal
 import json
@@ -327,6 +335,7 @@ class WencaiConfigApiRequest(BaseModel):
 
 class WencaiStoredConfig(WencaiConfigApiRequest):
     contract_verified: bool = False
+    verified_skills: tuple[str, ...] = ()
 
 
 class MemorySearchRequest(BaseModel):
@@ -585,11 +594,24 @@ def create_app(
         get_runtime_mode_controller().restore_wencai_configuration(
             configured=bool(wencai_setting_state.api_key.strip()),
             contract_verified=wencai_setting_state.contract_verified,
+            verified_capabilities=tuple(
+                capability
+                for capability, available in wencai_capabilities_for_skills(
+                    wencai_setting_state.verified_skills
+                ).items()
+                if available
+            ),
         )
     active_live_finance = live_finance_provider or FuyaoFinanceProvider()
     active_yahoo_finance = yahoo_finance_provider or ifind_quant_provider or YahooFinanceProvider()
     active_etnet = etnet_provider or EtNetProvider()
     live_probe_lock = asyncio.Lock()
+
+    def cn_index_provider() -> MarketDataProvider:
+        """Use an explicitly injected market provider for isolated app instances."""
+        if market_provider is not None:
+            return active_market_quotes
+        return active_live_finance if active_live_finance.is_configured else active_market_quotes
 
     async def fetch_overseas_quote(symbol: str) -> dict | None:
         providers = []
@@ -1014,7 +1036,7 @@ def create_app(
             )
             if item.symbol is None:
                 return unavailable
-            provider = active_live_finance if item.market == "CN" and active_live_finance.is_configured else active_market_quotes
+            provider = cn_index_provider() if item.market == "CN" else active_market_quotes
             try:
                 quote = await (provider.get_index_quote(item.symbol) if item.market == "CN"
                                else fetch_overseas_quote(item.symbol))
@@ -1058,7 +1080,7 @@ def create_app(
 
         quote = None
         daily_bars: list[dict] = []
-        provider = active_live_finance if selected.market == "CN" and active_live_finance.is_configured else active_market_quotes
+        provider = cn_index_provider() if selected.market == "CN" else active_market_quotes
         try:
             if selected.market == "CN":
                 quote = await provider.get_index_quote(selected.symbol)
@@ -2060,8 +2082,6 @@ def create_app(
     def get_evaluation_dashboard_summary(
         owner_id: str = Depends(owner_dependency),
     ) -> EvaluationDashboardResponse:
-        if blocked := reject_fixture_execution_in_live(active_evaluation_dashboard, "离线评测看板"):
-            return blocked
         req = EvaluationDashboardRequest(
             request_id=f"eval-dash-{int(active_clock().timestamp())}",
             operator_id=owner_id,
@@ -2078,8 +2098,6 @@ def create_app(
         request: EvaluationDashboardRequest,
         owner_id: str = Depends(owner_dependency),
     ) -> EvaluationDashboardResponse:
-        if blocked := reject_fixture_execution_in_live(active_evaluation_dashboard, "离线评测看板"):
-            return blocked
         if request.operator_id != owner_id:
             raise StoreOwnerError("dashboard request operator does not match owner scope")
         return active_evaluation_dashboard.run_dashboard(request)
@@ -2121,12 +2139,22 @@ def create_app(
     # -------------------------------------------------------------------------
     # Copilot Direction 2: Live LLM Chat, Tool Calling & Portfolio Parser Routes
     # -------------------------------------------------------------------------
-    async def persist_wencai_failure(_: str) -> None:
+    async def persist_wencai_failure(
+        _: str, capability: str | None = None,
+    ) -> None:
         nonlocal wencai_setting_state
-        if wencai_setting_state is None or not wencai_setting_state.contract_verified:
+        if wencai_setting_state is None:
             return
+        verified_skills = tuple(
+            skill_id
+            for skill_id in wencai_setting_state.verified_skills
+            if capability is None or skill_id not in wencai_skills_for_capability(capability)
+        )
         wencai_setting_state = wencai_setting_state.model_copy(
-            update={"contract_verified": False}
+            update={
+                "contract_verified": False,
+                "verified_skills": verified_skills,
+            }
         )
         if active_secret_store is not None:
             try:
@@ -2766,16 +2794,39 @@ def create_app(
         if not active_wencai_provider.is_configured:
             return _error_response(409, "WENCAI_NOT_CONFIGURED", "请先保存问财 API Key")
         results = await active_wencai_provider.probe_installed_skills()
-        passed = all(
-            row["status"] in {"SUCCESS", "PARTIAL"}
+        usable_results = tuple(
+            row for row in results
+            if row["status"] in {"SUCCESS", "PARTIAL"}
             and row.get("record_count", 0) > 0
             and row.get("item_count", 0) > 0
-            for row in results
         )
+        passed = bool(results) and len(usable_results) == len(results)
         error_code = next((row["error_code"] for row in results if row["error_code"]), None)
-        if passed and wencai_setting_state is not None:
+        verified_skills = tuple(row["skill_id"] for row in usable_results)
+        capability_map = wencai_capabilities_for_skills(verified_skills)
+        # A complete probe proves every bundled route even when a test double
+        # uses opaque skill IDs.  Partial probes retain the per-skill matrix so
+        # one unavailable route cannot disable unrelated real capabilities.
+        if passed:
+            capability_map = {name: True for name in capability_map}
+        capability_errors = {
+            capability: next(
+                (
+                    row["error_code"]
+                    for row in results
+                    if wencai_capabilities_for_skills([row["skill_id"]]).get(capability)
+                    and row.get("error_code")
+                ),
+                None,
+            )
+            for capability in capability_map
+        }
+        if wencai_setting_state is not None:
             wencai_setting_state = wencai_setting_state.model_copy(
-                update={"contract_verified": True}
+                update={
+                    "contract_verified": passed,
+                    "verified_skills": verified_skills,
+                }
             )
             if active_secret_store is not None:
                 try:
@@ -2788,10 +2839,24 @@ def create_app(
         await controller.apply_wencai_probe(
             available=passed,
             error_code=error_code,
-            auto_activate=passed,
+            auto_activate=any(capability_map.values()),
+            capabilities=capability_map,
+            capability_errors=capability_errors,
         )
-        body = {"status": "PASS" if passed else "FAILED", "skills": results}
-        return JSONResponse(status_code=200 if passed else 502, content=body)
+        body = {
+            "status": (
+                "PASS" if passed
+                else "PARTIAL" if any(capability_map.values())
+                else "FAILED"
+            ),
+            "skills": results,
+            "verified_skills": verified_skills,
+            "capabilities": capability_map,
+        }
+        return JSONResponse(
+            status_code=200 if any(capability_map.values()) else 502,
+            content=body,
+        )
 
     @api.post("/api/v1/copilot/config")
     def copilot_update_config_endpoint(
@@ -2831,6 +2896,128 @@ def create_app(
         if suffix is not None and suffix != market_prefix(clean_code).upper():
             return None
         return clean_code
+
+    async def _enrich_live_stock_quote(
+        data: dict[str, Any], clean_code: str,
+    ) -> dict[str, Any]:
+        """Merge code-matched Wencai industry and financial fields into a quote."""
+        required_financial_fields = (
+            "pe_ttm", "pb", "roe_pct", "valuation_quantile_pct"
+        )
+        provider = active_wencai_provider
+        if not getattr(provider, "is_configured", False):
+            data["financial_data_status"] = "NOT_CONFIGURED"
+            data["missing_fields"] = list(dict.fromkeys(
+                (*data.get("missing_fields", ()), *required_financial_fields)
+            ))
+            return data
+
+        symbol = str(data.get("symbol") or clean_code)
+        controller = get_runtime_mode_controller()
+        industry_request = ProviderRequest(
+            request_id=f"live-quote:{clean_code}:industry",
+            operation=ProviderOperation.INDUSTRY_DATA,
+            subject=(
+                f"{symbol} 所属同花顺行业 股票简称 市盈率TTM 市净率 "
+                "净资产收益率 估值分位"
+            ),
+            parameters={"asset_id": clean_code, "limit": 1},
+            timeout_ms=2000,
+        )
+        issue_codes: list[str] = []
+        sources: list[str] = []
+        try:
+            industry_result = await provider.execute(industry_request)
+        except Exception:
+            industry_result = None
+            issue_codes.append("TRANSPORT_ERROR")
+            await controller.record_wencai_failure(
+                "TRANSPORT_ERROR", capability="industry_data"
+            )
+
+        if industry_result is not None and industry_result.status == ProviderStatus.FAILED:
+            code = industry_result.issues[0].code.value if industry_result.issues else "PROVIDER_FAILED"
+            issue_codes.append(code)
+            await controller.record_wencai_failure(code, capability="industry_data")
+        elif industry_result is not None:
+            identity = decode_stock_identity(industry_result, clean_code)
+            decoded_metrics = decode_stock_metrics(industry_result, clean_code)
+            industry = identity.get("industry")
+            if identity.get("name"):
+                data["name"] = identity["name"]
+            if industry:
+                data["industry"] = industry
+                data["sector"] = canonical_sector_from_wencai(industry)
+                data["sub_industry"] = industry
+            data.update(decoded_metrics)
+            if identity or decoded_metrics:
+                await controller.record_wencai_capability_result(
+                    "industry_data", available=True
+                )
+            if industry_result.records:
+                sources.append(industry_result.records[0].source)
+
+        missing_after_industry = [
+            field for field in required_financial_fields
+            if data.get(field) in (None, "")
+        ]
+        if missing_after_industry:
+            # Some accounts expose financial columns through the industry
+            # Skill but not through the finance Skill.  Only try the latter
+            # when the primary response still lacks a required field.
+            financial_request = ProviderRequest(
+                request_id=f"live-quote:{clean_code}:financial",
+                operation=ProviderOperation.COMPANY_DATA,
+                subject=(
+                    f"{symbol} 市盈率TTM 市净率 净资产收益率 估值分位"
+                ),
+                parameters={"asset_id": clean_code, "limit": 1},
+                timeout_ms=2000,
+            )
+            try:
+                financial_result = await provider.execute(financial_request)
+            except Exception:
+                financial_result = None
+                issue_codes.append("TRANSPORT_ERROR")
+                await controller.record_wencai_failure(
+                    "TRANSPORT_ERROR", capability="company_data"
+                )
+            if financial_result is not None and financial_result.status == ProviderStatus.FAILED:
+                code = financial_result.issues[0].code.value if financial_result.issues else "PROVIDER_FAILED"
+                issue_codes.append(code)
+                await controller.record_wencai_failure(code, capability="company_data")
+            elif financial_result is not None:
+                decoded_metrics = decode_stock_metrics(financial_result, clean_code)
+                data.update(decoded_metrics)
+                if decoded_metrics:
+                    await controller.record_wencai_capability_result(
+                        "company_data", available=True
+                    )
+                if financial_result.records:
+                    sources.append(financial_result.records[0].source)
+
+        missing_financial = [
+            field for field in required_financial_fields
+            if data.get(field) in (None, "")
+        ]
+        preserved_missing = [
+            field for field in data.get("missing_fields", ())
+            if field not in required_financial_fields and field != "name"
+        ]
+        data["missing_fields"] = list(dict.fromkeys(
+            (*preserved_missing, *missing_financial)
+        ))
+        data["financial_data_source"] = " + ".join(dict.fromkeys(sources)) or None
+        data["financial_issue_codes"] = list(dict.fromkeys(issue_codes))
+        if not missing_financial:
+            data["financial_data_status"] = "COMPLETE"
+        elif any(code in {"AUTH_FAILED", "PERMISSION_DENIED"} for code in issue_codes):
+            data["financial_data_status"] = "PERMISSION_REQUIRED"
+        elif issue_codes:
+            data["financial_data_status"] = "UNAVAILABLE"
+        else:
+            data["financial_data_status"] = "PARTIAL"
+        return data
 
     async def _auto_complete_security_baseline(clean_code: str) -> dict[str, Any] | None:
         """Fetch the resilient quote chain; never manufacture missing observations."""
@@ -2940,10 +3127,13 @@ def create_app(
             live_capabilities = controller.capabilities["LIVE"]
             stock_quote_available = bool(live_capabilities.get("stock_quote"))
             fund_lookthrough_available = bool(live_capabilities.get("fund_lookthrough"))
+            industry_available = controller.is_wencai_capability_ready("industry_data")
+            wencai_configured = bool(getattr(active_wencai_provider, "is_configured", False))
             if not (
                 stock_quote_available
                 or fund_lookthrough_available
-                or controller.is_wencai_ready
+                or industry_available
+                or wencai_configured
             ):
                 return JSONResponse(
                     status_code=409,
@@ -2960,8 +3150,7 @@ def create_app(
                 stock_quote_available=stock_quote_available,
                 fund_lookthrough_available=fund_lookthrough_available,
                 wencai_available=bool(
-                    controller.is_wencai_ready
-                    or getattr(active_wencai_provider, "is_configured", False)
+                    industry_available or wencai_configured
                 ),
             )
             response = await refresh_portfolio_live(request, provider)
@@ -2970,7 +3159,6 @@ def create_app(
                 await controller.record_portfolio_metadata_result(
                     available=False, error_code=error_code
                 )
-                await persist_wencai_failure(error_code)
             elif response.status == "COMPLETE" and provider.wencai_metadata_succeeded:
                 await controller.record_portfolio_metadata_result(available=True)
             if response.status == "COMPLETE" and response.portfolio is not None:
@@ -2983,8 +3171,9 @@ def create_app(
                 and row.provider_status == ProviderStatus.FAILED.value
                 for row in response.positions
             ):
-                await controller.record_wencai_failure("PORTFOLIO_REFRESH_FAILED")
-                await persist_wencai_failure("PORTFOLIO_REFRESH_FAILED")
+                await controller.record_wencai_failure(
+                    "PORTFOLIO_REFRESH_FAILED", capability="industry_data"
+                )
             return response
         return refresh_portfolio_mock(request)
 
@@ -2994,7 +3183,15 @@ def create_app(
     ) -> JSONResponse:
         """Expose the verified provider contract for read-only research tools."""
         controller = get_runtime_mode_controller()
-        if controller.mode != DataMode.LIVE or not controller.is_wencai_ready:
+        required_capability = wencai_capability_for_operation(
+            request.operation.value,
+            str(request.parameters.get("channel", "announcement")),
+        )
+        if (
+            controller.mode != DataMode.LIVE
+            or required_capability is None
+            or not controller.is_wencai_capability_ready(required_capability)
+        ):
             return JSONResponse(
                 status_code=409,
                 content={
@@ -3015,8 +3212,9 @@ def create_app(
         result = await active_wencai_provider.execute(provider_request)
         if result.status == ProviderStatus.FAILED:
             error_code = result.issues[0].code.value if result.issues else "PROVIDER_FAILED"
-            await controller.record_wencai_failure(error_code)
-            await persist_wencai_failure(error_code)
+            await controller.record_wencai_failure(
+                error_code, capability=required_capability
+            )
         status_code = 200 if result.status in {ProviderStatus.SUCCESS, ProviderStatus.PARTIAL, ProviderStatus.EMPTY} else 502
         return JSONResponse(status_code=status_code, content=result.model_dump(mode="json"))
 
@@ -3060,6 +3258,7 @@ def create_app(
                     "error_code": "SECURITY_NOT_FOUND",
                     "message": f"扶摇数据接口未返回标的 [{symbol}] 的行情。",
                 })
+            data = await _enrich_live_stock_quote(data, clean_code)
             return JSONResponse(content={
                 "status": "SUCCESS",
                 "data": data,

@@ -289,6 +289,13 @@ class FuyaoFinanceProvider(MarketDataProvider):
         if observed is None:
             raise FuyaoProviderError("MISSING_TIMESTAMP", "扶摇行情缺少可核验的数据时间。")
         retrieved = datetime.now(UTC)
+        missing_fields = [
+            field
+            for field in ("pe_ttm", "pb", "roe_pct", "valuation_quantile_pct")
+            if field not in item or item.get(field) in (None, "")
+        ]
+        if not name:
+            missing_fields.insert(0, "name")
         return {
             "symbol": thscode,
             "name": name or thscode,
@@ -310,7 +317,10 @@ class FuyaoFinanceProvider(MarketDataProvider):
             "observed_at": observed.isoformat(),
             "retrieved_at": retrieved.isoformat(),
             "is_synthetic": False,
-            "missing_fields": ["name"] if not name else [],
+            # Fuyao's quote endpoint is intentionally quote-only.  Mark the
+            # financial fields explicitly so downstream callers cannot mistake
+            # a successful price response for a complete valuation snapshot.
+            "missing_fields": missing_fields,
             "fallback_reasons": [],
             "source": "Fuyao structured financial data API",
         }

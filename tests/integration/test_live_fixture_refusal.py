@@ -93,7 +93,6 @@ def test_live_mode_refuses_every_default_fixture_research_run() -> None:
         "/api/v1/advisor/portfolio-optimization-template",
         "/api/v1/advisor/scenario-simulation-template",
         "/api/v1/advisor/rebalancing-template",
-        "/api/v1/advisor/evaluation-dashboard-summary",
         "/api/v1/advisor/workflow",
     )
     for endpoint in fixture_gets:
@@ -106,6 +105,28 @@ def test_live_mode_refuses_every_default_fixture_research_run() -> None:
         assert response.status_code == 409, endpoint
         assert response.json()["error_code"] == "LIVE_RESEARCH_NOT_AVAILABLE"
         assert "演示数据" in response.json()["message"]
+
+    evaluation = client.get(
+        "/api/v1/advisor/evaluation-dashboard-summary", headers=headers
+    )
+    assert evaluation.status_code == 200
+    assert evaluation.json()["serving_mode"] == "OFFLINE_FIXTURE"
+    assert evaluation.json()["total_cases"] == evaluation.json()["passed_cases"]
+
+    evaluation_run = client.post(
+        "/api/v1/advisor/evaluation-dashboard-runs",
+        headers=headers,
+        json={
+            "schema_version": "evaluation-dashboard-request.v1",
+            "request_id": "live-guard-evaluation-run",
+            "operator_id": owner,
+            "generated_at": NOW.isoformat(),
+            "repeat_count": 1,
+        },
+    )
+    assert evaluation_run.status_code == 200
+    assert evaluation_run.json()["serving_mode"] == "OFFLINE_FIXTURE"
+    assert evaluation_run.json()["total_cases"] == evaluation_run.json()["passed_cases"]
 
     optimization_response = client.post(
         "/api/v1/advisor/portfolio-optimization-runs",

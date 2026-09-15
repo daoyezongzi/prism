@@ -71,6 +71,10 @@ class EvaluationDashboardResponse(ContractModel):
     summary: EvaluationDashboardSummary
     latency: EvaluationDashboardLatency
     cases: tuple[EvaluationDashboardCaseItem, ...]
+    # The dashboard is a local semantic regression suite.  It is intentionally
+    # independent from the runtime market-data mode and must not be presented
+    # as a live financial research result.
+    serving_mode: Literal["OFFLINE_FIXTURE"] = "OFFLINE_FIXTURE"
 
     @model_validator(mode="after")
     def validate_response(self) -> Self:

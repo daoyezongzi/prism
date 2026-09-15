@@ -33,7 +33,7 @@ def test_live_quote_without_financials_keeps_price_and_missing_values():
     })
     assert "1400" in report
     assert "未提供" in report
-    assert "LIVE" in report
+    assert "实时数据" in report
     assert "MOCK" not in report
     assert "0.00%" not in report
 
@@ -56,7 +56,7 @@ def test_report_mode_comes_from_result_not_mutable_runtime():
         "name": "测试", "symbol": "600519.SH", "price_cny": 10,
         "change_pct": 0,
     }, mode="MOCK")
-    assert "MOCK" in report
+    assert "离线演示数据" in report
     assert "0.00%" in report
 
 
@@ -238,7 +238,7 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
         pytest.skip("Node.js required for frontend behavior regression")
     source = (Path(__file__).resolve().parents[2] / "app/api/static/app.js").read_text(encoding="utf-8")
     prefix = source.partition("  microStore.subscribe((store) => {")[0]
-    names = ["hasFinancialNumber", "buildCopilotFundCard", "runCopilotStockResearch",
+    names = ["hasFinancialNumber", "researchSourceLabel", "buildCopilotFundCard", "runCopilotStockResearch",
              "requirePortfolioAnalysisContext", "renderPortfolioReadiness",
              "ensureDependency", "confirmProfileContext", "renderCompanionRisk",
              "runCopilotHealthCheck", "runCopilotRebalance", "runCopilotScenarioShock",
@@ -352,8 +352,9 @@ def test_frontend_live_data_flow_handles_missing_context_and_stale_results():
       pe_ttm:null,pb:0,roe_pct:0,valuation_quantile_pct:0},execution_context:{data_mode:"LIVE"}})});
     byId("copilot-stock-input").value = "600519.SH";
     await runCopilotStockResearch();
-    assert.match(output.textContent, /财务字段缺失/);
-    assert.match(output.textContent, /pe_ttm/);
+    assert.match(output.textContent, /财务指标缺失/);
+    assert.match(output.textContent, /PE\(TTM\)/);
+    assert.doesNotMatch(output.textContent, /LIVE_PRIMARY|数据模式 LIVE|来源层级/);
     assert.doesNotMatch(output.textContent, /NaN/);
 
     state.profile = {profile:{risk_level:"BALANCED",max_drawdown_tolerance_pct:"12"},questionnaire:{loss_tolerance_score:3}};

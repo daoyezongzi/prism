@@ -32,7 +32,17 @@ from app.providers.fuyao import (
     FuyaoFinanceProvider,
     FuyaoProviderError,
 )
-from app.runtime.mode import DataMode, get_runtime_mode_controller
+from app.providers.contracts import ProviderOperation, ProviderRequest
+from app.providers.wencai_normalization import (
+    canonical_sector_from_wencai,
+    decode_stock_identity,
+    decode_stock_metrics,
+)
+from app.runtime.mode import (
+    DataMode,
+    get_runtime_mode_controller,
+    wencai_capability_for_operation,
+)
 
 
 class CopilotMessage(BaseModel):
@@ -54,7 +64,7 @@ class CopilotAgent:
         llm_client: AsyncLLMClient | None = None,
         live_finance_provider: FuyaoFinanceProvider | None = None,
         skillhub_provider: WencaiSkillHubProvider | None = None,
-        on_wencai_failure: Callable[[str], Awaitable[None]] | None = None,
+        on_wencai_failure: Callable[[str, str | None], Awaitable[None]] | None = None,
     ) -> None:
         self.client = llm_client or AsyncLLMClient()
         self.static_market_provider = StaticMarketProvider()
@@ -173,6 +183,44 @@ class CopilotAgent:
                 has_error = True
                 yield {"type": "error", "message": chunk.get("message", "生成过程中出现异常")}
 
+        # Some compatible models return a natural-language answer even when the
+        # system contract requires a live fact.  Recover only when the target
+        # security can be resolved deterministically; the provider remains the
+        # sole source of numbers and a failed provider result is still surfaced.
+        if not executed_tools and self._requires_grounded_tool(user_message):
+            fallback = self._infer_fallback_tool_call(user_message)
+            if fallback is not None:
+                tool_name, tool_args = fallback
+                validated_args, validation_error = self._validate_tool_call(
+                    tool_name, tool_args
+                )
+                if validation_error is None:
+                    has_usable_output = True
+                    yield {
+                        "type": "tool_start",
+                        "tool": tool_name,
+                        "args": validated_args,
+                        "title": f"正在调用工具: {tool_name}",
+                    }
+                    tool_result = await self._execute_tool(
+                        tool_name,
+                        validated_args,
+                        persona,
+                        portfolio_context,
+                        data_mode=request_data_mode,
+                    )
+                    executed_tools.append({
+                        "tool": tool_name,
+                        "args": validated_args,
+                        "result": tool_result,
+                    })
+                    yield {
+                        "type": "tool_done",
+                        "tool": tool_name,
+                        "result": tool_result,
+                        "title": f"工具完成: {tool_name}",
+                    }
+
         if executed_tools:
             yield {"type": "grounding_start", "title": "正在核验工具事实与约束"}
             grounded_response = self._synthesize_grounded_response(
@@ -194,6 +242,34 @@ class CopilotAgent:
         if not has_usable_output and not has_error:
             yield {"type": "error", "message": "模型未返回可用正文或完整工具调用。"}
         yield {"type": "done", "timestamp": datetime.now(UTC).isoformat()}
+
+    @staticmethod
+    def _infer_fallback_tool_call(
+        user_message: str,
+    ) -> tuple[str, dict[str, str]] | None:
+        """Resolve a security identifier without asking the model to guess."""
+        code_match = re.search(r"(?<!\d)(\d{6})(?:\.(?:SH|SZ|BJ))?(?!\d)", user_message)
+        if code_match:
+            code = code_match.group(1)
+            if code in ETF_LOOKTHROUGH_DATABASE or code.startswith(("510", "512", "513", "515", "588", "159")):
+                return "query_fund_lookthrough", {"fund_code": code}
+            if code in A_SHARE_DATABASE or code.startswith((
+                "600", "601", "603", "605", "688", "689", "000", "001", "002", "003", "300", "301", "82", "83", "87", "88", "92",
+            )):
+                return "query_stock_quote", {"symbol": code}
+
+        for code, info in A_SHARE_DATABASE.items():
+            if str(info.get("name", "")) and str(info["name"]) in user_message:
+                return "query_stock_quote", {"symbol": code}
+        for code, info in ETF_LOOKTHROUGH_DATABASE.items():
+            aliases = (code, str(info.get("fund_name", "")), {
+                "588000": "科创50ETF",
+                "512480": "半导体ETF",
+                "510300": "沪深300ETF",
+            }.get(code, ""))
+            if any(alias and alias in user_message for alias in aliases):
+                return "query_fund_lookthrough", {"fund_code": code}
+        return None
 
     @staticmethod
     def _requires_grounded_tool(user_message: str) -> bool:
@@ -255,6 +331,137 @@ class CopilotAgent:
                 return {}, "模型工具参数未通过契约校验。"
             sanitized["target_sector_cap"] = float(value)
         return sanitized, None
+
+    async def _enrich_live_stock_data(
+        self, data: dict[str, Any], symbol: str,
+    ) -> dict[str, Any]:
+        """Add code-matched Wencai identity and financial fields to a real quote."""
+        required_fields = ("pe_ttm", "pb", "roe_pct", "valuation_quantile_pct")
+        provider = self.skillhub_provider
+        if not getattr(provider, "is_configured", False):
+            data["financial_data_status"] = "NOT_CONFIGURED"
+            data["missing_fields"] = list(dict.fromkeys(
+                (*data.get("missing_fields", ()), *required_fields)
+            ))
+            return data
+
+        clean_code = symbol.split(".")[0].strip().upper()
+        controller = get_runtime_mode_controller()
+        issue_codes: list[str] = []
+        sources: list[str] = []
+
+        # The installed industry Skill accepts these dynamic columns and, for
+        # the current official contract, can return the financial fields too.
+        # This is the primary path because the separate finance Skill may be
+        # unavailable for the same account.  All values still come from the
+        # matched provider row; this method never calculates or invents them.
+        industry_request = ProviderRequest(
+            request_id=f"live-chat:{clean_code}:industry",
+            operation=ProviderOperation.INDUSTRY_DATA,
+            subject=(
+                f"{symbol} 所属同花顺行业 股票简称 市盈率TTM 市净率 "
+                "净资产收益率 估值分位"
+            ),
+            parameters={"asset_id": clean_code, "limit": 1},
+            timeout_ms=2000,
+        )
+        try:
+            industry_result = await provider.execute(industry_request)
+        except Exception:
+            # Do not swallow task cancellation, which is a BaseException on
+            # supported Python versions.
+            industry_result = None
+            issue_codes.append("TRANSPORT_ERROR")
+            await controller.record_wencai_failure(
+                "TRANSPORT_ERROR", capability="industry_data"
+            )
+
+        if industry_result is not None and industry_result.status.value == "FAILED":
+            code = (
+                industry_result.issues[0].code.value
+                if industry_result.issues else "PROVIDER_FAILED"
+            )
+            issue_codes.append(code)
+            await controller.record_wencai_failure(code, capability="industry_data")
+        elif industry_result is not None:
+            identity = decode_stock_identity(industry_result, clean_code)
+            decoded_metrics = decode_stock_metrics(industry_result, clean_code)
+            industry = identity.get("industry")
+            if identity.get("name"):
+                data["name"] = identity["name"]
+            if industry:
+                data["industry"] = industry
+                data["sector"] = canonical_sector_from_wencai(industry)
+                data["sub_industry"] = industry
+            data.update(decoded_metrics)
+            if identity or decoded_metrics:
+                await controller.record_wencai_capability_result(
+                    "industry_data", available=True
+                )
+            if industry_result.records:
+                sources.append(industry_result.records[0].source)
+
+        missing_after_industry = [
+            field for field in required_fields
+            if data.get(field) in (None, "")
+        ]
+        if missing_after_industry:
+            # Use the finance Skill only as a bounded secondary path when the
+            # primary response still lacks a required field.  The provider
+            # itself remains the source of any fallback value.
+            financial_request = ProviderRequest(
+                request_id=f"live-chat:{clean_code}:financial",
+                operation=ProviderOperation.COMPANY_DATA,
+                subject=(
+                    f"{symbol} 市盈率TTM 市净率 净资产收益率 估值分位"
+                ),
+                parameters={"asset_id": clean_code, "limit": 1},
+                timeout_ms=2000,
+            )
+            try:
+                financial_result = await provider.execute(financial_request)
+            except Exception:
+                financial_result = None
+                issue_codes.append("TRANSPORT_ERROR")
+                await controller.record_wencai_failure(
+                    "TRANSPORT_ERROR", capability="company_data"
+                )
+            if financial_result is not None and financial_result.status.value == "FAILED":
+                code = (
+                    financial_result.issues[0].code.value
+                    if financial_result.issues else "PROVIDER_FAILED"
+                )
+                issue_codes.append(code)
+                await controller.record_wencai_failure(code, capability="company_data")
+            elif financial_result is not None:
+                decoded_metrics = decode_stock_metrics(financial_result, clean_code)
+                data.update(decoded_metrics)
+                if decoded_metrics:
+                    await controller.record_wencai_capability_result(
+                        "company_data", available=True
+                    )
+                if financial_result.records:
+                    sources.append(financial_result.records[0].source)
+
+        missing = [field for field in required_fields if data.get(field) in (None, "")]
+        preserved_missing = [
+            field for field in data.get("missing_fields", ())
+            if field not in required_fields and field != "name"
+        ]
+        data["missing_fields"] = list(dict.fromkeys(
+            (*preserved_missing, *missing)
+        ))
+        data["financial_data_source"] = " + ".join(dict.fromkeys(sources)) or None
+        data["financial_issue_codes"] = list(dict.fromkeys(issue_codes))
+        if not missing:
+            data["financial_data_status"] = "COMPLETE"
+        elif any(code in {"AUTH_FAILED", "PERMISSION_DENIED"} for code in issue_codes):
+            data["financial_data_status"] = "PERMISSION_REQUIRED"
+        elif issue_codes:
+            data["financial_data_status"] = "UNAVAILABLE"
+        else:
+            data["financial_data_status"] = "PARTIAL"
+        return data
 
     async def parse_portfolio_from_text(self, text: str) -> dict[str, Any]:
         """Parse natural language into structured portfolio bundle."""
@@ -442,6 +649,10 @@ class CopilotAgent:
                             "is_synthetic": False,
                         },
                     }
+                if data is not None:
+                    data = await self._enrich_live_stock_data(
+                        data, str(args["symbol"])
+                    )
                 return {
                     "status": "SUCCESS" if data else "EMPTY",
                     "source": "扶摇金融数据接口",
@@ -484,7 +695,19 @@ class CopilotAgent:
                     },
                 }
             if name == "query_wencai_semantic":
-                if not controller.is_wencai_ready:
+                channel = str(args.get("channel", "announcement"))
+                operation = (
+                    ProviderOperation.SEARCH_REPORTS
+                    if channel == "report"
+                    else ProviderOperation.SEARCH_NEWS
+                )
+                required_capability = wencai_capability_for_operation(
+                    operation.value, channel
+                )
+                if (
+                    required_capability is None
+                    or not controller.is_wencai_capability_ready(required_capability)
+                ):
                     return {
                         "status": "FAILED",
                         "error_code": "AUTH_FAILED",
@@ -496,8 +719,6 @@ class CopilotAgent:
                             "is_synthetic": False,
                         },
                     }
-                from app.providers.contracts import ProviderOperation, ProviderRequest
-                channel = str(args.get("channel", "announcement"))
                 req = ProviderRequest(
                     request_id=f"live-copilot-{int(datetime.now(UTC).timestamp())}",
                     operation=(
@@ -508,12 +729,33 @@ class CopilotAgent:
                     subject=str(args.get("query", "市场行情")),
                     parameters={"channel": channel},
                 )
-                res = await self.skillhub_provider.execute(req)
+                try:
+                    res = await self.skillhub_provider.execute(req)
+                except Exception:
+                    error_code = "TRANSPORT_ERROR"
+                    await controller.record_wencai_failure(
+                        error_code, capability=required_capability
+                    )
+                    if self.on_wencai_failure is not None:
+                        await self.on_wencai_failure(error_code, required_capability)
+                    return {
+                        "status": "FAILED",
+                        "error_code": error_code,
+                        "message": "问财真实检索暂时不可用，LIVE 模式未回退模拟数据。",
+                        "execution_context": {
+                            "data_mode": "LIVE",
+                            "provider": "wencai_skillhub_provider",
+                            "provider_serving_mode": "DIRECT",
+                            "is_synthetic": False,
+                        },
+                    }
                 if res.status.value == "FAILED":
                     error_code = res.issues[0].code.value if res.issues else "PROVIDER_FAILED"
-                    await controller.record_wencai_failure(error_code)
+                    await controller.record_wencai_failure(
+                        error_code, capability=required_capability
+                    )
                     if self.on_wencai_failure is not None:
-                        await self.on_wencai_failure(error_code)
+                        await self.on_wencai_failure(error_code, required_capability)
                 fields = dict(res.records[0].fields) if res.records else {}
                 raw_items = fields.get("items")
                 items: list[dict[str, Any]] = []
@@ -705,7 +947,15 @@ class CopilotAgent:
 
         selected_tool = stock_tool or fund_tool or check_tool or rebalance_tool or wencai_tool
         context = (selected_tool or {}).get("result", {}).get("execution_context", {})
-        mode_label = context.get("data_mode", "未标注")
+        mode_label = {
+            "LIVE": "实时数据",
+            "MOCK": "离线演示数据",
+        }.get(context.get("data_mode"), "当前数据")
+        provider_label = {
+            "fuyao_finance_api": "扶摇行情数据",
+            "wencai_skillhub_provider": "问财数据",
+            "deterministic_risk_engine": "确定性风控服务",
+        }.get(context.get("provider"), "外部数据服务")
 
         def field(data: dict[str, Any], key: str, suffix: str = "") -> str:
             value = data.get(key)
@@ -717,10 +967,10 @@ class CopilotAgent:
                 return stock_result.get("message", "行情底稿不可用，无法形成研判。")
             stock = stock_result["data"]
             lines.append(f"### 个股底稿字段：{stock['name']} ({stock['symbol']})")
-            lines.append(f"本次数据模式：{mode_label}；来源：{context.get('provider', '未标注')}。以下仅转述工具字段，缺失项不补值，不代表审计结论或投资建议。\n")
+            lines.append(f"本次数据：{mode_label}；来源：{provider_label}。以下仅转述工具字段，缺失项不补值，不代表审计结论或投资建议。\n")
             change = stock.get("change_pct")
             change_text = "未提供" if change is None else f"{change:+.2f}%"
-            lines.append(f"1. **行情字段**：价格 **¥{field(stock, 'price_cny')}**，涨跌幅 `{change_text}`，市盈率 PE(TTM) **{field(stock, 'pe_ttm', ' 倍')}**，估值分位 **{field(stock, 'valuation_quantile_pct', '%')}**，所属行业 **{field(stock, 'industry')}**。")
+            lines.append(f"1. **行情字段**：价格 **¥{field(stock, 'price_cny')}**，涨跌幅 `{change_text}`，市盈率 PE(TTM) **{field(stock, 'pe_ttm', ' 倍')}**，市净率 PB **{field(stock, 'pb')}**，估值分位 **{field(stock, 'valuation_quantile_pct', '%')}**，所属行业 **{field(stock, 'industry')}**。")
             lines.append(f"2. **财务字段**：ROE **{field(stock, 'roe_pct', '%')}**，毛利率 **{field(stock, 'gross_margin_pct', '%')}**，资产负债率 **{field(stock, 'debt_ratio_pct', '%')}**。")
             lines.append(f"数据时间：{field(stock, 'observed_at')}。")
             lines.append("3. **计算边界**：聊天层不计算适当性、配置比例或风险闸门；相关结论需提交结构化画像与持仓到后端确定性服务。")
@@ -731,7 +981,7 @@ class CopilotAgent:
                 return fund_result.get("message", "基金穿透底稿不可用。")
             fund = fund_result["data"]
             lines.append(f"### 基金披露持仓：{fund['fund_name']} ({fund['fund_code']})")
-            lines.append(f"本次数据模式：{mode_label}。基金持仓为定期披露，不代表实时持仓；披露期：{field(fund, 'holding_disclosure_as_of')}。")
+            lines.append(f"本次数据：{mode_label}；来源：{provider_label}。基金持仓为定期披露，不代表实时持仓；披露期：{field(fund, 'holding_disclosure_as_of')}。")
             for h in fund["top_holdings"]:
                 lines.append(f"- **{field(h, 'name')}** ({field(h, 'asset_id')})：权重 **{field(h, 'weight_pct', '%')}** · 行业：{field(h, 'sector')}")
             lines.append("\n聊天层只转述底稿字段；基金穿透占比、组合重叠和集中度必须由后端确定性服务计算。")
@@ -798,14 +1048,14 @@ class CopilotAgent:
                         lines.append(f"   {summary}")
                 lines.append(
                     f"检索时间：{result.get('retrieved_at', '未提供')}；"
-                    f"来源：{result.get('source', '问财 SkillHub')}。"
+                    "来源：问财数据。"
                 )
 
         else:
             lines.append("### 请求处理边界")
             lines.append(f"已识别咨询事项「{user_message}」和画像标签 {tag}，但当前没有可引用的确定性计算结果，因此不生成行情、敞口、适当性或调仓结论。")
 
-        lines.append(f"\n> 数据边界：[{mode_label}] · 聊天层仅转述工具字段；金融计算由结构化确定性服务执行")
+        lines.append(f"\n> 数据边界：{mode_label} · 聊天层仅转述工具字段；金融计算由结构化确定性服务执行")
         lines.append("\n---\n*风险揭示：证券市场存在风险，投资需谨慎。本报告基于量化模型推导，不作为收益承诺。*")
 
         return "\n".join(lines)

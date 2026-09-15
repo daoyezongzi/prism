@@ -165,7 +165,7 @@
     if (!facts) {panel.textContent = "请先确认问卷和持仓。"; return;}
     const rows = [
       ["版本", String(revision), "会话前提"],
-      ["数据模式", facts.data_mode, "运行模式"],
+      ["数据模式", facts.data_mode === "LIVE" ? "实时数据" : "离线演示数据", "运行模式"],
       ["风险等级", facts.profile.risk_level, facts.profile.profile_id],
       ["最大回撤容忍", `${facts.profile.max_drawdown_tolerance_pct}%`, facts.profile.profile_id],
       ["禁投约束", (facts.profile.exclusions || []).join("、") || "未声明", facts.profile.profile_id],
@@ -5783,11 +5783,12 @@
   function liveModeLabelForUser() {
     const liveCapabilities = (state.capabilities && state.capabilities.LIVE) || {};
     const fuyaoReady = !!(liveCapabilities.stock_quote || liveCapabilities.fund_lookthrough);
-    const wencaiReady = state.wencaiReady === true;
-    if (fuyaoReady && wencaiReady) return "LIVE · 双数据源";
-    if (fuyaoReady) return "LIVE · 扶摇数据";
-    if (wencaiReady) return "LIVE · 问财数据";
-    return "LIVE · 不可用";
+    const wencaiReady = state.wencaiReady === true
+      || !!(liveCapabilities.semantic_search || liveCapabilities.industry_data || liveCapabilities.company_data);
+    if (fuyaoReady && wencaiReady) return "实时数据 · 双数据源";
+    if (fuyaoReady) return "实时数据 · 扶摇行情";
+    if (wencaiReady) return "实时数据 · 问财数据";
+    return "实时数据 · 暂不可用";
   }
 
   function updateRuntimeDataModeUI() {
@@ -5801,7 +5802,7 @@
     btn.classList.toggle("mode-live", isLive);
     btn.classList.toggle("mode-mock", !isLive);
     const liveCapabilities = (state.capabilities && state.capabilities.LIVE) || {};
-    label.textContent = isLive ? liveModeLabelForUser() : "MOCK · 合成数据";
+    label.textContent = isLive ? liveModeLabelForUser() : "离线演示 · 合成数据";
     const capabilitySummary = [
       `A 股行情${liveCapabilities.stock_quote ? "可用" : "不可用"}`,
       `场内基金披露${liveCapabilities.fund_lookthrough ? "可用" : "不可用"}`,
@@ -5812,7 +5813,7 @@
       "title",
       isLive
         ? capabilitySummary
-        : (liveReady ? `可切换至实时数据；${capabilitySummary}` : "实时数据源尚未就绪"),
+      : (liveReady ? `可切换至实时数据；${capabilitySummary}` : "实时数据源尚未就绪"),
     );
 
     const fundInput = /^(510|512|513|515|588|159)/.test(byId("copilot-stock-input")?.value?.trim() || "");
@@ -5826,7 +5827,7 @@
       control.disabled = unavailable;
       control.setAttribute(
         "title",
-        unavailable ? `${unavailableMessage}；可切换至 MOCK 查看示例数据` : "",
+        unavailable ? `${unavailableMessage}；可切换至离线演示查看示例数据` : "",
       );
     });
   }
@@ -5847,11 +5848,11 @@
     if (confirmBtn) confirmBtn.disabled = false;
 
     if (currChip) {
-      currChip.textContent = (state.dataMode === "MOCK") ? "MOCK · 合成数据" : liveModeLabelForUser();
+      currChip.textContent = (state.dataMode === "MOCK") ? "离线演示 · 合成数据" : liveModeLabelForUser();
       currChip.className = "status-chip " + (state.dataMode === "MOCK" ? "chip-mock" : "chip-live");
     }
     if (targetChip) {
-      targetChip.textContent = (targetMode === "LIVE") ? liveModeLabelForUser() : "MOCK · 合成数据";
+      targetChip.textContent = (targetMode === "LIVE") ? liveModeLabelForUser() : "离线演示 · 合成数据";
       targetChip.className = "status-chip " + (targetMode === "LIVE" ? "chip-live" : "chip-mock");
     }
     if (revText) {
@@ -5868,7 +5869,7 @@
         if (confirmBtn) confirmBtn.disabled = !state.liveReady && !state.liveConfigured;
       } else {
         warnTitle.textContent = "沙箱仿真环境重置";
-        warnText.textContent = "切回 MOCK 模式将加载本地基准沙箱与高质量仿真数据，所有分析结果将标注 MOCK · 合成数据。";
+        warnText.textContent = "切回离线演示模式将加载本地基准沙箱与仿真数据，所有分析结果将标注为离线演示数据。";
       }
     }
 
@@ -5890,7 +5891,7 @@
 
     const targetMode = (state.dataMode === "MOCK") ? "LIVE" : "MOCK";
     if (targetMode === "LIVE" && !state.liveReady && !state.liveConfigured) {
-      alert(`LIVE 不可用：${(state.liveReadinessIssues || []).join("、") || "缺少官方 Provider 配置"}`);
+      alert(`实时数据不可用：${(state.liveReadinessIssues || []).join("、") || "缺少官方数据源配置"}`);
       return;
     }
     const expectedRevision = state.modeRevision;
@@ -6658,6 +6659,12 @@
     const sumPanel = byId("evaluation-summary-content");
     if (sumPanel && data.summary && data.latency) {
       sumPanel.textContent = "";
+      const modeNote = document.createElement("p");
+      modeNote.className = "research-boundary";
+      modeNote.textContent = data.serving_mode === "OFFLINE_FIXTURE"
+        ? "本套件为本地离线回归，仅验证规则、证据和响应契约，不读取或替代实时行情。"
+        : "评测数据来源已标注。";
+      sumPanel.append(modeNote);
       const sGrid = document.createElement("div");
       sGrid.className = "score-grid";
       const addSum = (title, val, badgeTag = "PASS", isGood = true) => {
@@ -6784,7 +6791,10 @@
           repeat_count: 1,
         }),
       });
-      if (!res.ok) throw new Error("评测套件运行失败");
+      if (!res.ok) {
+        const errorPayload = await res.json().catch(() => ({}));
+        throw new Error(errorPayload.message || "评测套件运行失败");
+      }
       const data = await res.json();
       renderEvaluationDashboardData(data);
     } catch (err) {
@@ -7810,12 +7820,14 @@
       ? "新鲜度未提供"
       : `最旧行情距计算时点 ${Number(stalest.staleness_seconds).toFixed(0)} 秒`;
     const sources = [...new Set(rows.map((row) => row.source).filter(Boolean))];
-    const sourceLabel = sources.length ? sources.join(" + ") : (refresh.provider || "未标注来源");
+    const sourceLabel = sources.length
+      ? sources.map((source) => researchSourceLabel(source)).join(" + ")
+      : researchSourceLabel(refresh.provider || "未标注来源");
     target.textContent = skipped
-      ? `LIVE · 未刷新 · ${refresh.issues?.[0] || "使用已确认持仓进行计算"}`
+      ? `实时数据未刷新 · ${refresh.issues?.[0] || "使用已确认持仓进行计算"}`
       : complete
-      ? `${isLive ? "LIVE · 真实数据刷新" : "MOCK · 合成数据"} · ${sourceLabel} · ${freshness}`
-      : `${isLive ? "LIVE · 需要复核" : "MOCK · 需要复核"} · ${refresh.issues?.[0] || "数据未完整刷新"}`;
+      ? `${isLive ? "实时数据已刷新" : "离线演示数据"} · ${sourceLabel} · ${freshness}`
+      : `${isLive ? "实时数据待复核" : "离线数据待复核"} · ${refresh.issues?.[0] || "数据未完整刷新"}`;
     target.className = `portfolio-refresh-status ${complete ? "complete" : "review"}`;
   }
 
@@ -8007,7 +8019,7 @@
     if (!isLiveMode) {
       sourceText.textContent = "当前为离线演示数据，指标由预置基准数据测算。";
     } else if (refresh?.status === "COMPLETE") {
-      sourceText.textContent = "本次组合已由可用 LIVE 数据源刷新；场内基金持仓来自最近一期定期披露。";
+      sourceText.textContent = "本次组合已由可用实时数据源刷新；场内基金持仓来自最近一期定期披露。";
     } else {
       sourceText.textContent = "本次未完成外部组合刷新；体检仅使用已确认持仓执行确定性计算，不引用未取得的公告、语义检索或最新组合数据。";
     }
@@ -8846,15 +8858,30 @@
         const banner = document.createElement("div");
         banner.className = "decision-banner hold";
         const title = document.createElement("h3");
-        title.textContent = `${quote.name} (${quote.symbol}) 行情已获取，财务适配性暂不可计算`;
+        title.textContent = `${quote.name} (${quote.symbol}) 已取得实时行情，财务指标待补齐`;
         const status = document.createElement("span");
         status.className = "cf-verdict cf-verdict-hold";
-        status.textContent = "REVIEW_REQUIRED 财务字段缺失";
+        const financialStatusLabels = {
+          PERMISSION_REQUIRED: "待授权",
+          NOT_CONFIGURED: "未配置",
+          UNAVAILABLE: "暂不可用",
+        };
+        status.textContent = `待复核 · 财务指标${financialStatusLabels[quote.financial_data_status] || "缺失"}`;
         banner.append(title, status);
         const body = document.createElement("div");
         body.className = "decision-card-body";
         const message = document.createElement("p");
-        message.textContent = `报价 ¥${quote.price_cny}；数据模式 ${res.execution_context?.data_mode || "未标注"}；来源层级 ${quote.provider_tier || "未知"}；数据时间 ${quote.observed_at || "未提供"}；缺少 ${missingFinancialFields.join("、")}，因此不生成估值与配置结论。`;
+        const fieldLabels = {
+          pe_ttm: "PE(TTM)",
+          pb: "PB",
+          roe_pct: "ROE",
+          valuation_quantile_pct: "估值分位",
+        };
+        const missingLabels = missingFinancialFields.map((field) => fieldLabels[field] || "财务指标");
+        const sourceLabel = researchSourceLabel(quote.source || quote.provider);
+        const observedLabel = quote.observed_at || "未提供";
+        const statusLabel = financialStatusLabels[quote.financial_data_status] || "财务指标待补齐";
+        message.textContent = `已取得实时行情，报价 ¥${quote.price_cny}；来源：${sourceLabel}；更新时间：${observedLabel}。财务指标${statusLabel}，缺少 ${missingLabels.join("、")}，因此暂不生成估值与配置结论。`;
         body.append(message);
         card.append(banner, body);
         output.append(card);
@@ -8862,10 +8889,11 @@
       }
 
       const providerTier = quote.provider_tier || "UNSPECIFIED";
-      const sourceIsLive = providerTier === "LIVE_PRIMARY" || providerTier === "LIVE_SECONDARY";
+      const sourceIsLive = res.execution_context?.data_mode === "LIVE"
+        || providerTier === "LIVE_PRIMARY" || providerTier === "LIVE_SECONDARY";
       const verdictBannerClass = sourceIsLive ? "buy" : "hold";
-      const verdictTitle = `标的底稿：${quote.name} (${quote.symbol}) · ${providerTier}`;
-      const verdictChipText = sourceIsLive ? "QUOTE 行情快照已获取" : "STATIC 静态底稿";
+      const verdictTitle = `标的底稿：${quote.name} (${quote.symbol}) · ${sourceIsLive ? "实时行情" : "离线底稿"}`;
+      const verdictChipText = sourceIsLive ? "实时行情已获取" : "离线底稿";
       const verdictChipClass = sourceIsLive ? "cf-verdict-pass" : "cf-verdict-hold";
 
       clear(output);
@@ -8922,9 +8950,10 @@
       cContent.className = "callout-content";
       const cTitle = document.createElement("div");
       cTitle.className = "callout-title";
-      cTitle.textContent = `基本面概况（所属行业：${quote.sector} / ${quote.sub_industry || quote.sector}）`;
+      cTitle.textContent = `基本面概况（所属行业：${quote.sector || "未提供"} / ${quote.sub_industry || quote.sector || "未提供"}）`;
       const cP = document.createElement("p");
-      cP.textContent = `${quote.name}（${quote.symbol}）当前报价 ¥${Number(quote.price_cny).toFixed(2)}，动态市盈率 TTM ${Number(quote.pe_ttm).toFixed(1)} 倍，历史估值分位 ${Number(quote.valuation_quantile_pct).toFixed(1)}%。毛利率 ${Number(quote.gross_margin_pct).toFixed(1)}%，ROE ${Number(quote.roe_pct).toFixed(1)}%，资产负债率 ${Number(quote.debt_ratio_pct).toFixed(1)}%。`;
+      const formatMetric = (value, digits = 1, suffix = "") => hasFinancialNumber(value) ? `${Number(value).toFixed(digits)}${suffix}` : "未提供";
+      cP.textContent = `${quote.name}（${quote.symbol}）当前报价 ¥${formatMetric(quote.price_cny, 2)}，动态市盈率 TTM ${formatMetric(quote.pe_ttm, 1, " 倍")}，市净率 PB ${formatMetric(quote.pb, 2)}，历史估值分位 ${formatMetric(quote.valuation_quantile_pct, 1, "%")}。毛利率 ${formatMetric(quote.gross_margin_pct, 1, "%")}，ROE ${formatMetric(quote.roe_pct, 1, "%")}，资产负债率 ${formatMetric(quote.debt_ratio_pct, 1, "%")}。`;
       cContent.append(cTitle, cP);
       callout.append(cIcon, cContent);
 
@@ -8933,10 +8962,10 @@
       metricsRow.className = "decision-metrics-row";
       const changePrefix = quote.change_pct >= 0 ? "+" : "";
       metricsRow.append(
-        buildCopilotMetricBox("最新报价 / 日涨跌", `¥${Number(quote.price_cny).toFixed(2)} (${changePrefix}${Number(quote.change_pct).toFixed(2)}%)`, false, sourceIsLive, `数据源：${quote.provider || "行情接口"}`),
-        buildCopilotMetricBox("估值分位", `${Number(quote.valuation_quantile_pct).toFixed(1)}%`, false, false, "历史分位数参考。"),
+        buildCopilotMetricBox("最新报价 / 日涨跌", `¥${formatMetric(quote.price_cny, 2)} (${hasFinancialNumber(quote.change_pct) ? `${changePrefix}${Number(quote.change_pct).toFixed(2)}%` : "未提供"})`, false, sourceIsLive, `数据源：${researchSourceLabel(quote.source || quote.provider)}`),
+        buildCopilotMetricBox("估值分位", formatMetric(quote.valuation_quantile_pct, 1, "%"), false, false, "历史分位数参考。"),
         buildCopilotMetricBox("数据时效", quote.staleness_seconds == null ? "未提供" : `${Number(quote.staleness_seconds).toFixed(0)} 秒前`, false, sourceIsLive, "数据更新时间间隔。"),
-        buildCopilotMetricBox("ROE / 毛利率", `${Number(quote.roe_pct).toFixed(1)}% / ${Number(quote.gross_margin_pct).toFixed(1)}%`, false, false, "来自最新财报披露。")
+        buildCopilotMetricBox("ROE / 毛利率", `${formatMetric(quote.roe_pct, 1, "%")} / ${formatMetric(quote.gross_margin_pct, 1, "%")}`, false, false, "来自最新财报披露。")
       );
 
       // Factual audit lineage
@@ -8953,12 +8982,12 @@
       const r1 = document.createElement("li");
       const r1Bold = document.createElement("strong");
       r1Bold.textContent = "行情与财务：";
-      r1.append(r1Bold, document.createTextNode(`数据源：${quote.provider || "行情接口"}；资产负债率 ${Number(quote.debt_ratio_pct).toFixed(1)}%。`));
+      r1.append(r1Bold, document.createTextNode(`数据源：${researchSourceLabel(quote.source || quote.provider)}；资产负债率 ${formatMetric(quote.debt_ratio_pct, 1, "%")}。`));
 
       const r2 = document.createElement("li");
       const r2Bold = document.createElement("strong");
       r2Bold.textContent = "行业与市值：";
-      r2.append(r2Bold, document.createTextNode(`所属 ${quote.sector} / ${quote.sub_industry || "未提供"}；总市值约 ¥${Number(quote.market_cap_cny || 0).toLocaleString()}。`));
+      r2.append(r2Bold, document.createTextNode(`所属 ${quote.sector || "未提供"} / ${quote.sub_industry || "未提供"}；总市值约 ${hasFinancialNumber(quote.market_cap_cny) ? `¥${Number(quote.market_cap_cny).toLocaleString()}` : "未提供"}。`));
 
       const r3 = document.createElement("li");
       const r3Bold = document.createElement("strong");
@@ -9775,7 +9804,14 @@
               progressBar.style.width = "60%";
               const toolChip = document.createElement("span");
               toolChip.className = "chat-tool-tag";
-              toolChip.textContent = `调用工具：${event.tool}`;
+              const toolLabels = {
+                query_stock_quote: "查询实时行情",
+                query_fund_lookthrough: "查询基金披露持仓",
+                query_wencai_semantic: "检索公告与研究资料",
+                run_portfolio_health_check: "执行组合体检",
+                generate_portfolio_rebalance: "生成组合调整方案",
+              };
+              toolChip.textContent = toolLabels[event.tool] || "查询结构化数据";
               toolsContainer.append(toolChip);
             } else if (event.type === "tool_done") {
               const toolStatus = event.result?.status || "FAILED";
@@ -9902,7 +9938,7 @@
     }
 
     const provSel = byId("llm-provider-select");
-    if (badge && byId("chat-runtime-mode")?.value === "MOCK") badge.textContent = "AI 模拟模式";
+    if (badge && byId("chat-runtime-mode")?.value === "MOCK") badge.textContent = "AI 离线演示模式";
     if (provSel) provSel.value = llmConfig.provider || "deepseek";
     const keyInput = byId("llm-api-key-input");
     if (keyInput) keyInput.value = llmConfig.apiKey || "";
@@ -9926,9 +9962,9 @@
     const mode = byId("chat-runtime-mode")?.value || "AUTO";
     const ai = byId("visible-ai-mode"), data = byId("visible-data-mode");
     if (!ai || !data) return;
-    ai.textContent = mode === "MOCK" ? "AI · MOCK 模拟" : llmConfig.configured ? "AI · 真实接口已配置" : mode === "LIVE" ? "AI · 真实接口未配置" : "AI · 本地规则";
+    ai.textContent = mode === "MOCK" ? "AI · 离线演示" : llmConfig.configured ? "AI · 真实接口已配置" : mode === "LIVE" ? "AI · 真实接口未配置" : "AI · 本地规则";
     ai.dataset.mode = mode === "MOCK" ? "mock" : llmConfig.configured ? "live" : "pending";
-    data.textContent = state.dataMode === "LIVE" ? "工具数据 · LIVE" : "工具数据 · MOCK";
+    data.textContent = state.dataMode === "LIVE" ? "工具数据 · 实时数据" : "工具数据 · 离线演示";
     data.dataset.mode = state.dataMode === "LIVE" ? "live" : "mock";
   }
 
@@ -10598,7 +10634,8 @@
       const card = document.createElement("article"); card.className = "market-factor-card";
       const heading = document.createElement("header");
       const title = document.createElement("strong"); title.textContent = factor.name;
-      heading.append(title, chip(factor.status, factor.status === "LIVE" ? "pass" : "review"));
+      const factorStatusLabel = factor.status === "LIVE" ? "实时数据" : factor.status === "REVIEW_REQUIRED" ? "待复核" : "离线演示";
+      heading.append(title, chip(factorStatusLabel, factor.status === "LIVE" ? "pass" : "review"));
       const value = document.createElement("p"); value.className = "market-factor-value";
       value.textContent = factor.latest_value == null ? "数据不可用" : `${Number(factor.latest_value).toLocaleString("zh-CN")} ${factor.unit}`;
       const correlation = document.createElement("dl"); correlation.className = "market-factor-correlations";
@@ -10791,7 +10828,7 @@
     const summary = displayedPortfolioSummary;
     if (!summary?.position_count) { setError("请先导入持仓"); return; }
     const cells = value => `"${String(value ?? "").replace(/^[=+@-]/, "'$&").replaceAll('"', '""')}"`;
-    const rows = [["数据模式", summary.data_mode], ["证券", "代码", "数量", "成本价", "现价", "市值", "累计盈亏", "占比%"], ...summary.positions.map(p => [p.name, p.asset_id, p.quantity, p.cost_price, p.price, p.market_value_cny, p.pnl_cny, p.weight_pct]), ["仅供参考，不构成投资建议"]];
+    const rows = [["数据模式", summary.data_mode === "LIVE" ? "实时数据" : "离线演示数据"], ["证券", "代码", "数量", "成本价", "现价", "市值", "累计盈亏", "占比%"], ...summary.positions.map(p => [p.name, p.asset_id, p.quantity, p.cost_price, p.price, p.market_value_cny, p.pnl_cny, p.weight_pct]), ["仅供参考，不构成投资建议"]];
     const blob = new Blob(["\uFEFF" + rows.map(row => row.map(cells).join(",")).join("\r\n")], {type: "text/csv;charset=utf-8"});
     const url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = "Prism-持仓报告.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   });

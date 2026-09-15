@@ -71,4 +71,5 @@ class EvaluationDashboardService:
             summary=summary,
             latency=latency,
             cases=case_items,
+            serving_mode=self.serving_mode,
         )

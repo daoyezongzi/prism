@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import httpx
@@ -14,7 +15,16 @@ from app.api.main import create_app
 app = create_app()
 from app.llm.agent import CopilotAgent, CopilotMessage
 from app.llm.client import AsyncLLMClient, LLMConfig
-from app.providers.contracts import FrozenDict, ProviderOperation, ProviderRequest
+from app.providers.contracts import (
+    FrozenDict,
+    ProviderOperation,
+    ProviderRecord,
+    ProviderRequest,
+    ProviderResult,
+    ProviderServingMode,
+    ProviderStatus,
+)
+from app.providers.fingerprint import compute_request_fingerprint
 from app.providers.live_market import LiveMarketProvider
 from app.providers.live_wencai import LiveWencaiProvider
 from app.runtime.mode import DataMode
@@ -181,6 +191,8 @@ def test_wencai_answer_lists_real_records_instead_of_four_generic_fields() -> No
     assert "公司披露半年度报告主要经营信息" in output
     assert "查询：" not in output
     assert "数据时间：" not in output
+    assert "数据模式：LIVE" not in output
+    assert "wencai_skillhub_provider" not in output
 
 
 def test_explicit_announcement_question_omits_unrequested_quote_template() -> None:
@@ -285,15 +297,20 @@ def test_agent_rejects_content_only_answer_for_financial_query() -> None:
         return [event async for event in agent.stream_chat("查询 300750 最新行情")]
 
     events = asyncio.run(_run())
-    assert not any(event["type"] == "token" for event in events)
-    assert any(event.get("message") == "该问题需要真实金融工具结果，模型未完成工具调用。" for event in events)
+    assert any(event["type"] == "tool_start" for event in events)
+    assert any(event["type"] == "tool_done" for event in events)
+    output = "".join(event.get("delta", "") for event in events if event["type"] == "token")
+    assert "999" not in output
+    assert "个股底稿字段" in output
 
     async def _run_named_security():
         agent = CopilotAgent(llm_client=ContentOnlyClient())
         return [event async for event in agent.stream_chat("宁德时代现在多少钱")]
 
     named_events = asyncio.run(_run_named_security())
-    assert not any(event["type"] == "token" for event in named_events)
+    assert any(event["type"] == "tool_start" for event in named_events)
+    assert any(event["type"] == "tool_done" for event in named_events)
+    assert any(event["type"] == "token" for event in named_events)
 
 
 def test_agent_allows_general_financial_education_without_live_tool() -> None:
@@ -516,3 +533,119 @@ def test_copilot_http_endpoints() -> None:
     assert chat_resp.status_code == 200
     assert "text/event-stream" in chat_resp.headers["content-type"]
     assert "data:" in chat_resp.text
+
+
+class _RealQuoteForEnrichment:
+    async def get_quote(self, code: str) -> dict[str, object]:
+        return {
+            "symbol": "300750.SZ",
+            "name": "宁德时代",
+            "price_cny": 329.63,
+            "observed_at": "2026-09-15T12:26:06+08:00",
+            "provider_tier": "LIVE_PRIMARY",
+            "retrieved_at": "2026-09-15T04:26:10+00:00",
+            "quote_latency_ms": 80,
+            "staleness_seconds": 4,
+            "is_synthetic": False,
+            "missing_fields": [
+                "pe_ttm", "pb", "roe_pct", "valuation_quantile_pct",
+            ],
+            "source": "Fuyao structured financial data API",
+        }
+
+    async def get_fund_lookthrough(self, code: str) -> None:
+        return None
+
+
+class _RealWencaiForEnrichment:
+    name = "wencai_skillhub_provider"
+    is_configured = True
+
+    def __init__(self) -> None:
+        self.requests: list[ProviderRequest] = []
+
+    async def execute(self, request: ProviderRequest) -> ProviderResult:
+        self.requests.append(request)
+        fields = {
+            "items": [{
+                "股票代码": "300750.SZ",
+                "股票简称": "宁德时代",
+                "所属同花顺行业": "电力设备",
+                "市盈率(TTM)": "24.8",
+                "市净率": "4.12",
+                "净资产收益率(ROE)": "18.7%",
+                "市盈率相对历史百分位": "48.0%",
+            }],
+            "columns": [
+                {"key": "市盈率(TTM)", "unit": "倍"},
+                {"key": "净资产收益率(ROE)", "unit": "%"},
+            ],
+        }
+        if request.operation == ProviderOperation.INDUSTRY_DATA:
+            fields["items"][0] = {
+                "股票代码": "300750.SZ",
+                "股票简称": "宁德时代",
+                "所属同花顺行业": "电力设备",
+                "市盈率(TTM)": "24.8",
+                "市净率": "4.12",
+                "净资产收益率(ROE)": "18.7%",
+                "市盈率相对历史百分位": "48.0%",
+            }
+        return ProviderResult(
+            request_id=request.request_id,
+            request_fingerprint=compute_request_fingerprint(request),
+            provider=self.name,
+            status=ProviderStatus.SUCCESS,
+            retrieved_at=datetime.now(UTC),
+            records=(ProviderRecord(source=self.name, fields=fields),),
+            serving_mode=ProviderServingMode.DIRECT,
+        )
+
+
+def test_live_quote_and_chat_use_code_matched_wencai_financial_fields() -> None:
+    from app.runtime.mode import reset_runtime_mode_controller
+
+    reset_runtime_mode_controller(DataMode.LIVE)
+    finance = _RealQuoteForEnrichment()
+    wencai = _RealWencaiForEnrichment()
+    with TestClient(create_app(
+        database_path=":memory:",
+        live_finance_provider=finance,
+        wencai_provider=wencai,
+    )) as client:
+        response = client.get("/api/v1/copilot/live-quote?symbol=300750")
+        assert response.status_code == 200
+        data = response.json()["data"]
+        assert data["price_cny"] == 329.63
+        assert data["pe_ttm"] == 24.8
+        assert data["pb"] == 4.12
+        assert data["roe_pct"] == 18.7
+        assert data["valuation_quantile_pct"] == 48.0
+        assert data["missing_fields"] == []
+        assert data["financial_data_status"] == "COMPLETE"
+        assert data["sector"] == "Industrials"
+        assert [request.operation for request in wencai.requests] == [
+            ProviderOperation.INDUSTRY_DATA,
+        ]
+
+    class ContentOnlyClient:
+        is_configured = True
+
+        async def stream_chat(self, messages, tools=None):
+            yield {"type": "content", "delta": "模型没有完成工具调用"}
+
+    async def _run_chat():
+        agent = CopilotAgent(
+            llm_client=ContentOnlyClient(),
+            live_finance_provider=finance,
+            skillhub_provider=wencai,
+        )
+        return [event async for event in agent.stream_chat(
+            "请研判 300750 的估值和财务质地"
+        )]
+
+    events = asyncio.run(_run_chat())
+    output = "".join(event.get("delta", "") for event in events if event["type"] == "token")
+    assert "329.63" in output
+    assert "24.8" in output
+    assert "模型没有完成工具调用" not in output

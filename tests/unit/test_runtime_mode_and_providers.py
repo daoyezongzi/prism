@@ -147,6 +147,44 @@ class TestRuntimeModeController:
 
         asyncio.run(_run())
 
+    def test_partial_wencai_probe_isolates_capability_failures(self):
+        async def _run():
+            os.environ["WENCAI_SKILLHUB_API_KEY"] = "test_official_key"
+            controller = RuntimeModeController(initial_mode=DataMode.MOCK)
+            await controller.apply_wencai_probe(
+                available=False,
+                error_code="AUTH_FAILED",
+                capabilities={
+                    "semantic_search": True,
+                    "industry_data": True,
+                },
+                capability_errors={"company_data": "AUTH_FAILED"},
+                auto_activate=True,
+            )
+
+            assert controller.mode == DataMode.LIVE
+            assert controller.is_wencai_ready is False
+            assert controller.is_wencai_capability_ready("semantic_search") is True
+            assert controller.is_wencai_capability_ready("industry_data") is True
+            assert controller.is_wencai_capability_ready("company_data") is False
+
+            await controller.record_wencai_failure(
+                "AUTH_FAILED", capability="company_data"
+            )
+            status = controller.get_status()
+            assert status["capabilities"]["LIVE"]["semantic_search"] is True
+            assert status["capabilities"]["LIVE"]["industry_data"] is True
+            assert status["wencai_live_capability_status"]["company_data"]["last_error_code"] == "AUTH_FAILED"
+
+            await controller.record_wencai_failure(
+                "AUTH_FAILED", capability="industry_data"
+            )
+            status = controller.get_status()
+            assert status["portfolio_metadata_ready"] is False
+            assert status["capabilities"]["LIVE"]["portfolio_refresh"] is False
+
+        asyncio.run(_run())
+
     def test_switch_mode_revision_conflict(self):
         async def _run():
             controller = RuntimeModeController(initial_mode=DataMode.MOCK)

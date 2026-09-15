@@ -52,7 +52,9 @@ def test_fuyao_quote_normalizes_snapshot_and_metadata() -> None:
         assert quote["change_pct"] == 0.688
         assert quote["provider_tier"] == "LIVE_PRIMARY"
         assert quote["is_synthetic"] is False
-        assert quote["missing_fields"] == []
+        assert quote["missing_fields"] == [
+            "pe_ttm", "pb", "roe_pct", "valuation_quantile_pct"
+        ]
 
     asyncio.run(run())
 
