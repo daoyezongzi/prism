@@ -1,7 +1,8 @@
-"""S3 defense deck page 11 figure in the deck's navy/blue palette.
+"""S3 defense deck page 11 figure: model understands, server computes and reviews.
 
 Same layered layout as fig-s14 (layer label column + chips + right-side
-responsibility panel), recoloured to match the blue-white slide template.
+responsibility panel). Each layer has its own hue so blocks separate at a
+glance on the blue slide template.
 Run:  python docs/submission/s3-figures/build_fig_s11.py
       node docs/submission/s3-figures/render_png.mjs
 """
@@ -10,34 +11,52 @@ from __future__ import annotations
 
 from build_figures import MONO, Svg
 
-NAVY = "#0B2E59"
-BLUE = "#1F5FBF"
-BLUE_SOFT = "#E8F0FC"
-BLUE_PALE = "#F4F8FE"
-LINE = "#C9D8EE"
 INK = "#1B2533"
 MUTED = "#5A6B82"
-LIGHT = "#CFE0F7"
+ARROW = "#6B7A90"
 WHITE = "#FFFFFF"
+
+# hue: (accent, soft zone fill, card border)
+ORANGE = ("#E07020", "#FDF1E7", "#F3C9A6")
+BLUE = ("#2F6FD6", "#EBF2FD", "#BCD2F2")
+TEAL = ("#13806A", "#E5F4EF", "#9FD3C4")
+AMBER = ("#C98A0B", "#FDF6E2", "#EED79A")
+SLATE = ("#4A5568", "#F0F2F5", "#C9CFD8")
+PURPLE = ("#6E49B8", "#F3EEFB", "#D2C3EE")
+GREEN_S = "#1E8A4C"
+RED_S = "#C0362C"
 
 L, R = 230, 1330  # chip column inside layers
 
 
-def layer(s: Svg, y, h, name, tech, chips, *, focus=False):
-    s.rect(30, y, R - 30, h, NAVY if focus else BLUE_PALE, None if focus else LINE, 1.5, 14)
-    s.text(50, y + h / 2 - 4, name, 22, 700, WHITE if focus else NAVY)
-    s.text(50, y + h / 2 + 22, tech, 14, 400, LIGHT if focus else MUTED)
+def tab(s: Svg, x, y, w, h, name, tech, hue):
+    """Solid coloured label block on the left of a zone."""
+    acc = hue[0]
+    s.rect(x, y, w, h, acc, None, 0, 10)
+    s.text(x + 18, y + h / 2 - 4, name, 22, 700, WHITE)
+    s.text(x + 18, y + h / 2 + 22, tech, 14, 400, "#EEF2F7")
+
+
+def layer(s: Svg, y, h, name, tech, chips, hue, *, steps=False):
+    acc, soft, line = hue
+    s.rect(30, y, R - 30, h, soft, line, 1.5, 14)
+    tab(s, 42, y + 12, L - 60, h - 24, name, tech, hue)
     n = len(chips)
-    gap = 44 if focus else 14
+    gap = 44 if steps else 14
     cw = (R - L - 20 - (n - 1) * gap) / n
     for i, (t, sub) in enumerate(chips):
         x = L + i * (cw + gap)
-        s.box(x, y + 16, cw, h - 32, t, sub, fill=WHITE, stroke=None if focus else LINE,
-              tcolor=NAVY, scolor=MUTED, tsize=20, ssize=15)
-        if focus:
-            s.badge(x + 22, y + 38, str(i + 1), fill=BLUE, r=13, size=15)
+        s.box(x, y + 16, cw, h - 32, t, sub, fill=WHITE, stroke=acc if steps else line,
+              sw=2 if steps else 1.5, tcolor=acc, scolor=MUTED, tsize=20, ssize=15)
+        if steps:
+            s.badge(x + 22, y + 38, str(i + 1), fill=acc, r=13, size=15)
             if i < n - 1:
-                s.arrow([(x + cw + 6, y + h / 2), (x + cw + gap - 6, y + h / 2)], LIGHT, 2.5)
+                s.arrow([(x + cw + 6, y + h / 2), (x + cw + gap - 6, y + h / 2)], acc, 2.5)
+
+
+def down(s: Svg, x, y1, y2, label):
+    s.arrow([(x, y1), (x, y2)], ARROW, 2)
+    s.text(x + 12, y2 - 12, label, 14, 400, MUTED)
 
 
 def fig_s11() -> None:
@@ -45,79 +64,83 @@ def fig_s11() -> None:
 
     layer(s, 20, 112, "交互入口", "浏览器工作台", [
         ("咨询", "意图识别"), ("问卷与持仓", "确认资料"),
-        ("研究工作台", "选定任务"), ("分析结果", "SSE 流式回传")])
-    s.arrow([(680, 132), (680, 168)], BLUE, 2)
-    s.text(692, 156, "HTTP / SSE", 14, 400, MUTED)
+        ("研究工作台", "选定任务"), ("分析结果", "SSE 流式回传")], ORANGE)
+    down(s, 680, 132, 168, "HTTP / SSE")
 
     layer(s, 168, 112, "应用服务", "FastAPI · Pydantic", [
         ("请求校验", "参数 · 账户归属"), ("锁定前提", "画像 · 持仓版本"),
-        ("研究编排", "依赖 · 时间预算"), ("合并回执", "状态 · 引用")])
-    s.arrow([(680, 280), (680, 316)], BLUE, 2)
-    s.text(692, 304, "领域调用", 14, 400, MUTED)
+        ("研究编排", "依赖 · 时间预算"), ("合并回执", "状态 · 引用")], BLUE)
+    down(s, 680, 280, 316, "领域调用")
 
     layer(s, 316, 140, "金融领域", "Python · Decimal", [
         ("画像预算", "风险适当性"), ("证据核验", "来源 · 口径"),
-        ("组合计算", "穿透 · 调仓"), ("独立审查", "风险 · 合规")], focus=True)
+        ("组合计算", "穿透 · 调仓"), ("独立审查", "风险 · 合规")], TEAL, steps=True)
 
     # bottom: adapters + storage
     y4, h4 = 496, 132
-    s.arrow([(420, 456), (420, y4)], BLUE, 2)
-    s.text(432, 484, "数据查询 · 模型推理", 14, 400, MUTED)
-    s.arrow([(1010, 456), (1010, y4)], BLUE, 2)
-    s.text(1022, 484, "快照读写", 14, 400, MUTED)
+    down(s, 420, 456, y4, "数据查询 · 模型推理")
+    down(s, 1010, 456, y4, "快照读写")
 
-    s.rect(30, y4, 650, h4, BLUE_PALE, LINE, 1.5, 14)
-    s.text(50, y4 + 40, "外部金融适配", 22, 700, NAVY)
+    acc, soft, line = AMBER
+    s.rect(30, y4, 650, h4, soft, line, 1.5, 14)
+    s.rect(42, y4 + 12, 160, 34, acc, None, 0, 8)
+    s.text(122, y4 + 36, "外部金融适配", 18, 700, WHITE, "middle")
     ext = [("问财 SkillHub", "9 项金融 Skill"), ("iFinD", "数据适配"), ("模型接口", "可切换")]
-    ew = (680 - 50 - 20 - 2 * 12) / 3
+    ew = (680 - 42 - 12 - 2 * 12) / 3
     for i, (t, sub) in enumerate(ext):
-        s.box(50 + i * (ew + 12), y4 + 56, ew, 62, t, sub, fill=WHITE, stroke=LINE,
-              tcolor=NAVY, scolor=MUTED, tsize=18, ssize=14)
+        s.box(42 + i * (ew + 12), y4 + 56, ew, 64, t, sub, fill=WHITE, stroke=line,
+              tcolor=acc, scolor=MUTED, tsize=18, ssize=14)
 
-    s.rect(710, y4, R - 710, h4, BLUE_PALE, LINE, 1.5, 14)
-    s.text(730, y4 + 40, "版本化存储", 22, 700, NAVY)
-    s.text(730, y4 + 76, "SQLite / PostgreSQL", 18, 700, INK)
-    s.text(730, y4 + 104, "画像与持仓快照 · 研究事实 · 结论回执", 15, 400, MUTED)
+    acc, soft, line = SLATE
+    s.rect(710, y4, R - 710, h4, soft, line, 1.5, 14)
+    s.rect(722, y4 + 12, 136, 34, acc, None, 0, 8)
+    s.text(790, y4 + 36, "版本化存储", 18, 700, WHITE, "middle")
+    dbs = [("SQLite / PostgreSQL", "关系库"), ("快照与回执", "画像 · 持仓 · 研究事实")]
+    dw = (R - 722 - 12 - 12) / 2
+    for i, (t, sub) in enumerate(dbs):
+        s.box(722 + i * (dw + 12), y4 + 56, dw, 64, t, sub, fill=WHITE, stroke=line,
+              tcolor=acc, scolor=MUTED, tsize=18, ssize=14)
 
     # provider result strip
     y5, h5 = 668, 102
-    s.line([(200, y4 + h4), (200, y5)], BLUE, 2, dash="6 5")
-    s.rect(30, y5, R - 30, h5, WHITE, BLUE, 1.8, 14)
-    s.text(50, y5 + 42, "ProviderResult", 20, 700, BLUE, font=MONO)
-    s.text(50, y5 + 70, "统一标注来源 · 时间 · 缺项", 14, 400, MUTED)
-    states = [("成功", "正常采纳，展示来源"), ("部分可用", "只用有效项，列明缺口"),
-              ("空结果", "保留原查询条件"), ("失败", "展示异常原因与重试提示")]
+    acc, soft, line = PURPLE
+    s.line([(200, y4 + h4), (200, y5)], AMBER[0], 2, dash="6 5")
+    s.rect(30, y5, R - 30, h5, soft, line, 1.5, 14)
+    s.rect(42, y5 + 12, L - 60, h5 - 24, acc, None, 0, 10)
+    s.text(60, y5 + 44, "ProviderResult", 18, 700, WHITE, font=MONO)
+    s.text(60, y5 + 68, "来源 · 时间 · 缺项", 14, 400, "#EEF2F7")
+    states = [("成功", "正常采纳，展示来源", GREEN_S), ("部分可用", "只用有效项，列明缺口", AMBER[0]),
+              ("空结果", "保留原查询条件", SLATE[0]), ("失败", "展示异常原因与重试提示", RED_S)]
     sw_ = (R - L - 20 - 3 * 14) / 4
-    for i, (t, sub) in enumerate(states):
-        x = L + 30 + i * (sw_ + 14)
-        s.rect(x, y5 + 16, sw_ - 30, h5 - 32, BLUE_SOFT, None, 0, 10)
-        s.text(x + 18, y5 + 46, t, 18, 700, NAVY)
-        s.text(x + 18, y5 + 72, sub, 14, 400, MUTED)
+    for i, (t, sub, c) in enumerate(states):
+        x = L + i * (sw_ + 14)
+        s.rect(x, y5 + 16, sw_, h5 - 32, WHITE, line, 1.5, 10)
+        s.rect(x, y5 + 16, 6, h5 - 32, c, None, 0, 3)
+        s.text(x + 22, y5 + 46, t, 18, 700, c)
+        s.text(x + 22, y5 + 72, sub, 14, 400, MUTED)
 
-    # right panel
+    # right panel: responsibility split
     x0, pw = 1360, 210
-    s.rect(x0, 20, pw, 112, WHITE, LINE, 1.5, 12)
-    s.text(x0 + 18, 52, "图例", 17, 700, NAVY)
-    s.rect(x0 + 18, 68, 26, 18, NAVY, None, 0, 4)
-    s.text(x0 + 54, 83, "确定性计算核心", 16, 400, INK)
-    s.rect(x0 + 18, 100, 26, 18, BLUE_PALE, LINE, 1.5, 4)
-    s.text(x0 + 54, 115, "接入与基础设施", 16, 400, INK)
+    s.rect(x0, 20, pw, 436, WHITE, "#C9D8EE", 1.5, 12)
+    s.text(x0 + 18, 56, "职责隔离", 20, 700, INK)
+    a = AMBER
+    s.rect(x0 + 14, 74, pw - 28, 170, a[1], a[2], 1.5, 10)
+    s.text(x0 + 28, 106, "大模型", 18, 700, a[0])
+    for i, t in enumerate(["意图识别 · 工具选择", "结论通俗表达"]):
+        s.text(x0 + 28, 138 + i * 26, t, 15, 400, INK)
+    s.text(x0 + 28, 222, "不参与金融计算", 15, 700, RED_S)
+    t_ = TEAL
+    s.rect(x0 + 14, 260, pw - 28, 180, t_[1], t_[2], 1.5, 10)
+    s.text(x0 + 28, 292, "领域程序", 18, 700, t_[0])
+    for i, t in enumerate(["金额 · 比例 · 手数", "风险与合规裁决", "Decimal 确定性计算"]):
+        s.text(x0 + 28, 324 + i * 26, t, 15, 400, INK)
 
-    s.rect(x0, 168, pw, 288, WHITE, NAVY, 2, 12)
-    s.text(x0 + 18, 204, "职责隔离", 19, 700, NAVY)
-    s.text(x0 + 18, 244, "大模型", 16, 700, INK)
-    s.text(x0 + 18, 270, "意图识别 · 工具选择", 15, 400, MUTED)
-    s.text(x0 + 18, 294, "结论通俗表达", 15, 400, MUTED)
-    s.text(x0 + 18, 318, "不参与金融计算", 15, 700, BLUE)
-    s.line([(x0 + 18, 340), (x0 + pw - 18, 340)], LINE, 1)
-    s.text(x0 + 18, 372, "领域程序", 16, 700, INK)
-    s.text(x0 + 18, 398, "金额 · 比例 · 手数", 15, 400, MUTED)
-    s.text(x0 + 18, 422, "风险与合规裁决", 15, 400, MUTED)
-
-    s.rect(x0, 496, pw, 274, WHITE, LINE, 1.5, 12)
-    s.text(x0 + 18, 532, "可回溯", 19, 700, NAVY)
-    for i, t in enumerate(["每项数据带来源", "与取数时点", "计算基于锁定版本", "结论附状态与引用"]):
-        s.text(x0 + 18, 572 + i * 30, t, 15, 400, MUTED)
+    p = PURPLE
+    s.rect(x0, 496, pw, 274, WHITE, "#C9D8EE", 1.5, 12)
+    s.text(x0 + 18, 532, "可回溯", 20, 700, INK)
+    for i, t in enumerate(["数据带来源与时点", "计算基于锁定版本", "结论附状态与引用"]):
+        s.add(f'<circle cx="{x0 + 26}" cy="{567 + i * 40}" r="5" fill="{p[0]}"/>')
+        s.text(x0 + 40, 572 + i * 40, t, 15, 400, INK)
 
     s.save("fig-s11-model-service-split.svg")
 
