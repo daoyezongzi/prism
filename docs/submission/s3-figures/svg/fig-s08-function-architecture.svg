@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720">
+<rect x="600" y="180" width="400" height="360" rx="18" fill="#FFF3EA" stroke="#D9631E" stroke-width="2.5"/>
+<text x="800.0" y="228" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#8A2E12" text-anchor="middle">统一投资者档案</text>
+<polyline points="630,248 970,248" fill="none" stroke="#D9631E" stroke-width="1.2" stroke-linejoin="round"/>
+<text x="634" y="288" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="700" fill="#2A1E18" text-anchor="start">画像 Profile</text>
+<text x="634" y="312" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#6B5A50" text-anchor="start">19 题 · DIMS 八维 · C1–C5</text>
+<text x="634" y="344" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="700" fill="#2A1E18" text-anchor="start">已确认持仓</text>
+<text x="634" y="368" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#6B5A50" text-anchor="start">资产占比 · 行业暴露 · 交易记录</text>
+<text x="634" y="400" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="700" fill="#2A1E18" text-anchor="start">长期偏好</text>
+<text x="634" y="424" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#6B5A50" text-anchor="start">现金预留 · 换手节奏 · 调整习惯</text>
+<text x="634" y="456" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="700" fill="#2A1E18" text-anchor="start">研究记录</text>
+<text x="634" y="480" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#6B5A50" text-anchor="start">方法版本 · 输入时点 · 结果</text>
+<text x="800.0" y="526" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="400" fill="#8A2E12" text-anchor="middle">用户确认后生效 · 保留历史版本</text>
+<rect x="60" y="40" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#E3C7B3" stroke-width="1.5"/>
+<text x="86" y="86" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">01</text>
+<text x="132" y="86" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">AI 对话工作台</text>
+<text x="86" y="128" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">六类高频投顾场景一站式问答</text>
+<rect x="86" y="144" width="122.0" height="28" rx="14.0" fill="#F5EFEB" stroke="#6B5A50" stroke-width="1.2"/>
+<text x="147.0" y="163.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#6B5A50" text-anchor="middle">读取画像与持仓</text>
+<polyline points="600,220 530,220 530,115.0 501.2,115.0" fill="none" stroke="#6B5A50" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="490,115.0 502.8,107.0 502.8,123.0" fill="#6B5A50"/>
+<rect x="60" y="285" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#E3C7B3" stroke-width="1.5"/>
+<text x="86" y="331" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">02</text>
+<text x="132" y="331" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">持仓分析诊断</text>
+<text x="86" y="373" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">持仓 KPI 与画像区间逐项对照</text>
+<rect x="86" y="389" width="122.0" height="28" rx="14.0" fill="#F5EFEB" stroke="#6B5A50" stroke-width="1.2"/>
+<text x="147.0" y="408.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#6B5A50" text-anchor="middle">读取持仓与预算</text>
+<polyline points="600,360.0 530,360.0 530,360.0 501.2,360.0" fill="none" stroke="#6B5A50" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="490,360.0 502.8,352.0 502.8,368.0" fill="#6B5A50"/>
+<rect x="60" y="530" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#E3C7B3" stroke-width="1.5"/>
+<text x="86" y="576" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">03</text>
+<text x="132" y="576" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">大盘鉴别研判</text>
+<text x="86" y="618" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">指数切换，趋势与风险同屏</text>
+<rect x="86" y="634" width="108.0" height="28" rx="14.0" fill="#F5EFEB" stroke="#6B5A50" stroke-width="1.2"/>
+<text x="140.0" y="653.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#6B5A50" text-anchor="middle">关联持仓暴露</text>
+<polyline points="600,480 530,480 530,605.0 501.2,605.0" fill="none" stroke="#6B5A50" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="490,605.0 502.8,597.0 502.8,613.0" fill="#6B5A50"/>
+<rect x="1110" y="40" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#E3C7B3" stroke-width="1.5"/>
+<text x="1136" y="86" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">04</text>
+<text x="1182" y="86" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">交易风格分析</text>
+<text x="1136" y="128" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">依据交易行为证据识别风格</text>
+<rect x="1136" y="144" width="108.0" height="28" rx="14.0" fill="#F5EFEB" stroke="#6B5A50" stroke-width="1.2"/>
+<text x="1190.0" y="163.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#6B5A50" text-anchor="middle">读取交易记录</text>
+<polyline points="1000,220 1060,220 1060,115.0 1098.8,115.0" fill="none" stroke="#6B5A50" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="1110,115.0 1097.2,107.0 1097.2,123.0" fill="#6B5A50"/>
+<rect x="1110" y="285" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#D9631E" stroke-width="2"/>
+<text x="1136" y="331" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">05</text>
+<text x="1182" y="331" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">风险测评画像</text>
+<text x="1136" y="373" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">19 题问卷生成八维画像</text>
+<rect x="1136" y="389" width="94.0" height="28" rx="14.0" fill="#FCE6D6" stroke="#8A2E12" stroke-width="1.2"/>
+<text x="1183.0" y="408.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#8A2E12" text-anchor="middle">确认后写入</text>
+<polyline points="1110,360.0 1011.2,360.0" fill="none" stroke="#D9631E" stroke-width="2.8" stroke-linejoin="round"/>
+<polygon points="1000,360.0 1012.8,352.0 1012.8,368.0" fill="#D9631E"/>
+<rect x="1110" y="530" width="430" height="150" rx="14" fill="#FFFFFF" stroke="#E3C7B3" stroke-width="1.5"/>
+<text x="1136" y="576" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#D9631E" text-anchor="start">06</text>
+<text x="1182" y="576" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="23" font-weight="700" fill="#2A1E18" text-anchor="start">证据溯源合规</text>
+<text x="1136" y="618" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6B5A50" text-anchor="start">逻辑链可展开，结论可查</text>
+<rect x="1136" y="634" width="122.0" height="28" rx="14.0" fill="#F5EFEB" stroke="#6B5A50" stroke-width="1.2"/>
+<text x="1197.0" y="653.04" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="14" font-weight="700" fill="#6B5A50" text-anchor="middle">记录来源与版本</text>
+<polyline points="1000,480 1060,480 1060,605.0 1098.8,605.0" fill="none" stroke="#6B5A50" stroke-width="1.8" stroke-linejoin="round"/>
+<polygon points="1110,605.0 1097.2,597.0 1097.2,613.0" fill="#6B5A50"/>
+<text x="800" y="600" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="700" fill="#8A2E12" text-anchor="middle">一处更新，其余模块按最新前提重算</text>
+</svg>
