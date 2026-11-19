@@ -5,6 +5,7 @@
 | 原稿页 | 图名 | SVG（可编辑） | PNG（2x，透明底） |
 | --- | --- | --- | --- |
 | S8 | 功能架构：统一投资者档案驱动六模块 | `svg/fig-s08-function-architecture.svg` | `png/fig-s08-function-architecture.png` |
+| S11（蓝白版） | 模型负责理解与表达，服务端负责计算与审查 | `svg/fig-s11-model-service-split.svg` | `png/fig-s11-model-service-split.png` |
 | S14 | 系统整体分层架构 | `svg/fig-s14-system-layers.svg` | `png/fig-s14-system-layers.png` |
 | S15 | SkillHub 底座与自研控制链 | `svg/fig-s15-skillhub-control-chain.svg` | `png/fig-s15-skillhub-control-chain.png` |
 | S16 | 画像风险预算与组合穿透 | `svg/fig-s16-risk-budget-penetration.svg` | `png/fig-s16-risk-budget-penetration.png` |
@@ -26,5 +27,6 @@
 
 ```bash
 python docs/submission/s3-figures/build_figures.py
+python docs/submission/s3-figures/build_fig_s11.py
 node docs/submission/s3-figures/render_png.mjs
 ```
