@@ -1,39 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
-<rect width="1200" height="560" fill="#FFFFFF"/>
-<rect x="20.0" y="20.0" width="1160.0" height="104.0" rx="14" fill="#0B2E59"/>
-<text x="52.0" y="88.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="54" font-weight="700" fill="#FFFFFF" text-anchor="start">82.05%</text>
-<text x="300.0" y="66.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="400" fill="#CFE0F7" text-anchor="start">的受访者曾因信息不足、分析困难或无法判断</text>
-<text x="300.0" y="100.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="start">而推迟甚至放弃投资决策</text>
-<text x="40.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">问卷中的三个困扰</text>
-<text x="700.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">产品的对应设计</text>
-<text x="40.0" y="226.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">信息太多，不知道该看什么</text>
-<rect x="40.0" y="242.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
-<rect x="40.0" y="242.0" width="330.2" height="34.0" rx="6" fill="#1F5FBF"/>
-<text x="382.2" y="268.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">58.97%</text>
-<polyline points="612.0,259.0 684.0,259.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
-<polygon points="696.0,259.0 683.2,251.0 683.2,267.0" fill="#6E9BDB"/>
-<rect x="700.0" y="206.0" width="460.0" height="92.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<rect x="700.0" y="206.0" width="8.0" height="92.0" rx="4" fill="#1F5FBF"/>
-<text x="728.0" y="244.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">重点筛选</text>
-<text x="728.0" y="278.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">结合个人画像，只呈现与持仓相关的要点</text>
-<text x="40.0" y="342.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">来源分散，要在多个平台切换</text>
-<rect x="40.0" y="358.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
-<rect x="40.0" y="358.0" width="301.6" height="34.0" rx="6" fill="#1F5FBF"/>
-<text x="353.6" y="384.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">53.85%</text>
-<polyline points="612.0,375.0 684.0,375.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
-<polygon points="696.0,375.0 683.2,367.0 683.2,383.0" fill="#6E9BDB"/>
-<rect x="700.0" y="322.0" width="460.0" height="92.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<rect x="700.0" y="322.0" width="8.0" height="92.0" rx="4" fill="#1F5FBF"/>
-<text x="728.0" y="360.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">统一查询</text>
-<text x="728.0" y="394.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">行情、财报、公告在一个入口查齐</text>
-<text x="40.0" y="458.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">难以判断信息是否可靠</text>
-<rect x="40.0" y="474.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
-<rect x="40.0" y="474.0" width="272.8" height="34.0" rx="6" fill="#1F5FBF"/>
-<text x="324.8" y="500.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">48.72%</text>
-<polyline points="612.0,491.0 684.0,491.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
-<polygon points="696.0,491.0 683.2,483.0 683.2,499.0" fill="#6E9BDB"/>
-<rect x="700.0" y="438.0" width="460.0" height="92.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<rect x="700.0" y="438.0" width="8.0" height="92.0" rx="4" fill="#1F5FBF"/>
-<text x="728.0" y="476.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">依据展示</text>
-<text x="728.0" y="510.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">每个结论附来源与数据时间，可点开核对</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540">
+<rect width="1200" height="540" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="1160.0" height="100.0" rx="14" fill="#0B2E59"/>
+<text x="52.0" y="88.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="52" font-weight="700" fill="#FFFFFF" text-anchor="start">82.05%</text>
+<text x="300.0" y="82.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF" text-anchor="start">的受访者曾因看不懂、拿不准而推迟或放弃投资</text>
+<text x="40.0" y="170.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">三个困扰</text>
+<text x="700.0" y="170.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">我们的回应</text>
+<text x="40.0" y="222.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">信息太多，不知道看什么</text>
+<rect x="40.0" y="238.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
+<rect x="40.0" y="238.0" width="330.2" height="34.0" rx="6" fill="#1F5FBF"/>
+<text x="382.2" y="264.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">58.97%</text>
+<polyline points="612.0,255.0 682.0,255.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="694.0,255.0 681.2,247.0 681.2,263.0" fill="#6E9BDB"/>
+<rect x="700.0" y="204.0" width="460.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<rect x="700.0" y="204.0" width="8.0" height="88.0" rx="4" fill="#1F5FBF"/>
+<text x="728.0" y="242.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">重点筛选</text>
+<text x="728.0" y="276.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">只看与自己持仓相关的要点</text>
+<text x="40.0" y="334.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">来源分散，要来回切换平台</text>
+<rect x="40.0" y="350.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
+<rect x="40.0" y="350.0" width="301.6" height="34.0" rx="6" fill="#1F5FBF"/>
+<text x="353.6" y="376.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">53.85%</text>
+<polyline points="612.0,367.0 682.0,367.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="694.0,367.0 681.2,359.0 681.2,375.0" fill="#6E9BDB"/>
+<rect x="700.0" y="316.0" width="460.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<rect x="700.0" y="316.0" width="8.0" height="88.0" rx="4" fill="#1F5FBF"/>
+<text x="728.0" y="354.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">统一查询</text>
+<text x="728.0" y="388.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">行情、财报、公告一处查齐</text>
+<text x="40.0" y="446.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#1B2533" text-anchor="start">难以判断信息是否可靠</text>
+<rect x="40.0" y="462.0" width="560.0" height="34.0" rx="6" fill="#F4F8FE"/>
+<rect x="40.0" y="462.0" width="272.8" height="34.0" rx="6" fill="#1F5FBF"/>
+<text x="324.8" y="488.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="start">48.72%</text>
+<polyline points="612.0,479.0 682.0,479.0" fill="none" stroke="#6E9BDB" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="694.0,479.0 681.2,471.0 681.2,487.0" fill="#6E9BDB"/>
+<rect x="700.0" y="428.0" width="460.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<rect x="700.0" y="428.0" width="8.0" height="88.0" rx="4" fill="#1F5FBF"/>
+<text x="728.0" y="466.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">依据展示</text>
+<text x="728.0" y="500.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">每个结论都附来源和时间</text>
 </svg>

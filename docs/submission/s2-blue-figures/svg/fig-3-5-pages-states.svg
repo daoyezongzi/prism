@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470">
+<rect width="1200" height="470" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="206.5" y="68.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">对话工作台</text>
+<text x="206.5" y="101.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">提问与追问</text>
+<rect x="413.0" y="20.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="599.5" y="68.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">持仓分析</text>
+<text x="599.5" y="101.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">资产结构与风险</text>
+<rect x="806.0" y="20.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="992.5" y="68.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">个人中心</text>
+<text x="992.5" y="101.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">测评与画像</text>
+<rect x="20.0" y="150.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="206.5" y="198.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">市场观察</text>
+<text x="206.5" y="231.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">指数与行情</text>
+<rect x="413.0" y="150.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="599.5" y="198.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">研究工作台</text>
+<text x="599.5" y="231.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">查数据 · 找资料 · 算指标</text>
+<rect x="806.0" y="150.0" width="373.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="992.5" y="198.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">技能商店</text>
+<text x="992.5" y="231.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">能力与启用状态</text>
+<rect x="20.0" y="300.0" width="1160.0" height="150.0" rx="14" fill="#0B2E59"/>
+<text x="44.0" y="344.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="start">所有页面统一五种状态</text>
+<rect x="44.0" y="368.0" width="200.0" height="60.0" rx="30" fill="#FFFFFF"/>
+<text x="144.0" y="406.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">加载中</text>
+<rect x="268.0" y="368.0" width="200.0" height="60.0" rx="30" fill="#FFFFFF"/>
+<text x="368.0" y="406.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">成功</text>
+<rect x="492.0" y="368.0" width="200.0" height="60.0" rx="30" fill="#FFFFFF"/>
+<text x="592.0" y="406.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">部分可用</text>
+<rect x="716.0" y="368.0" width="200.0" height="60.0" rx="30" fill="#FFFFFF"/>
+<text x="816.0" y="406.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">空结果</text>
+<rect x="940.0" y="368.0" width="200.0" height="60.0" rx="30" fill="#FDECEA"/>
+<text x="1040.0" y="406.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#B42318" text-anchor="middle">失败</text>
+</svg>

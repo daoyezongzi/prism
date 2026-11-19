@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+<rect width="1200" height="500" fill="#FFFFFF"/>
+<rect x="20.0" y="190.0" width="200.0" height="100.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="120.0" y="249.4" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">查询请求</text>
+<polyline points="220.0,240.0 258.0,240.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="270.0,240.0 257.2,232.0 257.2,248.0" fill="#1F5FBF"/>
+<rect x="270.0" y="180.0" width="240.0" height="120.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="390.0" y="233.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">金融数据接口</text>
+<text x="390.0" y="266.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">问财等提供方</text>
+<polyline points="510.0,240.0 558.0,240.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="570.0,240.0 557.2,232.0 557.2,248.0" fill="#1F5FBF"/>
+<rect x="570.0" y="180.0" width="140.0" height="120.0" rx="12" fill="#0B2E59"/>
+<text x="640.0" y="248.6" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">返回结果</text>
+<polyline points="710.0,240.0 750.0,240.0 750.0,75.0 790.0,75.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="770.0,75.0 780.0,75.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="792.0,75.0 779.2,67.0 779.2,83.0" fill="#1F5FBF"/>
+<rect x="792.0" y="30.0" width="388.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="816.0" y="70.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">完整返回</text>
+<text x="816.0" y="102.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">直接进入计算</text>
+<polyline points="710.0,240.0 750.0,240.0 750.0,190.0 790.0,190.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="770.0,190.0 780.0,190.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="792.0,190.0 779.2,182.0 779.2,198.0" fill="#1F5FBF"/>
+<rect x="792.0" y="145.0" width="388.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="816.0" y="185.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">部分返回</text>
+<text x="816.0" y="217.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">标出缺项，只用可用字段</text>
+<polyline points="710.0,240.0 750.0,240.0 750.0,305.0 790.0,305.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="770.0,305.0 780.0,305.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="792.0,305.0 779.2,297.0 779.2,313.0" fill="#1F5FBF"/>
+<rect x="792.0" y="260.0" width="388.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="816.0" y="300.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">没有数据</text>
+<text x="816.0" y="332.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">如实显示为空，不补值</text>
+<polyline points="710.0,240.0 750.0,240.0 750.0,420.0 790.0,420.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="770.0,420.0 780.0,420.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="792.0,420.0 779.2,412.0 779.2,428.0" fill="#1F5FBF"/>
+<rect x="792.0" y="375.0" width="388.0" height="90.0" rx="12" fill="#FDECEA" stroke="#B42318" stroke-width="1.5"/>
+<text x="816.0" y="415.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#B42318" text-anchor="start">请求失败</text>
+<text x="816.0" y="447.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="start">提示原因，可稍后重试</text>
+</svg>

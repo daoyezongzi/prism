@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400">
+<rect width="1200" height="400" fill="#FFFFFF"/>
+<rect x="40.0" y="60.0" width="260.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="170.0" y="109.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="middle">接口层</text>
+<text x="170.0" y="140.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#5A6B82" text-anchor="middle">校验参数与权限</text>
+<rect x="360.0" y="60.0" width="260.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="490.0" y="109.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="middle">应用服务</text>
+<text x="490.0" y="140.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#5A6B82" text-anchor="middle">协调读取与执行</text>
+<polyline points="304.0,115.0 344.0,115.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="356.0,115.0 343.2,107.0 343.2,123.0" fill="#1F5FBF"/>
+<rect x="700.0" y="30.0" width="460.0" height="170.0" rx="14" fill="#FFFFFF" stroke="#1F5FBF" stroke-width="2" stroke-dasharray="10 7"/>
+<text x="930.0" y="58.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#1F5FBF" text-anchor="middle">不发起任何网络请求</text>
+<rect x="740.0" y="74.0" width="380.0" height="106.0" rx="12" fill="#0B2E59"/>
+<text x="930.0" y="120.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF" text-anchor="middle">领域模块</text>
+<text x="930.0" y="153.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#CFE0F7" text-anchor="middle">画像 · 组合 · 预算 · 审查</text>
+<polyline points="620.0,115.0 728.0,127.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="740.0,127.0 727.2,119.0 727.2,135.0" fill="#1F5FBF"/>
+<polyline points="490.0,170.0 490.0,240.0 330.0,240.0 330.0,258.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="330.0,270.0 322.0,257.2 338.0,257.2" fill="#1F5FBF"/>
+<polyline points="490.0,240.0 650.0,240.0 650.0,258.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="650.0,270.0 642.0,257.2 658.0,257.2" fill="#1F5FBF"/>
+<rect x="180.0" y="270.0" width="300.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="330.0" y="318.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">外部适配</text>
+<text x="330.0" y="351.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">金融数据 · 大模型</text>
+<rect x="500.0" y="270.0" width="300.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="650.0" y="318.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">存储</text>
+<text x="650.0" y="351.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">事务与版本</text>
+<rect x="840.0" y="270.0" width="320.0" height="110.0" rx="12" fill="#E8F0FC"/>
+<text x="1000.0" y="332.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">可脱离网络单独测试</text>
+</svg>

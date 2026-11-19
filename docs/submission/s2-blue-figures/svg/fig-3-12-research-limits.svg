@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470">
+<rect width="1200" height="470" fill="#FFFFFF"/>
+<rect x="20.0" y="150.0" width="170.0" height="80.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="105.0" y="197.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">检查依赖</text>
+<rect x="250.0" y="60.0" width="170.0" height="80.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="335.0" y="107.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">行情查询</text>
+<rect x="250.0" y="240.0" width="170.0" height="80.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="335.0" y="287.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">持仓分析</text>
+<rect x="480.0" y="150.0" width="150.0" height="80.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="555.0" y="197.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">汇总</text>
+<polyline points="190.0,190.0 220.0,190.0 220.0,100.0 238.0,100.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="250.0,100.0 237.2,92.0 237.2,108.0" fill="#1F5FBF"/>
+<polyline points="220.0,190.0 220.0,280.0 238.0,280.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="250.0,280.0 237.2,272.0 237.2,288.0" fill="#1F5FBF"/>
+<polyline points="420.0,100.0 450.0,100.0 450.0,190.0 468.0,190.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="480.0,190.0 467.2,182.0 467.2,198.0" fill="#1F5FBF"/>
+<polyline points="420.0,280.0 450.0,280.0 450.0,190.0 468.0,190.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="480.0,190.0 467.2,182.0 467.2,198.0" fill="#1F5FBF"/>
+<text x="335.0" y="200.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#1F5FBF" text-anchor="middle">并行执行</text>
+<rect x="20.0" y="360.0" width="610.0" height="80.0" rx="12" fill="#E8F0FC"/>
+<text x="325.0" y="407.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">超时只取消下游，已完成的结果保留</text>
+<rect x="680.0" y="20.0" width="230.0" height="120.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="795.0" y="84.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="40" font-weight="700" fill="#1F5FBF" text-anchor="middle">400</text>
+<text x="795.0" y="120.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="middle">排队总量</text>
+<rect x="930.0" y="20.0" width="230.0" height="120.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1045.0" y="84.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="40" font-weight="700" fill="#1F5FBF" text-anchor="middle">200</text>
+<text x="1045.0" y="120.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="middle">单人排队</text>
+<rect x="680.0" y="160.0" width="230.0" height="120.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="795.0" y="224.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="40" font-weight="700" fill="#1F5FBF" text-anchor="middle">100</text>
+<text x="795.0" y="260.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="middle">同时运行</text>
+<rect x="930.0" y="160.0" width="230.0" height="120.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1045.0" y="224.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="40" font-weight="700" fill="#1F5FBF" text-anchor="middle">8</text>
+<text x="1045.0" y="260.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#5A6B82" text-anchor="middle">大模型并发</text>
+<rect x="680.0" y="300.0" width="480.0" height="140.0" rx="12" fill="#0B2E59"/>
+<text x="920.0" y="380.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="52" font-weight="700" fill="#FFFFFF" text-anchor="middle">60 秒</text>
+<text x="920.0" y="422.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#CFE0F7" text-anchor="middle">单次研究总时限</text>
+</svg>

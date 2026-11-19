@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+<rect width="1200" height="500" fill="#FFFFFF"/>
+<rect x="20.0" y="175.0" width="180.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="110.0" y="239.4" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">建议草稿</text>
+<polyline points="200.0,230.0 230.0,230.0 230.0,110.0 248.0,110.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="260.0,110.0 247.2,102.0 247.2,118.0" fill="#1F5FBF"/>
+<rect x="260.0" y="30.0" width="380.0" height="160.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="450.0" y="103.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">风险审查</text>
+<text x="450.0" y="136.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">画像上限 · 持仓 · 证据</text>
+<polyline points="640.0,110.0 680.0,110.0 680.0,230.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polyline points="200.0,230.0 230.0,230.0 230.0,350.0 248.0,350.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="260.0,350.0 247.2,342.0 247.2,358.0" fill="#1F5FBF"/>
+<rect x="260.0" y="270.0" width="380.0" height="160.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="450.0" y="343.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">合规审查</text>
+<text x="450.0" y="376.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">事实引用 · 风险提示 · 禁用说法</text>
+<polyline points="640.0,350.0 680.0,350.0 680.0,230.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polyline points="680.0,230.0 708.0,230.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="720.0,230.0 707.2,222.0 707.2,238.0" fill="#1F5FBF"/>
+<rect x="720.0" y="110.0" width="220.0" height="240.0" rx="14" fill="#0B2E59"/>
+<text x="830.0" y="156.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">取最严结果</text>
+<rect x="760.0" y="180.0" width="140.0" height="42.0" rx="21" fill="#FDECEA"/>
+<text x="830.0" y="209.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#B42318" text-anchor="middle">拦截</text>
+<rect x="760.0" y="234.0" width="140.0" height="42.0" rx="21" fill="#FFFFFF"/>
+<text x="830.0" y="263.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">需复核</text>
+<rect x="760.0" y="288.0" width="140.0" height="42.0" rx="21" fill="#E8F0FC"/>
+<text x="830.0" y="317.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">通过</text>
+<polyline points="940.0,180.0 968.0,180.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="980.0,180.0 967.2,172.0 967.2,188.0" fill="#1F5FBF"/>
+<rect x="980.0" y="120.0" width="200.0" height="110.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1080.0" y="168.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="middle">给出建议</text>
+<text x="1080.0" y="201.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">附决策回执</text>
+<polyline points="940.0,290.0 968.0,290.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="980.0,290.0 967.2,282.0 967.2,298.0" fill="#1F5FBF"/>
+<rect x="980.0" y="250.0" width="200.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1080.0" y="302.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">不输出建议</text>
+<text x="600.0" y="482.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">两道审查都通过，才会给出建议</text>
+</svg>

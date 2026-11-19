@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440">
+<rect width="1200" height="440" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="1160.0" height="190.0" rx="14" fill="#0B2E59"/>
+<text x="44.0" y="64.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="start">当前事实：参与计算</text>
+<rect x="44.0" y="90.0" width="220.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="154.0" y="142.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">已确认问卷</text>
+<rect x="294.0" y="90.0" width="220.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="404.0" y="142.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">当前持仓</text>
+<polyline points="268.0,135.0 278.0,135.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="290.0,135.0 277.2,127.0 277.2,143.0" fill="#1F5FBF"/>
+<rect x="544.0" y="90.0" width="220.0" height="90.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="654.0" y="142.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">数据模式</text>
+<polyline points="518.0,135.0 528.0,135.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="540.0,135.0 527.2,127.0 527.2,143.0" fill="#1F5FBF"/>
+<polyline points="794.0,135.0 828.0,135.0" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="840.0,135.0 827.2,127.0 827.2,143.0" fill="#FFFFFF"/>
+<rect x="840.0" y="90.0" width="310.0" height="90.0" rx="12" fill="#FFFFFF"/>
+<text x="995.0" y="145.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="middle">会话前提 → 计算</text>
+<rect x="20.0" y="240.0" width="1160.0" height="180.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="44.0" y="284.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">历史记录：只帮助理解</text>
+<rect x="44.0" y="310.0" width="220.0" height="86.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="154.0" y="360.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">最近消息</text>
+<rect x="294.0" y="310.0" width="220.0" height="86.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="404.0" y="360.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">已保存资料</text>
+<polyline points="268.0,353.0 278.0,353.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="290.0,353.0 277.2,345.0 277.2,361.0" fill="#1F5FBF"/>
+<polyline points="524.0,353.0 568.0,353.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="580.0,353.0 567.2,345.0 567.2,361.0" fill="#1F5FBF"/>
+<rect x="580.0" y="310.0" width="330.0" height="86.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="745.0" y="360.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">用户主动恢复并确认</text>
+<polyline points="910.0,353.0 995.0,353.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round" stroke-dasharray="8 6"/>
+<polyline points="995.0,353.0 995.0,196.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round" stroke-dasharray="8 6"/>
+<polygon points="995.0,184.0 987.0,196.8 1003.0,196.8" fill="#1F5FBF"/>
+<text x="1010.0" y="290.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#1F5FBF" text-anchor="start">才进入</text>
+</svg>

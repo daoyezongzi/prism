@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+<rect width="1200" height="520" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="570.0" height="230.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="42.0" y="60.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">账户</text>
+<rect x="610.0" y="20.0" width="570.0" height="230.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="632.0" y="60.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">对话</text>
+<rect x="20.0" y="270.0" width="570.0" height="230.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="42.0" y="310.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">研究记录</text>
+<rect x="610.0" y="270.0" width="570.0" height="230.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="632.0" y="310.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">参考资料</text>
+<rect x="50.0" y="110.0" width="200.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="150.0" y="152.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">本地账户</text>
+<polyline points="250.0,145.0 338.0,145.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="350.0,145.0 337.2,137.0 337.2,153.0" fill="#1F5FBF"/>
+<text x="300.0" y="133.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="700" fill="#5A6B82" text-anchor="middle">用户名</text>
+<rect x="350.0" y="110.0" width="200.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="450.0" y="152.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">登录会话</text>
+<rect x="640.0" y="110.0" width="200.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="740.0" y="152.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">对话</text>
+<polyline points="840.0,145.0 928.0,145.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="940.0,145.0 927.2,137.0 927.2,153.0" fill="#1F5FBF"/>
+<text x="890.0" y="133.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="700" fill="#5A6B82" text-anchor="middle">对话编号</text>
+<rect x="940.0" y="110.0" width="200.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1040.0" y="152.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">消息</text>
+<rect x="50.0" y="335.0" width="200.0" height="110.0" rx="12" fill="#0B2E59"/>
+<text x="150.0" y="397.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF" text-anchor="middle">研究快照</text>
+<polyline points="250.0,390.0 318.0,340.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="330.0,340.0 317.2,332.0 317.2,348.0" fill="#1F5FBF"/>
+<rect x="330.0" y="300.0" width="230.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="445.0" y="342.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">研究事实</text>
+<polyline points="250.0,440.0 318.0,440.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="330.0,440.0 317.2,432.0 317.2,448.0" fill="#1F5FBF"/>
+<rect x="330.0" y="405.0" width="230.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="445.0" y="447.6" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="700" fill="#0B2E59" text-anchor="middle">原始请求与响应</text>
+<text x="150.0" y="478.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="700" fill="#1F5FBF" text-anchor="middle">按用户与快照共同关联</text>
+<rect x="630.0" y="380.0" width="150.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="705.0" y="422.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">资料</text>
+<polyline points="780.0,415.0 798.0,415.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="810.0,415.0 797.2,407.0 797.2,423.0" fill="#1F5FBF"/>
+<rect x="810.0" y="380.0" width="150.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="885.0" y="422.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">资料版本</text>
+<polyline points="960.0,415.0 978.0,415.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="990.0,415.0 977.2,407.0 977.2,423.0" fill="#1F5FBF"/>
+<rect x="990.0" y="380.0" width="170.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1075.0" y="422.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">检索片段</text>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+<rect width="1200" height="560" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="220.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="130.0" y="75.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">直接持股</text>
+<polyline points="240.0,68.0 278.0,68.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="290.0,68.0 277.2,60.0 277.2,76.0" fill="#1F5FBF"/>
+<rect x="290.0" y="20.0" width="260.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="420.0" y="75.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">按股票计入</text>
+<polyline points="550.0,68.0 590.0,68.0 590.0,188.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<rect x="20.0" y="140.0" width="220.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="130.0" y="195.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">基金 / ETF</text>
+<polyline points="240.0,188.0 278.0,188.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="290.0,188.0 277.2,180.0 277.2,196.0" fill="#1F5FBF"/>
+<rect x="290.0" y="140.0" width="260.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="420.0" y="195.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">按成分比例拆分</text>
+<polyline points="550.0,188.0 590.0,188.0 590.0,188.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<rect x="20.0" y="260.0" width="220.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="130.0" y="315.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">无披露基金</text>
+<polyline points="240.0,308.0 278.0,308.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="290.0,308.0 277.2,300.0 277.2,316.0" fill="#1F5FBF"/>
+<rect x="290.0" y="260.0" width="260.0" height="96.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="420.0" y="315.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">单列为未分类</text>
+<polyline points="550.0,308.0 590.0,308.0 590.0,188.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="590.0,188.0 628.0,188.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="640.0,188.0 627.2,180.0 627.2,196.0" fill="#1F5FBF"/>
+<rect x="640.0" y="108.0" width="520.0" height="160.0" rx="12" fill="#0B2E59"/>
+<text x="900.0" y="182.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">金额守恒校验</text>
+<text x="900.0" y="216.1" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="400" fill="#CFE0F7" text-anchor="middle">拆分后合计 = 原持仓市值</text>
+<polyline points="900.0,268.0 900.0,308.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="900.0,320.0 892.0,307.2 908.0,307.2" fill="#1F5FBF"/>
+<rect x="640.0" y="320.0" width="520.0" height="100.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="900.0" y="363.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="26" font-weight="700" fill="#0B2E59" text-anchor="middle">计算占比与集中度</text>
+<text x="900.0" y="396.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="21" font-weight="400" fill="#5A6B82" text-anchor="middle">仅证券 / 含现金两种口径</text>
+<polyline points="900.0,420.0 900.0,448.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="900.0,460.0 892.0,447.2 908.0,447.2" fill="#1F5FBF"/>
+<rect x="640.0" y="460.0" width="520.0" height="80.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="900.0" y="507.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">对照画像上限，标出超限项</text>
+</svg>

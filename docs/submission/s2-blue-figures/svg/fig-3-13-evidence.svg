@@ -1,75 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660">
-<rect width="1200" height="660" fill="#FFFFFF"/>
-<rect x="20.0" y="20.0" width="520.0" height="620.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="44.0" y="62.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">第一步：同源归并</text>
-<text x="44.0" y="94.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#5A6B82" text-anchor="start">按 lineage_id 把转载、镜像合并为一个来源</text>
-<rect x="44.0" y="130.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="144.0" y="163.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">A 网站原文</text>
-<rect x="44.0" y="200.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="144.0" y="233.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">B 网站转载</text>
-<rect x="44.0" y="270.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="144.0" y="303.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">C 聚合页面</text>
-<rect x="44.0" y="340.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="144.0" y="373.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">交易所公告</text>
-<rect x="44.0" y="410.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="144.0" y="443.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">公司年报</text>
-<polyline points="244.0,155.0 280.0,155.0 280.0,295.0 244.0,295.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="244.0,225.0 280.0,225.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="280.0,225.0 318.0,225.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
-<polygon points="330.0,225.0 317.2,217.0 317.2,233.0" fill="#1F5FBF"/>
-<rect x="334.0" y="190.0" width="180.0" height="70.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="424.0" y="219.4" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 1</text>
-<text x="424.0" y="248.4" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#5A6B82" text-anchor="middle">3 条记录</text>
-<polyline points="244.0,365.0 318.0,365.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
-<polygon points="330.0,365.0 317.2,357.0 317.2,373.0" fill="#1F5FBF"/>
-<rect x="334.0" y="337.0" width="180.0" height="56.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="424.0" y="359.7" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 2</text>
-<text x="424.0" y="386.7" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#5A6B82" text-anchor="middle">1 条记录</text>
-<polyline points="244.0,435.0 318.0,435.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
-<polygon points="330.0,435.0 317.2,427.0 317.2,443.0" fill="#1F5FBF"/>
-<rect x="334.0" y="407.0" width="180.0" height="56.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="424.0" y="429.7" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 3</text>
-<text x="424.0" y="456.7" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="15" font-weight="400" fill="#5A6B82" text-anchor="middle">1 条记录</text>
-<rect x="44.0" y="530.0" width="470.0" height="86.0" rx="12" fill="#0B2E59"/>
-<text x="279.0" y="568.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">5 条记录 = 3 个独立来源</text>
-<text x="279.0" y="600.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#CFE0F7" text-anchor="middle">转载再多也只算一票</text>
-<text x="580.0" y="62.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">第二步：按独立来源数判定</text>
-<text x="580.0" y="94.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#5A6B82" text-anchor="start">前提：主体、指标、单位、期间与数据质量已核对</text>
-<text x="922.0" y="138.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#5A6B82" text-anchor="middle">反对的独立来源数</text>
-<text x="754.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="middle">0 个</text>
-<text x="922.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="middle">1 个</text>
-<text x="1090.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="middle">≥ 2 个</text>
-<text x="580.0" y="172.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#5A6B82" text-anchor="start">支持数</text>
-<text x="580.0" y="257.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="start">≥ 2 个</text>
-<rect x="674.0" y="194.0" width="160.0" height="110.0" rx="10" fill="#0B2E59"/>
-<text x="754.0" y="244.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#FFFFFF" text-anchor="middle">SUPPORTED</text>
-<text x="754.0" y="274.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#CFE0F7" text-anchor="middle">事实成立</text>
-<rect x="842.0" y="194.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="922.0" y="244.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#5A6B82" text-anchor="middle">UNRESOLVED</text>
-<text x="922.0" y="274.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">正反并存</text>
-<rect x="1010.0" y="194.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="1090.0" y="244.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#5A6B82" text-anchor="middle">UNRESOLVED</text>
-<text x="1090.0" y="274.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">正反并存</text>
-<text x="580.0" y="375.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="start">1 个</text>
-<rect x="674.0" y="312.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="754.0" y="362.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#1F5FBF" text-anchor="middle">INSUFFICIENT</text>
-<text x="754.0" y="392.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">来源不足</text>
-<rect x="842.0" y="312.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="922.0" y="362.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#5A6B82" text-anchor="middle">UNRESOLVED</text>
-<text x="922.0" y="392.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">正反并存</text>
-<rect x="1010.0" y="312.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="1090.0" y="362.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#5A6B82" text-anchor="middle">UNRESOLVED</text>
-<text x="1090.0" y="392.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">正反并存</text>
-<text x="580.0" y="493.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="start">0 个</text>
-<rect x="674.0" y="430.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="754.0" y="480.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#1F5FBF" text-anchor="middle">INSUFFICIENT</text>
-<text x="754.0" y="510.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">来源不足</text>
-<rect x="842.0" y="430.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="922.0" y="480.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#1F5FBF" text-anchor="middle">INSUFFICIENT</text>
-<text x="922.0" y="510.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">来源不足</text>
-<rect x="1010.0" y="430.0" width="160.0" height="110.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
-<text x="1090.0" y="480.0" font-family="Consolas, Menlo, monospace" font-size="17" font-weight="700" fill="#B42318" text-anchor="middle">CONTRADICTED</text>
-<text x="1090.0" y="510.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#5A6B82" text-anchor="middle">事实被否定</text>
-<text x="580.0" y="590.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#5A6B82" text-anchor="start">主体、单位、期间或质量存在歧义时，一律记为 UNRESOLVED。</text>
-<text x="580.0" y="626.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#0B2E59" text-anchor="start">只有 SUPPORTED 的事实可以进入建议。</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+<rect width="1200" height="560" fill="#FFFFFF"/>
+<rect x="20.0" y="20.0" width="520.0" height="520.0" rx="14" fill="#F4F8FE" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="44.0" y="64.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">第一步：同源合并</text>
+<rect x="44.0" y="92.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="144.0" y="125.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">A 网站原文</text>
+<rect x="44.0" y="158.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="144.0" y="191.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">B 网站转载</text>
+<rect x="44.0" y="224.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="144.0" y="257.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">C 聚合页面</text>
+<rect x="44.0" y="290.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="144.0" y="323.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">交易所公告</text>
+<rect x="44.0" y="356.0" width="200.0" height="50.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="144.0" y="389.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#1B2533" text-anchor="middle">公司年报</text>
+<polyline points="244.0,117.0 280.0,117.0 280.0,249.0 244.0,249.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="244.0,183.0 280.0,183.0" fill="none" stroke="#1F5FBF" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="280.0,183.0 318.0,183.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="330.0,183.0 317.2,175.0 317.2,191.0" fill="#1F5FBF"/>
+<rect x="334.0" y="153.0" width="180.0" height="60.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="424.0" y="190.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 1</text>
+<polyline points="244.0,315.0 318.0,315.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="330.0,315.0 317.2,307.0 317.2,323.0" fill="#1F5FBF"/>
+<rect x="334.0" y="288.0" width="180.0" height="54.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="424.0" y="322.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 2</text>
+<polyline points="244.0,381.0 318.0,381.0" fill="none" stroke="#1F5FBF" stroke-width="2.2" stroke-linejoin="round"/>
+<polygon points="330.0,381.0 317.2,373.0 317.2,389.0" fill="#1F5FBF"/>
+<rect x="334.0" y="354.0" width="180.0" height="54.0" rx="12" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="424.0" y="388.9" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">来源 3</text>
+<rect x="44.0" y="446.0" width="470.0" height="70.0" rx="12" fill="#0B2E59"/>
+<text x="279.0" y="489.6" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">5 条记录 = 3 个独立来源</text>
+<text x="580.0" y="64.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#0B2E59" text-anchor="start">第二步：按来源数判定</text>
+<text x="930.0" y="110.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="20" font-weight="700" fill="#5A6B82" text-anchor="middle">反对的来源数</text>
+<text x="770.0" y="142.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">0</text>
+<text x="930.0" y="142.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">1</text>
+<text x="1090.0" y="142.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">≥ 2</text>
+<text x="580.0" y="142.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="18" font-weight="700" fill="#5A6B82" text-anchor="start">支持的来源数</text>
+<text x="620.0" y="231.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">≥ 2</text>
+<rect x="694.0" y="162.0" width="152.0" height="122.0" rx="10" fill="#0B2E59"/>
+<text x="770.0" y="232.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">成立</text>
+<rect x="854.0" y="162.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="930.0" y="232.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#5A6B82" text-anchor="middle">待复核</text>
+<rect x="1014.0" y="162.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1090.0" y="232.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#5A6B82" text-anchor="middle">待复核</text>
+<text x="620.0" y="361.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">1</text>
+<rect x="694.0" y="292.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="770.0" y="362.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#1F5FBF" text-anchor="middle">证据不足</text>
+<rect x="854.0" y="292.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="930.0" y="362.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#5A6B82" text-anchor="middle">待复核</text>
+<rect x="1014.0" y="292.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="1090.0" y="362.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#5A6B82" text-anchor="middle">待复核</text>
+<text x="620.0" y="491.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="22" font-weight="700" fill="#0B2E59" text-anchor="middle">0</text>
+<rect x="694.0" y="422.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="770.0" y="492.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#1F5FBF" text-anchor="middle">证据不足</text>
+<rect x="854.0" y="422.0" width="152.0" height="122.0" rx="10" fill="#FFFFFF" stroke="#C9D8EE" stroke-width="1.5"/>
+<text x="930.0" y="492.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#1F5FBF" text-anchor="middle">证据不足</text>
+<rect x="1014.0" y="422.0" width="152.0" height="122.0" rx="10" fill="#FDECEA" stroke="#B42318" stroke-width="1.5"/>
+<text x="1090.0" y="492.0" font-family="Microsoft YaHei, PingFang SC, Noto Sans SC, sans-serif" font-size="24" font-weight="700" fill="#B42318" text-anchor="middle">不成立</text>
 </svg>
