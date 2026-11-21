@@ -4,9 +4,7 @@
 
 Prism 是面向同花顺 A18 赛题的个性化证券投顾智能体系统。系统将已确认的投资者画像、持仓资料、金融数据和研究任务组织为可复核的分析过程，由确定性程序完成金额、比例、风险与再平衡计算，并在建议输出前执行独立风险与合规审查。
 
-[技术文档](docs/submission/competition-technical-solution.md) · [技术文档 PDF](docs/submission/Prism-技术文档-图形优化版.pdf) · [技术设计文档](docs/submission/technical-report.md) · [本地部署教程](docs/local-deployment.md)
-
-![Prism 整体处理流程](docs/submission/figures/judge-01-processing-flow.png)
+[技术设计文档](docs/submission/technical-report.md) · [本地部署教程](docs/local-deployment.md)
 
 ## 项目介绍
 
@@ -45,7 +43,7 @@ Prism 遵守以下工程原则：
 
 ### 总体架构
 
-![Prism 系统总体架构](docs/submission/figures/judge-02-architecture.png)
+![Prism 系统总体架构](docs/submission/figures/prism-figure-02-architecture.png)
 
 后端采用模块化单体结构。接口层负责 HTTP、SSE、认证与字段校验；应用服务层协调画像、组合、研究和会话流程；领域模块执行确定性计算；数据提供方模块管理金融服务调用及状态；存储模块保存当前资料、历史记录和决策事件。
 
@@ -112,13 +110,9 @@ Prism 遵守以下工程原则：
 | 均衡型 | 35% | 45% | 40% | 20% |
 | 成长型 | 50% | 60% | 60% | 35% |
 
-![画像参与风险计算](docs/submission/figures/judge-03-profile-calculation.png)
-
 ### 来源独立性与证据验证
 
 系统按照主体、指标、单位和期间确定比较口径，并使用 `lineage_id` 识别同源记录。相同来源的重复记录只计为一项独立支持；组内冲突、口径差异、缺少来源关联和部分数据均进入问题记录。声明需要至少两个独立来源支持、没有独立反对并且没有待处理问题，才能形成已验证事实。
-
-![证据验证与建议依据](docs/submission/figures/judge-04-evidence-validation.png)
 
 ### 穿透暴露与集中度
 
@@ -128,15 +122,11 @@ Prism 遵守以下工程原则：
 
 再平衡服务将目标权重转换为交易数量，依次处理交易单位、持仓上限、报价、费用、最低现金比例和卖出优先顺序。每项行动完成后更新现金，最终依据测算数量重新计算组合暴露与画像条件。
 
-![目标权重与交易数量计算](docs/submission/figures/judge-05-rebalancing.png)
-
 ### 有限研究任务与双重审查
 
 专业研究采用有向无环图表达依赖关系。系统在执行前检查未知依赖和有向环，对可同时运行的独立节点执行并发调度，并以请求预算、节点预算和整体剩余时间共同限制单次调用。前置节点出现部分数据、空结果、失败或取消时，依赖节点保存对应原因。
 
 建议生成前分别执行风险审查与合规审查。整体状态按照 `PASS < REVIEW_REQUIRED < BLOCKED` 的优先级聚合，任一审查提升等级时，最终结果保留该等级及关联问题。
-
-![专业研究协作与双重审查](docs/submission/figures/judge-06-decision-gates.png)
 
 ### 版本化会话与历史记忆
 
@@ -314,7 +304,6 @@ git diff --check
 | 文档 | 内容 |
 | --- | --- |
 | [Prism.md](Prism.md) | 项目目标、总体约束与产品工程规范 |
-| [竞赛技术文档](docs/submission/competition-technical-solution.md) | 需求、产品功能、核心技术、创新设计与验证案例 |
 | [技术设计文档](docs/submission/technical-report.md) | 模块、接口、数据规则、部署结构、测试方法和系统边界 |
 | [系统总体架构](docs/architecture.md) | 系统分层、运行流程与页面设计 |
 | [本地部署教程](docs/local-deployment.md) | 获取项目、启动服务和创建账户 |
@@ -329,5 +318,7 @@ git diff --check
 | [100题Agent质量评测](docs/submission/research-quality-agent-review-20261003.md) | 真实原文、实际检索回答、独立代理标注与页面导出；不包含真实模型规划 |
 | [ADR-0001](docs/adr/0001-modular-monolith.md) | 模块化单体架构决策 |
 | [TODO](TODO.md) · [LOG](LOG.md) | 当前任务与验证记录 |
+
+竞赛交付文档、答辩幻灯片和展示图可存放在本地 `docs/defense/`，Git 会忽略该目录。
 
 Prism 用于证券研究与决策支持。页面展示、研究结论和组合测算不构成证券投资建议，任何真实交易均需由用户依据适用法律、账户规则和独立审查自行决定。

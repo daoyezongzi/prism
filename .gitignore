@@ -38,3 +38,38 @@ web/dist/
 Thumbs.db
 .playwright-cli/
 output/
+
+# Local competition and defense materials
+/docs/defense/
+/competition_brief.txt
+/【A18】*.docx
+/docs/plans/2026-09-17-judge-technical-document.md
+/docs/plans/2026-10-04-technical-presentation.md
+
+# Keep engineering documentation and verification inputs in the legacy submission directory.
+/docs/submission/*
+!/docs/submission/technical-report.md
+!/docs/submission/system-test-report.md
+!/docs/submission/functional-innovations-acceptance-20261006.md
+!/docs/submission/investor-workbench-design-review-20261003.md
+!/docs/submission/research-platform-acceptance-20261001.md
+!/docs/submission/research-platform-followup-20261001.md
+!/docs/submission/research-quality-agent-review-20261003.md
+!/docs/submission/upstream-sync-20261003.md
+!/docs/submission/upstream-sync-20261006.md
+!/docs/submission/figures/
+/docs/submission/figures/*
+!/docs/submission/figures/prism-figure-*.png
+!/docs/submission/test-evidence/
+/docs/submission/test-evidence/innovation-expansion-20261006/docx-*.json
+/docs/submission/test-evidence/proposed-innovations-20261006/
+/docs/submission/test-evidence/s2c-innovations-20261006/page-*.png
+/docs/submission/test-evidence/s2c-innovations-20261006/verification.json
+
+# Presentation exports kept alongside the product demos in older checkouts.
+/docs/showcase/README.md
+/docs/showcase/*.docx
+/docs/showcase/*.pptx
+/docs/showcase/*.png
+!/docs/showcase/current-pages-snapshot-*.png
+/docs/showcase/innovation-expansion-20261006/
